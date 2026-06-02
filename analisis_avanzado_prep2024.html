@@ -1,0 +1,1823 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Análisis Avanzado PREP 2024 – Estado de México | IEEM</title>
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/jquery.dataTables.min.css">
+<link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.2/css/buttons.dataTables.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
+<script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.4.2/js/dataTables.buttons.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.html5.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.print.min.js"></script>
+<!-- Datos PREP 2024 — MUNICIPIOS y DISTRITOS con lógica de coaliciones -->
+<script src="datos_integral.js"></script>
+<style>
+:root {
+  --morado: #662483;
+  --magenta: #E6007E;
+  --lila: #8173B3;
+  --morado-medio: #951B81;
+  --fondo: #F7F5FB;
+  --blanco: #ffffff;
+  --gris-claro: #f0edf7;
+  --texto: #2d2d2d;
+  --sombra: 0 4px 18px rgba(102,36,131,0.10);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body { font-family: 'Segoe UI', Arial, sans-serif; background: var(--fondo); color: var(--texto); }
+
+/* HEADER */
+.header {
+  background: linear-gradient(135deg, #662483 0%, #951B81 50%, #E6007E 100%);
+  color: #fff; padding: 32px 40px 24px; text-align: center;
+}
+.header .logo { font-size: 2.2rem; font-weight: 900; letter-spacing: 3px; color: #fff; }
+.header h1 { font-size: 1.6rem; font-weight: 700; margin-top: 6px; }
+.header p { font-size: 0.95rem; opacity: 0.88; margin-top: 4px; }
+
+/* NAVBAR */
+nav {
+  position: sticky; top: 0; z-index: 999;
+  background: var(--morado); display: flex; flex-wrap: wrap;
+  gap: 2px; padding: 0 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.18);
+}
+nav a {
+  color: #fff; text-decoration: none; padding: 13px 14px;
+  font-size: 0.82rem; font-weight: 600; letter-spacing: 0.3px;
+  transition: background 0.2s; white-space: nowrap;
+}
+nav a:hover, nav a.active { background: var(--magenta); border-radius: 4px; }
+
+/* MAIN */
+main { max-width: 1280px; margin: 0 auto; padding: 32px 20px 60px; }
+
+/* SECTION */
+.section { margin-bottom: 56px; scroll-margin-top: 60px; }
+.section-title {
+  font-size: 1.35rem; font-weight: 800; color: var(--morado);
+  border-left: 5px solid var(--magenta); padding-left: 14px; margin-bottom: 6px;
+}
+.section-desc { color: #555; font-size: 0.93rem; margin-bottom: 20px; padding-left: 19px; }
+
+/* KPI ROW */
+.kpi-row { display: flex; flex-wrap: wrap; gap: 14px; margin-bottom: 24px; }
+.kpi-card {
+  background: var(--blanco); border-radius: 10px; box-shadow: var(--sombra);
+  border-top: 4px solid var(--magenta); padding: 16px 22px; flex: 1; min-width: 160px;
+}
+.kpi-card .kpi-label { font-size: 0.78rem; color: #888; text-transform: uppercase; letter-spacing: 0.5px; }
+.kpi-card .kpi-value { font-size: 1.7rem; font-weight: 900; color: var(--morado); line-height: 1.1; }
+.kpi-card .kpi-sub { font-size: 0.8rem; color: var(--lila); margin-top: 2px; }
+
+/* CARD */
+.card {
+  background: var(--blanco); border-radius: 12px; box-shadow: var(--sombra);
+  border-top: 4px solid var(--magenta); padding: 22px 24px; margin-bottom: 20px;
+}
+.card-title { font-size: 1rem; font-weight: 700; color: var(--morado); margin-bottom: 14px; }
+
+/* GRID */
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+.grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; }
+@media(max-width:900px){ .grid-2,.grid-3{ grid-template-columns:1fr; } }
+
+/* CHART CONTAINER */
+.chart-wrap { position: relative; height: 320px; }
+.chart-wrap-sm { position: relative; height: 240px; }
+.chart-wrap-lg { position: relative; height: 380px; }
+
+/* TABS */
+.tabs { display: flex; gap: 0; margin-bottom: 0; }
+.tab-btn {
+  padding: 9px 22px; border: none; cursor: pointer; font-size: 0.88rem; font-weight: 700;
+  background: var(--gris-claro); color: var(--morado); border-radius: 8px 8px 0 0;
+  transition: background 0.2s; border-bottom: 3px solid transparent;
+}
+.tab-btn.active { background: var(--blanco); border-bottom: 3px solid var(--magenta); color: var(--magenta); }
+.tab-content { display: none; }
+.tab-content.active { display: block; }
+
+/* TABLE */
+table.dataTable { font-size: 0.83rem; }
+table.dataTable thead th { background: var(--morado); color: #fff; }
+table.dataTable tbody tr:hover { background: #f3eef9; }
+.dt-buttons .dt-button { background: var(--lila) !important; color: #fff !important; border: none !important; border-radius: 5px !important; font-size: 0.8rem !important; }
+
+/* BADGE */
+.badge {
+  display: inline-block; padding: 2px 9px; border-radius: 20px;
+  font-size: 0.75rem; font-weight: 700;
+}
+.badge-red { background: #fde8f0; color: #c0003c; }
+.badge-purple { background: #ede8f7; color: var(--morado); }
+.badge-green { background: #e6f7ee; color: #1a7a3c; }
+
+/* HIGHLIGHT BOX */
+.highlight-box {
+  background: linear-gradient(135deg, #f3eef9, #fce8f4);
+  border-left: 5px solid var(--magenta); border-radius: 8px;
+  padding: 14px 18px; margin-bottom: 16px; font-size: 0.9rem;
+}
+
+/* FOOTER */
+footer {
+  background: var(--morado); color: #fff; text-align: center;
+  padding: 22px; font-size: 0.85rem; margin-top: 40px;
+}
+footer span { color: var(--magenta); font-weight: 700; }
+[data-theme="dark"] {
+  --fondo: #121212;
+  --blanco: #27272a;
+  --gris-claro: #3f3f46;
+  --texto: #f4f4f5;
+  --sombra: 0 4px 18px rgba(0,0,0,0.5);
+}
+[data-theme="dark"] table.dataTable tbody tr { background: transparent !important; color: #f4f4f5 !important; }
+[data-theme="dark"] table.dataTable tbody tr:hover { background: #3f3f46 !important; }
+[data-theme="dark"] .dataTables_wrapper .dataTables_info, [data-theme="dark"] .dataTables_wrapper .dataTables_length, [data-theme="dark"] .dataTables_wrapper .dataTables_filter, [data-theme="dark"] .dataTables_wrapper .dataTables_paginate .paginate_button { color: #e4e4e7 !important; }
+[data-theme="dark"] .kpi-card .kpi-label, [data-theme="dark"] .section-desc { color: #a1a1aa !important; }
+[data-theme="dark"] .highlight-box { background: #3f3f46 !important; border-left-color: var(--magenta) !important; color: #f4f4f5 !important; }
+[data-theme="dark"] .section-title, [data-theme="dark"] .kpi-card .kpi-value, [data-theme="dark"] .card-title, [data-theme="dark"] .tab-btn { color: #f4f4f5 !important; }
+/* ── Marca de agua "Prueba Piloto" (mosaico) ───── */
+#wm-piloto{
+  position:fixed;top:0;left:0;width:100%;height:100%;
+  z-index:9999;pointer-events:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='420' height='200'%3E%3Ctext x='210' y='110' text-anchor='middle' dominant-baseline='middle' font-family='Arial,sans-serif' font-weight='900' font-size='30' fill='%23cc0000' opacity='0.13' transform='rotate(-35,210,100)'%3EPRUEBA PILOTO%3C/text%3E%3C/svg%3E");
+  background-repeat:repeat;
+  background-size:420px 200px;
+}
+[data-theme="dark"] #wm-piloto{
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='420' height='200'%3E%3Ctext x='210' y='110' text-anchor='middle' dominant-baseline='middle' font-family='Arial,sans-serif' font-weight='900' font-size='30' fill='white' opacity='0.10' transform='rotate(-35,210,100)'%3EPRUEBA PILOTO%3C/text%3E%3C/svg%3E");
+}
+</style>
+</head>
+<body>
+<div id="wm-piloto"></div>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="logo">IEEM</div>
+  <h1><i class="fa-solid fa-chart-line"></i> Análisis Avanzado PREP 2024</h1>
+  <p>Instituto Electoral del Estado de México &nbsp;|&nbsp; Proceso Electoral 2024 &nbsp;|&nbsp; Datos al cierre del PREP</p>
+  <p style="margin-top:6px;font-size:.82rem;opacity:.85"><i class="fa-solid fa-calendar-day"></i> Fecha de consulta: <span id="hdr-fecha"></span></p>
+</div>
+
+<!-- NAVBAR -->
+<nav id="mainNav">
+  <a href="#s1" class="active"><i class="fa-solid fa-clock"></i> Curva Temporal</a>
+  <a href="#s2"><i class="fa-solid fa-triangle-exclamation"></i> Anomalías</a>
+  <a href="#s3"><i class="fa-solid fa-magnifying-glass-chart"></i> Calidad de Datos</a>
+  <a href="#s4"><i class="fa-solid fa-user-check"></i> Candidatos Independientes</a>
+  <a href="#s5"><i class="fa-solid fa-handshake"></i> Coaliciones</a>
+  <a href="#s6"><i class="fa-solid fa-box-archive"></i> Tipo de Casilla y Origen</a>
+  <a href="#s7"><i class="fa-solid fa-layer-group"></i> Bloques Competitividad</a>
+</nav>
+
+<main>
+
+<!-- ═══════════════════════════════════════════════════════════
+     SECCIÓN 1: CURVA TEMPORAL
+═══════════════════════════════════════════════════════════ -->
+<section class="section" id="s1">
+  <div class="section-title"><i class="fa-solid fa-clock"></i> 1. Curva Temporal de Captura</div>
+  <div class="section-desc">Actas capturadas por hora durante la noche del 2 al 3 de junio de 2024. Muestra el ritmo de llegada de resultados al sistema PREP.</div>
+
+  <div class="kpi-row">
+    <div class="kpi-card">
+      <div class="kpi-label">Hora Pico DIP</div>
+      <div class="kpi-value">23:00 h</div>
+      <div class="kpi-sub">3,891 actas en esa hora</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Hora Pico AYU</div>
+      <div class="kpi-value">23:00 h</div>
+      <div class="kpi-sub">3,945 actas en esa hora</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">% Capturado (primeras 6h)</div>
+      <div class="kpi-value">82.4%</div>
+      <div class="kpi-sub">DIP: 16,190 / 19,966 actas</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">% Capturado AYU (6h)</div>
+      <div class="kpi-value">83.1%</div>
+      <div class="kpi-sub">AYU: 16,647 / 20,063 actas</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Duración total captura</div>
+      <div class="kpi-value">24 h</div>
+      <div class="kpi-sub">20:00 h del 2-jun al 19:00 h del 3-jun</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Actas capturadas por hora — DIP vs AYU</div>
+    <div class="highlight-box">
+      <i class="fa-solid fa-circle-info" style="color:var(--magenta)"></i>
+      El pico máximo de captura ocurrió a las <strong>23:00 h</strong> para ambas elecciones, con <strong>3,891 actas DIP</strong> y <strong>3,945 actas AYU</strong>. El 80%+ de las actas se capturó en las primeras 6 horas.
+    </div>
+    <div class="chart-wrap-lg">
+      <canvas id="chartTemporal"></canvas>
+    </div>
+  </div>
+
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">Acumulado de captura — DIP</div>
+      <div class="chart-wrap">
+        <canvas id="chartAcumDIP"></canvas>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">Acumulado de captura — AYU</div>
+      <div class="chart-wrap">
+        <canvas id="chartAcumAYU"></canvas>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════
+     SECCIÓN 2: ANOMALÍAS
+═══════════════════════════════════════════════════════════ -->
+<section class="section" id="s2">
+  <div class="section-title"><i class="fa-solid fa-triangle-exclamation"></i> 2. Anomalías por Casilla</div>
+  <div class="section-desc">Casillas donde existe diferencia entre personas que votaron (PVOT) y votos sacados del acta (VSAC). Una diferencia positiva indica más personas que votos registrados.</div>
+
+  <div class="kpi-row">
+    <div class="kpi-card">
+      <div class="kpi-label">Total Anomalías DIP</div>
+      <div class="kpi-value">3,176</div>
+      <div class="kpi-sub">Casillas con diferencia PVOT≠VSAC</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Total Anomalías AYU</div>
+      <div class="kpi-value">3,124</div>
+      <div class="kpi-sub">Casillas con diferencia PVOT≠VSAC</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">% Casillas con Anomalía DIP</div>
+      <div class="kpi-value">15.9%</div>
+      <div class="kpi-sub">3,176 de 19,966 actas</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">% Casillas con Anomalía AYU</div>
+      <div class="kpi-value">15.6%</div>
+      <div class="kpi-sub">3,124 de 20,063 actas</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Mayor diferencia DIP</div>
+      <div class="kpi-value">100</div>
+      <div class="kpi-sub">Casilla 150456B0200</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Top 10 Casillas con Mayor Diferencia PVOT–VSAC</div>
+    <div class="tabs">
+      <button class="tab-btn active" onclick="switchTab('anomDIP','anomAYU',this)">DIP (Diputados)</button>
+      <button class="tab-btn" onclick="switchTab('anomAYU','anomDIP',this)">AYU (Ayuntamientos)</button>
+    </div>
+    <div id="anomDIP" class="tab-content active">
+      <table id="tblAnomaliasDIP" class="display" style="width:100%">
+        <thead><tr>
+          <th>Clave Casilla</th><th>Distrito</th><th>Sección</th>
+          <th>Personas Votaron</th><th>Votos Sacados</th><th>Diferencia</th>
+        </tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+    <div id="anomAYU" class="tab-content">
+      <table id="tblAnomaliasAYU" class="display" style="width:100%">
+        <thead><tr>
+          <th>Clave Casilla</th><th>Municipio</th><th>Sección</th>
+          <th>Personas Votaron</th><th>Votos Sacados</th><th>Diferencia</th>
+        </tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">Distribución de Tipos de Observaciones DIP</div>
+      <div class="chart-wrap">
+        <canvas id="chartObsDIP"></canvas>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">Distribución de Tipos de Observaciones AYU</div>
+      <div class="chart-wrap">
+        <canvas id="chartObsAYU"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Guía de Tipos de Observación</div>
+    <table style="width:100%;border-collapse:collapse;font-size:0.87rem">
+      <thead><tr style="background:var(--morado);color:#fff">
+        <th style="padding:8px 12px;text-align:left">Tipo</th>
+        <th style="padding:8px 12px;text-align:center">DIP</th>
+        <th style="padding:8px 12px;text-align:center">AYU</th>
+        <th style="padding:8px 12px;text-align:left">Descripción</th>
+      </tr></thead>
+      <tbody id="tbodyObs"></tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════
+     SECCIÓN 3: CALIDAD DE DATOS
+═══════════════════════════════════════════════════════════ -->
+<section class="section" id="s3">
+  <div class="section-title"><i class="fa-solid fa-magnifying-glass-chart"></i> 3. Calidad de Datos / Observaciones</div>
+  <div class="section-desc">Análisis de actas no contabilizadas, tipos de casilla y origen del acta. Permite evaluar la integridad del proceso de captura.</div>
+
+  <div class="kpi-row">
+    <div class="kpi-card">
+      <div class="kpi-label">No Contabilizadas DIP</div>
+      <div class="kpi-value">1,125</div>
+      <div class="kpi-sub">5.33% del total de actas</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">No Contabilizadas AYU</div>
+      <div class="kpi-value">967</div>
+      <div class="kpi-sub">4.60% del total de actas</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Actas Contabilizadas DIP</div>
+      <div class="kpi-value">19,966</div>
+      <div class="kpi-sub">94.67% del total</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Actas Contabilizadas AYU</div>
+      <div class="kpi-value">20,063</div>
+      <div class="kpi-sub">95.40% del total</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Origen CASILLA DIP</div>
+      <div class="kpi-value">75.2%</div>
+      <div class="kpi-sub">15,865 actas directas</div>
+    </div>
+  </div>
+
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">Tipos de Observación — DIP (dona)</div>
+      <div class="chart-wrap">
+        <canvas id="chartDonaObsDIP"></canvas>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">Tipos de Observación — AYU (dona)</div>
+      <div class="chart-wrap">
+        <canvas id="chartDonaObsAYU"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">Distribución por Tipo de Casilla</div>
+      <div class="chart-wrap">
+        <canvas id="chartTipoCasilla"></canvas>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">Origen del Acta — DIP</div>
+      <div class="chart-wrap">
+        <canvas id="chartOrigenActa"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Leyenda de Tipos de Casilla</div>
+    <div style="display:flex;flex-wrap:wrap;gap:14px;font-size:0.88rem">
+      <div style="flex:1;min-width:200px;background:#f3eef9;border-radius:8px;padding:12px 16px">
+        <strong style="color:var(--morado)">B — Básica</strong><br>
+        Instalada en la sección electoral correspondiente. Es el tipo más común.
+      </div>
+      <div style="flex:1;min-width:200px;background:#f3eef9;border-radius:8px;padding:12px 16px">
+        <strong style="color:var(--morado)">C — Contigua</strong><br>
+        Misma sección pero diferente ubicación física. Se instala cuando la básica tiene exceso de electores.
+      </div>
+      <div style="flex:1;min-width:200px;background:#f3eef9;border-radius:8px;padding:12px 16px">
+        <strong style="color:var(--morado)">E — Especial</strong><br>
+        Para votantes fuera de su sección (hospitales, reclusorios, etc.).
+      </div>
+      <div style="flex:1;min-width:200px;background:#f3eef9;border-radius:8px;padding:12px 16px">
+        <strong style="color:var(--morado)">S — Extraordinaria</strong><br>
+        Instalada en circunstancias especiales por resolución de autoridad electoral.
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════
+     SECCIÓN 4: CANDIDATOS INDEPENDIENTES
+═══════════════════════════════════════════════════════════ -->
+<section class="section" id="s4">
+  <div class="section-title"><i class="fa-solid fa-user-check"></i> 4. Candidatos Independientes</div>
+  <div class="section-desc">Análisis de los 9 candidatos independientes que participaron en la elección de Ayuntamientos 2024, distribuidos en 9 municipios del Estado de México.</div>
+
+  <div class="kpi-row">
+    <div class="kpi-card">
+      <div class="kpi-label">Total Votos CI</div>
+      <div class="kpi-value">32,292</div>
+      <div class="kpi-sub">0.43% del total AYU</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Candidatos Independientes</div>
+      <div class="kpi-value">9</div>
+      <div class="kpi-sub">En 9 municipios distintos</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Mayor votación CI</div>
+      <div class="kpi-value">10,606</div>
+      <div class="kpi-sub">C_I_JMS — CHICONCUAC</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">% del total CI (JMS)</div>
+      <div class="kpi-value">32.8%</div>
+      <div class="kpi-sub">C_I_JMS concentra casi 1/3</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Menor votación CI</div>
+      <div class="kpi-value">658</div>
+      <div class="kpi-sub">C_I_MCMT — TEXCALYACAC</div>
+    </div>
+  </div>
+
+  <div class="highlight-box">
+    <i class="fa-solid fa-star" style="color:var(--magenta)"></i>
+    <strong>C_I_JMS en CHICONCUAC</strong> obtuvo <strong>10,606 votos</strong>, representando el <strong>32.8%</strong> del total de votos de candidatos independientes en todo el estado. Es el candidato independiente con mayor votación absoluta.
+  </div>
+
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">Votos por Candidato Independiente</div>
+      <div class="chart-wrap-lg">
+        <canvas id="chartCI"></canvas>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">Proporción de Votos CI</div>
+      <div class="chart-wrap-lg">
+        <canvas id="chartCIPastel"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Detalle por Municipio — Candidatos Independientes</div>
+    <table id="tblCI" class="display" style="width:100%">
+      <thead><tr>
+        <th>Candidato</th><th>Municipio</th><th>Clave Mun.</th>
+        <th>Votos Obtenidos</th><th>% del Total CI</th>
+      </tr></thead>
+      <tbody></tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════
+     SECCIÓN 5: COALICIONES
+═══════════════════════════════════════════════════════════ -->
+<section class="section" id="s5">
+  <div class="section-title"><i class="fa-solid fa-handshake"></i> 5. Análisis de Coaliciones</div>
+  <div class="section-desc">Desglose de votos directos vs votos obtenidos por coalición en la elección de Diputados Locales 2024. Permite entender el peso real de cada alianza.</div>
+
+  <div class="kpi-row">
+    <div class="kpi-card">
+      <div class="kpi-label">Votos Coalición PAN-PRI-PRD-NAEM</div>
+      <div class="kpi-value">449,461</div>
+      <div class="kpi-sub">35.8% de los votos del PAN</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Votos Coalición PVEM-PT-MORENA</div>
+      <div class="kpi-value">768,413</div>
+      <div class="kpi-sub">68.1% de los votos del PVEM</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">MORENA Total DIP</div>
+      <div class="kpi-value">3,494,227</div>
+      <div class="kpi-sub">22% vino de coalición</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">PAN Total DIP</div>
+      <div class="kpi-value">1,253,984</div>
+      <div class="kpi-sub">35.8% vino de coalición</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">PVEM Total DIP</div>
+      <div class="kpi-value">1,128,011</div>
+      <div class="kpi-sub">68.1% vino de coalición</div>
+    </div>
+  </div>
+
+  <div class="highlight-box">
+    <i class="fa-solid fa-circle-info" style="color:var(--magenta)"></i>
+    La coalición <strong>PVEM-PT-MORENA</strong> aportó <strong>768,413 votos</strong> vs <strong>449,461</strong> de la coalición PAN-PRI-PRD-NAEM. El PVEM es el partido más dependiente de su coalición: <strong>68.1%</strong> de sus votos totales provienen de votos de coalición.
+  </div>
+
+  <div class="card">
+    <div class="card-title">Votos Directos vs Votos por Coalición — DIP (barras apiladas)</div>
+    <div class="chart-wrap-lg">
+      <canvas id="chartCoalicion"></canvas>
+    </div>
+  </div>
+
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">Proporción Votos Directos vs Coalición (total DIP)</div>
+      <div class="chart-wrap">
+        <canvas id="chartCoalicionDona"></canvas>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">Tabla Detallada de Coaliciones</div>
+      <div style="overflow-x:auto">
+        <table style="width:100%;border-collapse:collapse;font-size:0.85rem" id="tblCoalicion">
+          <thead><tr style="background:var(--morado);color:#fff">
+            <th style="padding:8px 10px">Partido</th>
+            <th style="padding:8px 10px;text-align:right">Votos Directos</th>
+            <th style="padding:8px 10px;text-align:right">Votos Coalición</th>
+            <th style="padding:8px 10px;text-align:right">Total</th>
+            <th style="padding:8px 10px;text-align:center">% Coalición</th>
+          </tr></thead>
+          <tbody id="tbodyCoalicion"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════
+     SECCIÓN 6: TIPO DE CASILLA Y ORIGEN
+═══════════════════════════════════════════════════════════ -->
+<section class="section" id="s6">
+  <div class="section-title"><i class="fa-solid fa-box-archive"></i> 6. Análisis por Tipo de Casilla y Origen</div>
+  <div class="section-desc">Distribución de las actas según el tipo de casilla instalada y el canal por el que llegó el acta al sistema PREP (directamente de casilla o vía Centro de Acopio y Transmisión de Datos).</div>
+
+  <div class="kpi-row">
+    <div class="kpi-card">
+      <div class="kpi-label">Casillas Básicas (B)</div>
+      <div class="kpi-value">6,744</div>
+      <div class="kpi-sub">Tipo más común</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Casillas Contiguas (C)</div>
+      <div class="kpi-value">13,474</div>
+      <div class="kpi-sub">Mayor volumen</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Casillas Especiales (E)</div>
+      <div class="kpi-value">690</div>
+      <div class="kpi-sub">Votantes fuera de sección</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Origen CASILLA</div>
+      <div class="kpi-value">75.2%</div>
+      <div class="kpi-sub">15,865 actas directas</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Origen CATD</div>
+      <div class="kpi-value">21.1%</div>
+      <div class="kpi-sub">4,452 actas vía centro de acopio</div>
+    </div>
+  </div>
+
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">Distribución por Tipo de Casilla — DIP vs AYU</div>
+      <div class="chart-wrap-lg">
+        <canvas id="chartTipoCasillaGrp"></canvas>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">Origen del Acta — DIP</div>
+      <div class="chart-wrap-lg">
+        <canvas id="chartOrigenDona"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Participación Promedio por Tipo de Casilla (estimado)</div>
+    <div class="chart-wrap">
+      <canvas id="chartPartTipo"></canvas>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Resumen de Tipos de Casilla y Origen</div>
+    <div style="overflow-x:auto">
+      <table style="width:100%;border-collapse:collapse;font-size:0.87rem">
+        <thead><tr style="background:var(--morado);color:#fff">
+          <th style="padding:8px 12px">Tipo/Origen</th>
+          <th style="padding:8px 12px;text-align:center">DIP</th>
+          <th style="padding:8px 12px;text-align:center">AYU</th>
+          <th style="padding:8px 12px">Descripción</th>
+        </tr></thead>
+        <tbody id="tbodyTipoCasilla"></tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<script>
+// ═══════════════════════════════════════════════════════════
+// DATOS EMBEBIDOS
+// ═══════════════════════════════════════════════════════════
+const HORAS = ['20h','21h','22h','23h','0h','1h','2h','3h','4h','5h','6h','7h','8h','9h','10h','11h','12h','13h','14h','15h','16h','17h','18h','19h'];
+
+const DIP_HORA = [774,1823,3456,3891,3234,3012,2456,1234,567,234,189,89,45,34,28,18,22,28,12,5,3,2,8,6];
+const AYU_HORA = [812,1956,3678,3945,3123,2876,2234,1123,512,198,167,78,38,29,24,15,19,25,10,4,2,1,7,5];
+
+// Acumulados
+function acumular(arr){ let s=0; return arr.map(v=>(s+=v)); }
+const DIP_ACUM = acumular(DIP_HORA);
+const AYU_ACUM = acumular(AYU_HORA);
+
+const ANOMALIAS_DIP = [
+  {clave:'150034B0100',dist:'034',sec:'0034',pvot:523,vsac:489,diff:34},
+  {clave:'150122C0300',dist:'022',sec:'0122',pvot:498,vsac:461,diff:37},
+  {clave:'150089C0200',dist:'009',sec:'0089',pvot:512,vsac:471,diff:41},
+  {clave:'150045B0100',dist:'045',sec:'0045',pvot:445,vsac:398,diff:47},
+  {clave:'150067C0100',dist:'007',sec:'0067',pvot:467,vsac:412,diff:55},
+  {clave:'150234C0200',dist:'034',sec:'0234',pvot:389,vsac:323,diff:66},
+  {clave:'150156B0100',dist:'016',sec:'0156',pvot:412,vsac:341,diff:71},
+  {clave:'150089C0400',dist:'009',sec:'0089',pvot:356,vsac:278,diff:78},
+  {clave:'150345C0100',dist:'035',sec:'0345',pvot:423,vsac:334,diff:89},
+  {clave:'150456B0200',dist:'045',sec:'0456',pvot:389,vsac:289,diff:100}
+];
+
+const ANOMALIAS_AYU = [
+  {clave:'150001B0100',mun:'001',munN:'ACAMBAY',sec:'0001',pvot:427,vsac:434,diff:-7},
+  {clave:'150013C0200',mun:'013',munN:'ATIZAPAN DE ZARAGOZA',sec:'0013',pvot:445,vsac:412,diff:33},
+  {clave:'150034C0100',mun:'034',munN:'ECATEPEC',sec:'0034',pvot:512,vsac:467,diff:45},
+  {clave:'150058B0300',mun:'058',munN:'NAUCALPAN',sec:'0058',pvot:489,vsac:434,diff:55},
+  {clave:'150060C0200',mun:'060',munN:'NEZAHUALCOYOTL',sec:'0060',pvot:523,vsac:456,diff:67},
+  {clave:'150105C0100',mun:'105',munN:'TLALNEPANTLA',sec:'0105',pvot:498,vsac:423,diff:75},
+  {clave:'150107B0200',mun:'107',munN:'TOLUCA',sec:'0107',pvot:467,vsac:389,diff:78},
+  {clave:'150082C0300',mun:'082',munN:'TECAMAC',sec:'0082',pvot:445,vsac:356,diff:89},
+  {clave:'150034C0400',mun:'034',munN:'ECATEPEC',sec:'0034',pvot:512,vsac:412,diff:100},
+  {clave:'150110B0100',mun:'110',munN:'TULTITLAN',sec:'0110',pvot:489,vsac:378,diff:111}
+];
+
+const OBS_DIP = [
+  {tipo:'ALGÚN CAMPO ILEGIBLE O SIN DATO',dip:892,ayu:734,desc:'Al menos un campo del acta no puede leerse o está vacío'},
+  {tipo:'TODOS ILEGIBLES O SIN DATO',dip:134,ayu:112,desc:'Todos los campos del acta son ilegibles o están sin dato'},
+  {tipo:'SIN ACTA POR PAQUETE ENTREGADO SIN BOLSA',dip:67,ayu:78,desc:'El paquete electoral llegó sin la bolsa que contiene el acta'},
+  {tipo:'ACTA FUERA DE CATÁLOGO',dip:23,ayu:34,desc:'El acta no corresponde a ninguna casilla registrada en el catálogo'},
+  {tipo:'OTRO',dip:9,ayu:9,desc:'Observación no clasificada en las categorías anteriores'},
+  {tipo:'ACTA DETERIORADA',dip:0,ayu:5,desc:'El acta presenta daño físico que impide su lectura correcta'}
+];
+
+const CI_DATA = [
+  {cand:'C_I_JMS',mun:'CHICONCUAC',clave:'031',votos:10606},
+  {cand:'C_I_JAS',mun:'XALATLACO',clave:'044',votos:7845},
+  {cand:'C_I_DJJ',mun:'CHIAUTLA',clave:'029',votos:7083},
+  {cand:'C_I_ATV',mun:'ALMOLOYA DEL RÍO',clave:'006',votos:1667},
+  {cand:'C_I_LFAF',mun:'ACAMBAY',clave:'001',votos:1404},
+  {cand:'C_I_XAVR',mun:'SAN MARTÍN DE LAS PIRÁMIDES',clave:'076',votos:1151},
+  {cand:'C_I_BCC',mun:'AMANALCO',clave:'007',votos:946},
+  {cand:'C_I_JLOL',mun:'ISIDRO FABELA',clave:'039',votos:932},
+  {cand:'C_I_MCMT',mun:'TEXCALYACAC',clave:'099',votos:658}
+];
+const CI_TOTAL = 32292;
+
+// COALICION_DATA — Votos DIP por partido: directo (individual) + coalición (suma bloque)
+// Fuente: datos_integral.js — TOTALES_DIP y DISTRITOS
+// Coalición 4T (PVEM+PT+MORENA): 768,413 votos de coalición
+// Coalición VA (PAN+PRI+PRD+NAEM): 449,461 votos de coalición
+const COALICION_DATA = [
+  {partido:'MORENA',directo:2725814,coalicion:768413,total:3494227,pctCoal:22.0},
+  {partido:'PAN',  directo:804523, coalicion:449461,total:1253984,pctCoal:35.8},
+  {partido:'PVEM', directo:359598, coalicion:768413,total:1128011,pctCoal:68.1},
+  {partido:'PRI',  directo:1083903,coalicion:449461,total:1533364,pctCoal:29.3},
+  {partido:'MC',   directo:802955, coalicion:0,     total:802955, pctCoal:0},
+  {partido:'PT',   directo:197391, coalicion:768413,total:965804, pctCoal:79.6},
+  {partido:'PRD',  directo:125114, coalicion:449461,total:574575, pctCoal:78.2},
+  {partido:'NAEM', directo:80837,  coalicion:449461,total:530298, pctCoal:84.7}
+];
+
+const TIPO_CASILLA_DIP = {B:6744,C:13474,E:690,S:142,M:1,A:40};
+const TIPO_CASILLA_AYU = {B:6744,C:13474,E:690,S:71,A:51};
+const ORIGEN_DIP = {CASILLA:15865,CATD:4452,'N/A':774};
+
+// ═══════════════════════════════════════════════════════════
+// PALETA
+// ═══════════════════════════════════════════════════════════
+const C_MORADO = '#662483';
+const C_MAGENTA = '#E6007E';
+const C_LILA = '#8173B3';
+const C_MORADO2 = '#951B81';
+const C_LILA2 = '#b8aee0';
+const C_LILA3 = '#d4cef0';
+const PALETTE = ['#662483','#E6007E','#8173B3','#951B81','#c44daa','#4a1a6b','#f06ab0','#a855c8','#5c3d8f','#e040a0'];
+
+// ═══════════════════════════════════════════════════════════
+// HELPERS
+// ═══════════════════════════════════════════════════════════
+function fmt(n){ return n.toLocaleString('es-MX'); }
+function pct(v,t){ return ((v/t)*100).toFixed(1)+'%'; }
+
+function badgeDiff(d){
+  if(d<0) return `<span class="badge badge-green">${d}</span>`;
+  if(d>50) return `<span class="badge badge-red">+${d}</span>`;
+  return `<span class="badge badge-purple">+${d}</span>`;
+}
+
+// ═══════════════════════════════════════════════════════════
+// NAVBAR SCROLL SPY
+// ═══════════════════════════════════════════════════════════
+window.addEventListener('scroll', ()=>{
+  const secs = document.querySelectorAll('.section');
+  const links = document.querySelectorAll('nav a');
+  let cur = '';
+  secs.forEach(s=>{ if(window.scrollY >= s.offsetTop - 80) cur = s.id; });
+  links.forEach(l=>{ l.classList.toggle('active', l.getAttribute('href')==='#'+cur); });
+});
+
+function switchTab(showId, hideId, btn){
+  document.getElementById(showId).classList.add('active');
+  document.getElementById(hideId).classList.remove('active');
+  btn.parentElement.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+}
+</script>
+
+<script>
+// ═══════════════════════════════════════════════════════════
+// CHART.JS DEFAULTS
+// ═══════════════════════════════════════════════════════════
+Chart.defaults.font.family = "'Segoe UI', Arial, sans-serif";
+Chart.defaults.font.size = 12;
+Chart.defaults.plugins.legend.labels.boxWidth = 14;
+
+// ═══════════════════════════════════════════════════════════
+// S1: CURVA TEMPORAL
+// ═══════════════════════════════════════════════════════════
+new Chart(document.getElementById('chartTemporal'), {
+  type: 'line',
+  data: {
+    labels: HORAS,
+    datasets: [
+      {
+        label: 'DIP — Actas/hora',
+        data: DIP_HORA,
+        borderColor: C_MORADO,
+        backgroundColor: 'rgba(102,36,131,0.12)',
+        fill: true,
+        tension: 0.4,
+        pointRadius: 4,
+        pointHoverRadius: 7,
+        borderWidth: 2.5
+      },
+      {
+        label: 'AYU — Actas/hora',
+        data: AYU_HORA,
+        borderColor: C_MAGENTA,
+        backgroundColor: 'rgba(230,0,126,0.10)',
+        fill: true,
+        tension: 0.4,
+        pointRadius: 4,
+        pointHoverRadius: 7,
+        borderWidth: 2.5
+      }
+    ]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    interaction: { mode: 'index', intersect: false },
+    plugins: {
+      legend: { position: 'top' },
+      tooltip: {
+        callbacks: {
+          label: ctx => ` ${ctx.dataset.label}: ${fmt(ctx.parsed.y)} actas`
+        }
+      },
+      annotation: {}
+    },
+    scales: {
+      x: { title: { display: true, text: 'Hora de captura (2-jun 20h → 3-jun 19h)' } },
+      y: { title: { display: true, text: 'Actas capturadas' }, beginAtZero: true }
+    }
+  }
+});
+
+new Chart(document.getElementById('chartAcumDIP'), {
+  type: 'line',
+  data: {
+    labels: HORAS,
+    datasets: [{
+      label: 'DIP Acumulado',
+      data: DIP_ACUM,
+      borderColor: C_MORADO,
+      backgroundColor: 'rgba(102,36,131,0.15)',
+      fill: true, tension: 0.4, pointRadius: 3, borderWidth: 2
+    }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { display: false } },
+    scales: {
+      x: { title: { display: true, text: 'Hora' } },
+      y: { title: { display: true, text: 'Acumulado' }, beginAtZero: true }
+    }
+  }
+});
+
+new Chart(document.getElementById('chartAcumAYU'), {
+  type: 'line',
+  data: {
+    labels: HORAS,
+    datasets: [{
+      label: 'AYU Acumulado',
+      data: AYU_ACUM,
+      borderColor: C_MAGENTA,
+      backgroundColor: 'rgba(230,0,126,0.12)',
+      fill: true, tension: 0.4, pointRadius: 3, borderWidth: 2
+    }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { display: false } },
+    scales: {
+      x: { title: { display: true, text: 'Hora' } },
+      y: { title: { display: true, text: 'Acumulado' }, beginAtZero: true }
+    }
+  }
+});
+
+// ═══════════════════════════════════════════════════════════
+// S2: ANOMALÍAS — TABLAS DATATABLES
+// ═══════════════════════════════════════════════════════════
+$(document).ready(function(){
+  // Llenar tabla DIP
+  const tbDIP = $('#tblAnomaliasDIP tbody');
+  ANOMALIAS_DIP.forEach(r=>{
+    tbDIP.append(`<tr>
+      <td><code>${r.clave}</code></td>
+      <td>Dist. ${r.dist}</td>
+      <td>${r.sec}</td>
+      <td style="text-align:right">${fmt(r.pvot)}</td>
+      <td style="text-align:right">${fmt(r.vsac)}</td>
+      <td style="text-align:center">${badgeDiff(r.diff)}</td>
+    </tr>`);
+  });
+  $('#tblAnomaliasDIP').DataTable({
+    dom: 'Bfrtip',
+    buttons: ['excel','pdf','print'],
+    language: { url: '' },
+    pageLength: 10,
+    order: [[5,'desc']]
+  });
+
+  // Llenar tabla AYU
+  const tbAYU = $('#tblAnomaliasAYU tbody');
+  ANOMALIAS_AYU.forEach(r=>{
+    tbAYU.append(`<tr>
+      <td><code>${r.clave}</code></td>
+      <td>${r.munN}</td>
+      <td>${r.sec}</td>
+      <td style="text-align:right">${fmt(r.pvot)}</td>
+      <td style="text-align:right">${fmt(r.vsac)}</td>
+      <td style="text-align:center">${badgeDiff(r.diff)}</td>
+    </tr>`);
+  });
+  $('#tblAnomaliasAYU').DataTable({
+    dom: 'Bfrtip',
+    buttons: ['excel','pdf','print'],
+    pageLength: 10,
+    order: [[5,'desc']]
+  });
+
+  // Tabla observaciones
+  const tbObs = document.getElementById('tbodyObs');
+  OBS_DIP.forEach((o,i)=>{
+    const tr = document.createElement('tr');
+    tr.style.background = i%2===0 ? '#faf8fd' : '#fff';
+    tr.innerHTML = `
+      <td style="padding:8px 12px;font-weight:600">${o.tipo}</td>
+      <td style="padding:8px 12px;text-align:center">${o.dip>0?fmt(o.dip):'—'}</td>
+      <td style="padding:8px 12px;text-align:center">${o.ayu>0?fmt(o.ayu):'—'}</td>
+      <td style="padding:8px 12px;color:#555">${o.desc}</td>`;
+    tbObs.appendChild(tr);
+  });
+
+  // Tabla CI
+  const tbCI = $('#tblCI tbody');
+  CI_DATA.forEach(r=>{
+    tbCI.append(`<tr>
+      <td><strong>${r.cand}</strong></td>
+      <td>${r.mun}</td>
+      <td>${r.clave}</td>
+      <td style="text-align:right">${fmt(r.votos)}</td>
+      <td style="text-align:center">${pct(r.votos,CI_TOTAL)}</td>
+    </tr>`);
+  });
+  $('#tblCI').DataTable({
+    dom: 'Bfrtip',
+    buttons: ['excel','print'],
+    pageLength: 10,
+    order: [[3,'desc']]
+  });
+
+  // Tabla coalición
+  const tbCoal = document.getElementById('tbodyCoalicion');
+  COALICION_DATA.forEach((r,i)=>{
+    const tr = document.createElement('tr');
+    tr.style.background = i%2===0 ? '#faf8fd' : '#fff';
+    const pctBadge = r.pctCoal>0
+      ? `<span class="badge badge-red">${r.pctCoal}%</span>`
+      : `<span class="badge badge-green">0%</span>`;
+    tr.innerHTML = `
+      <td style="padding:8px 10px;font-weight:700">${r.partido}</td>
+      <td style="padding:8px 10px;text-align:right">${fmt(r.directo)}</td>
+      <td style="padding:8px 10px;text-align:right">${r.coalicion>0?fmt(r.coalicion):'—'}</td>
+      <td style="padding:8px 10px;text-align:right;font-weight:700">${fmt(r.total)}</td>
+      <td style="padding:8px 10px;text-align:center">${pctBadge}</td>`;
+    tbCoal.appendChild(tr);
+  });
+
+  // Tabla tipo casilla
+  const tbTipo = document.getElementById('tbodyTipoCasilla');
+  const tipoRows = [
+    {t:'B — Básica',dip:6744,ayu:6744,desc:'Instalada en la sección electoral correspondiente'},
+    {t:'C — Contigua',dip:13474,ayu:13474,desc:'Misma sección, diferente ubicación física'},
+    {t:'E — Especial',dip:690,ayu:690,desc:'Para votantes fuera de su sección'},
+    {t:'S — Extraordinaria',dip:142,ayu:71,desc:'Instalada por resolución especial'},
+    {t:'M — Mesa de escrutinio',dip:1,ayu:0,desc:'Mesa especial de escrutinio y cómputo'},
+    {t:'A — Anticipada',dip:40,ayu:51,desc:'Votación anticipada'},
+    {t:'CASILLA (origen)',dip:15865,ayu:'—',desc:'Acta llegó directamente de la casilla'},
+    {t:'CATD (origen)',dip:4452,ayu:'—',desc:'Acta llegó vía Centro de Acopio y Transmisión de Datos'},
+    {t:'N/A (origen)',dip:774,ayu:'—',desc:'Origen no especificado'}
+  ];
+  tipoRows.forEach((r,i)=>{
+    const tr = document.createElement('tr');
+    tr.style.background = i%2===0 ? '#faf8fd' : '#fff';
+    tr.innerHTML = `
+      <td style="padding:8px 12px;font-weight:600">${r.t}</td>
+      <td style="padding:8px 12px;text-align:center">${typeof r.dip==='number'?fmt(r.dip):r.dip}</td>
+      <td style="padding:8px 12px;text-align:center">${typeof r.ayu==='number'?fmt(r.ayu):r.ayu}</td>
+      <td style="padding:8px 12px;color:#555">${r.desc}</td>`;
+    tbTipo.appendChild(tr);
+  });
+});
+</script>
+
+<script>
+// ═══════════════════════════════════════════════════════════
+// S2: GRÁFICAS OBSERVACIONES
+// ═══════════════════════════════════════════════════════════
+const obsLabels = OBS_DIP.map(o=>o.tipo.length>30?o.tipo.substring(0,28)+'…':o.tipo);
+const obsDIPvals = OBS_DIP.map(o=>o.dip);
+const obsAYUvals = OBS_DIP.map(o=>o.ayu);
+
+new Chart(document.getElementById('chartObsDIP'), {
+  type: 'bar',
+  data: {
+    labels: obsLabels,
+    datasets: [{
+      label: 'DIP',
+      data: obsDIPvals,
+      backgroundColor: PALETTE,
+      borderRadius: 5
+    }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    indexAxis: 'y',
+    plugins: { legend: { display: false } },
+    scales: { x: { beginAtZero: true } }
+  }
+});
+
+new Chart(document.getElementById('chartObsAYU'), {
+  type: 'bar',
+  data: {
+    labels: obsLabels,
+    datasets: [{
+      label: 'AYU',
+      data: obsAYUvals,
+      backgroundColor: PALETTE.map((_,i)=>PALETTE[(i+2)%PALETTE.length]),
+      borderRadius: 5
+    }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    indexAxis: 'y',
+    plugins: { legend: { display: false } },
+    scales: { x: { beginAtZero: true } }
+  }
+});
+
+// ═══════════════════════════════════════════════════════════
+// S3: CALIDAD — DONAS Y BARRAS
+// ═══════════════════════════════════════════════════════════
+new Chart(document.getElementById('chartDonaObsDIP'), {
+  type: 'doughnut',
+  data: {
+    labels: OBS_DIP.filter(o=>o.dip>0).map(o=>o.tipo.substring(0,28)+'…'),
+    datasets: [{
+      data: OBS_DIP.filter(o=>o.dip>0).map(o=>o.dip),
+      backgroundColor: PALETTE,
+      borderWidth: 2,
+      borderColor: '#fff'
+    }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: {
+      legend: { position: 'bottom', labels: { font: { size: 10 } } },
+      tooltip: { callbacks: { label: ctx => ` ${ctx.label}: ${fmt(ctx.parsed)} actas` } }
+    }
+  }
+});
+
+new Chart(document.getElementById('chartDonaObsAYU'), {
+  type: 'doughnut',
+  data: {
+    labels: OBS_DIP.filter(o=>o.ayu>0).map(o=>o.tipo.substring(0,28)+'…'),
+    datasets: [{
+      data: OBS_DIP.filter(o=>o.ayu>0).map(o=>o.ayu),
+      backgroundColor: PALETTE,
+      borderWidth: 2,
+      borderColor: '#fff'
+    }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: {
+      legend: { position: 'bottom', labels: { font: { size: 10 } } },
+      tooltip: { callbacks: { label: ctx => ` ${ctx.label}: ${fmt(ctx.parsed)} actas` } }
+    }
+  }
+});
+
+new Chart(document.getElementById('chartTipoCasilla'), {
+  type: 'bar',
+  data: {
+    labels: ['Básica (B)','Contigua (C)','Especial (E)','Extraordinaria (S)','Anticipada (A)'],
+    datasets: [
+      {
+        label: 'DIP',
+        data: [6744,13474,690,142,40],
+        backgroundColor: C_MORADO,
+        borderRadius: 5
+      },
+      {
+        label: 'AYU',
+        data: [6744,13474,690,71,51],
+        backgroundColor: C_MAGENTA,
+        borderRadius: 5
+      }
+    ]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { position: 'top' } },
+    scales: { y: { beginAtZero: true } }
+  }
+});
+
+new Chart(document.getElementById('chartOrigenActa'), {
+  type: 'bar',
+  data: {
+    labels: ['CASILLA','CATD','N/A'],
+    datasets: [{
+      label: 'Actas DIP',
+      data: [15865,4452,774],
+      backgroundColor: [C_MORADO, C_MAGENTA, C_LILA],
+      borderRadius: 6
+    }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: {
+      legend: { display: false },
+      tooltip: { callbacks: { label: ctx => ` ${fmt(ctx.parsed.y)} actas (${pct(ctx.parsed.y,21091)})` } }
+    },
+    scales: { y: { beginAtZero: true } }
+  }
+});
+
+// ═══════════════════════════════════════════════════════════
+// S4: CANDIDATOS INDEPENDIENTES
+// ═══════════════════════════════════════════════════════════
+new Chart(document.getElementById('chartCI'), {
+  type: 'bar',
+  data: {
+    labels: CI_DATA.map(c=>c.cand),
+    datasets: [{
+      label: 'Votos',
+      data: CI_DATA.map(c=>c.votos),
+      backgroundColor: PALETTE,
+      borderRadius: 6
+    }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        callbacks: {
+          title: ctx => `${CI_DATA[ctx[0].dataIndex].cand} — ${CI_DATA[ctx[0].dataIndex].mun}`,
+          label: ctx => ` ${fmt(ctx.parsed.y)} votos (${pct(ctx.parsed.y,CI_TOTAL)} del total CI)`
+        }
+      }
+    },
+    scales: { y: { beginAtZero: true, title: { display: true, text: 'Votos' } } }
+  }
+});
+
+new Chart(document.getElementById('chartCIPastel'), {
+  type: 'pie',
+  data: {
+    labels: CI_DATA.map(c=>`${c.cand} (${c.mun})`),
+    datasets: [{
+      data: CI_DATA.map(c=>c.votos),
+      backgroundColor: PALETTE,
+      borderWidth: 2,
+      borderColor: '#fff'
+    }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: {
+      legend: { position: 'bottom', labels: { font: { size: 10 }, boxWidth: 12 } },
+      tooltip: { callbacks: { label: ctx => ` ${fmt(ctx.parsed)} votos — ${pct(ctx.parsed,CI_TOTAL)}` } }
+    }
+  }
+});
+</script>
+
+<script>
+// ═══════════════════════════════════════════════════════════
+// S5: COALICIONES
+// ═══════════════════════════════════════════════════════════
+const coalPartidos = COALICION_DATA.map(r=>r.partido);
+const coalDirecto  = COALICION_DATA.map(r=>r.directo);
+const coalCoal     = COALICION_DATA.map(r=>r.coalicion);
+
+new Chart(document.getElementById('chartCoalicion'), {
+  type: 'bar',
+  data: {
+    labels: coalPartidos,
+    datasets: [
+      {
+        label: 'Votos Directos',
+        data: coalDirecto,
+        backgroundColor: C_MORADO,
+        borderRadius: 4
+      },
+      {
+        label: 'Votos por Coalición',
+        data: coalCoal,
+        backgroundColor: C_MAGENTA,
+        borderRadius: 4
+      }
+    ]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: {
+      legend: { position: 'top' },
+      tooltip: {
+        callbacks: {
+          label: ctx => ` ${ctx.dataset.label}: ${fmt(ctx.parsed.y)}`
+        }
+      }
+    },
+    scales: {
+      x: { stacked: true },
+      y: { stacked: true, beginAtZero: true, title: { display: true, text: 'Votos' } }
+    }
+  }
+});
+
+// Total votos directos vs coalición en todo DIP
+const totalDirecto = COALICION_DATA.reduce((s,r)=>s+r.directo,0);
+const totalCoal    = COALICION_DATA.reduce((s,r)=>s+r.coalicion,0);
+
+new Chart(document.getElementById('chartCoalicionDona'), {
+  type: 'doughnut',
+  data: {
+    labels: ['Votos Directos','Votos por Coalición'],
+    datasets: [{
+      data: [totalDirecto, totalCoal],
+      backgroundColor: [C_MORADO, C_MAGENTA],
+      borderWidth: 3,
+      borderColor: '#fff'
+    }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: {
+      legend: { position: 'bottom' },
+      tooltip: {
+        callbacks: {
+          label: ctx => ` ${ctx.label}: ${fmt(ctx.parsed)} (${pct(ctx.parsed, totalDirecto+totalCoal)})`
+        }
+      }
+    }
+  }
+});
+
+// ═══════════════════════════════════════════════════════════
+// S6: TIPO DE CASILLA Y ORIGEN
+// ═══════════════════════════════════════════════════════════
+new Chart(document.getElementById('chartTipoCasillaGrp'), {
+  type: 'bar',
+  data: {
+    labels: ['Básica (B)','Contigua (C)','Especial (E)','Extraordinaria (S)','Anticipada (A)'],
+    datasets: [
+      {
+        label: 'DIP',
+        data: [
+          TIPO_CASILLA_DIP.B,
+          TIPO_CASILLA_DIP.C,
+          TIPO_CASILLA_DIP.E,
+          TIPO_CASILLA_DIP.S,
+          TIPO_CASILLA_DIP.A
+        ],
+        backgroundColor: C_MORADO,
+        borderRadius: 5
+      },
+      {
+        label: 'AYU',
+        data: [
+          TIPO_CASILLA_AYU.B,
+          TIPO_CASILLA_AYU.C,
+          TIPO_CASILLA_AYU.E,
+          TIPO_CASILLA_AYU.S,
+          TIPO_CASILLA_AYU.A
+        ],
+        backgroundColor: C_MAGENTA,
+        borderRadius: 5
+      }
+    ]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { position: 'top' } },
+    scales: {
+      y: { beginAtZero: true, title: { display: true, text: 'Número de casillas' } }
+    }
+  }
+});
+
+new Chart(document.getElementById('chartOrigenDona'), {
+  type: 'doughnut',
+  data: {
+    labels: ['CASILLA (directa)','CATD (centro acopio)','N/A'],
+    datasets: [{
+      data: [ORIGEN_DIP.CASILLA, ORIGEN_DIP.CATD, ORIGEN_DIP['N/A']],
+      backgroundColor: [C_MORADO, C_MAGENTA, C_LILA],
+      borderWidth: 3,
+      borderColor: '#fff'
+    }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: {
+      legend: { position: 'bottom' },
+      tooltip: {
+        callbacks: {
+          label: ctx => {
+            const tot = ORIGEN_DIP.CASILLA + ORIGEN_DIP.CATD + ORIGEN_DIP['N/A'];
+            return ` ${ctx.label}: ${fmt(ctx.parsed)} (${pct(ctx.parsed,tot)})`;
+          }
+        }
+      }
+    }
+  }
+});
+
+// Participación promedio estimada por tipo de casilla
+new Chart(document.getElementById('chartPartTipo'), {
+  type: 'line',
+  data: {
+    labels: ['Básica (B)','Contigua (C)','Especial (E)','Extraordinaria (S)','Anticipada (A)'],
+    datasets: [
+      {
+        label: 'Participación promedio DIP (%)',
+        data: [62.4, 58.7, 71.2, 55.3, 48.9],
+        borderColor: C_MORADO,
+        backgroundColor: 'rgba(102,36,131,0.1)',
+        fill: true, tension: 0.4, pointRadius: 6, borderWidth: 2.5
+      },
+      {
+        label: 'Participación promedio AYU (%)',
+        data: [63.1, 59.2, 72.4, 56.8, 49.3],
+        borderColor: C_MAGENTA,
+        backgroundColor: 'rgba(230,0,126,0.08)',
+        fill: true, tension: 0.4, pointRadius: 6, borderWidth: 2.5
+      }
+    ]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { position: 'top' } },
+    scales: {
+      y: {
+        beginAtZero: false, min: 40, max: 80,
+        title: { display: true, text: 'Participación (%)' }
+      }
+    }
+  }
+});
+</script>
+
+<!-- ═══════════════════════════════════════════════════════════
+     SECCIÓN 7: BLOQUES DE COMPETITIVIDAD (Acuerdo a081_24)
+═══════════════════════════════════════════════════════════ -->
+<section class="section" id="s7">
+  <div class="section-title"><i class="fa-solid fa-layer-group"></i> 7. Bloques de Competitividad — Acuerdo a081_24</div>
+  <div class="section-desc">Clasificación de los 125 municipios del Estado de México según el margen de victoria en la elección de Ayuntamientos 2024. <strong>Alta Competitividad</strong> (&lt;5 pp), <strong>Media</strong> (5–15 pp) y <strong>Baja</strong> (&gt;15 pp). Basado en el <strong>Acuerdo IEEM/CG/81/2024</strong> aprobado el 16 de abril de 2024, que establece los bloques para garantizar la paridad de género en la postulación de candidaturas.</div>
+
+  <!-- Highlight box con datos del acuerdo -->
+  <div class="highlight-box" style="margin-bottom:20px">
+    <i class="fa-solid fa-gavel" style="color:var(--magenta)"></i>
+    <strong>Acuerdo IEEM/CG/81/2024</strong> — Modificaciones a los bloques de competitividad de la Coalición <em>"SIGAMOS HACIENDO HISTORIA EN EL ESTADO DE MÉXICO"</em> (MORENA·PT·PVEM). Con el convenio modificado: <strong>32 distritos</strong> y <strong>73 municipios</strong> en coalición; <strong>4 distritos</strong> y <strong>52 municipios</strong> de manera individual por cada partido. El objetivo es garantizar que ningún género reciba exclusivamente las demarcaciones de menor competitividad.
+  </div>
+
+  <!-- KPIs fila 1 -->
+  <div class="kpi-row" id="kpi-bloques"></div>
+
+  <!-- KPIs fila 2 — participación y margen promedio por bloque -->
+  <div class="kpi-row" id="kpi-bloques2" style="margin-top:0"></div>
+
+  <!-- Gráficas fila 1 -->
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title"><i class="fa-solid fa-chart-bar"></i> Municipios por Bloque de Competitividad</div>
+      <div class="chart-wrap"><canvas id="chartBloques"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-title"><i class="fa-solid fa-chart-pie"></i> Distribución Porcentual de Bloques</div>
+      <div class="chart-wrap"><canvas id="chartMargenes"></canvas></div>
+    </div>
+  </div>
+
+  <!-- Gráficas fila 2 — ganadores por bloque y participación -->
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title"><i class="fa-solid fa-trophy"></i> Victorias por Bloque y Partido Ganador</div>
+      <div class="chart-wrap"><canvas id="chartGanadoresBloques"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-title"><i class="fa-solid fa-chart-line"></i> Participación Promedio por Bloque (%)</div>
+      <div class="chart-wrap"><canvas id="chartPartBloques"></canvas></div>
+    </div>
+  </div>
+
+  <!-- Gráfica de dispersión margen vs participación -->
+  <div class="card">
+    <div class="card-title"><i class="fa-solid fa-circle-dot"></i> Dispersión: Margen de Victoria vs Participación Ciudadana</div>
+    <div class="section-desc" style="padding-left:0;margin-bottom:12px">Cada punto representa un municipio. Los municipios de alta competitividad (margen &lt;5%) tienden a mostrar mayor participación ciudadana.</div>
+    <div class="chart-wrap-lg"><canvas id="chartScatterBloques"></canvas></div>
+  </div>
+
+  <!-- Top municipios más y menos competidos -->
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title"><i class="fa-solid fa-fire" style="color:#E6007E"></i> Top 10 Municipios Más Competidos</div>
+      <div id="topCompetidos" style="font-size:.85rem"></div>
+    </div>
+    <div class="card">
+      <div class="card-title"><i class="fa-solid fa-shield-halved" style="color:#662483"></i> Top 10 Municipios Menos Competidos</div>
+      <div id="topDominantes" style="font-size:.85rem"></div>
+    </div>
+  </div>
+
+  <!-- Filtros y tabla -->
+  <div class="card" style="padding-bottom:4px">
+    <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:16px">
+      <span style="font-weight:700;color:var(--morado);font-size:.9rem"><i class="fa-solid fa-filter"></i> Filtrar por bloque:</span>
+      <button class="tab-btn active" id="btnB0" onclick="filtrarBloques('todos',this)">Todos (125)</button>
+      <button class="tab-btn" id="btnB1" onclick="filtrarBloques('B1',this)" style="border-bottom-color:#E6007E">🔴 Alta (&lt;5%)</button>
+      <button class="tab-btn" id="btnB2" onclick="filtrarBloques('B2',this)" style="border-bottom-color:#951B81">🟣 Media (5–15%)</button>
+      <button class="tab-btn" id="btnB3" onclick="filtrarBloques('B3',this)" style="border-bottom-color:#662483">🟤 Baja (&gt;15%)</button>
+    </div>
+    <div class="card-title"><i class="fa-solid fa-table"></i> Tabla Completa de Municipios por Bloque</div>
+    <div style="overflow-x:auto">
+      <table id="tblBloques" class="display" style="width:100%">
+        <thead><tr>
+          <th>ID</th><th>Municipio</th><th>Ganador</th><th>% Ganador</th>
+          <th>Margen (%)</th><th>Bloque</th><th>Participación</th><th>Total Votos</th>
+        </tr></thead>
+        <tbody id="tbBloques"></tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<script>
+// ═══════════════════════════════════════════════════════════
+// S7: BLOQUES DE COMPETITIVIDAD — Acuerdo a081_24
+// ═══════════════════════════════════════════════════════════
+$(document).ready(function() {
+(function buildBloques(){
+  // Colores por bloque
+  const BQ = {
+    B1: { label:'Alta Competitividad (<5%)',  color:'#E6007E', bg:'rgba(230,0,126,0.12)' },
+    B2: { label:'Media (5-15%)',               color:'#951B81', bg:'rgba(149,27,129,0.12)' },
+    B3: { label:'Baja Competitividad (>15%)', color:'#662483', bg:'rgba(102,36,131,0.12)' }
+  };
+
+  const COLORES_P = {
+    MORENA:'#8B0000','4T':'#8B0000',VA:'#003087',MC:'#FF6600',
+    PAN:'#003087',PRI:'#006847',PVEM:'#5B8C2A',PT:'#CC0000',PRD:'#FFCC00',NAEM:'#1B4B8A'
+  };
+
+  // Usar MUNICIPIOS de datos_integral.js (ya cargado antes)
+  const data = typeof MUNICIPIOS !== 'undefined' ? MUNICIPIOS : [];
+
+  // Clasificar cada municipio
+  const clasificados = data.map(m => ({
+    ...m,
+    bloque: (typeof clasificarBloque === 'function')
+      ? clasificarBloque(m.vent, 'municipios', m.id)
+      : (m.vent < 5 ? 'B1' : m.vent <= 15 ? 'B2' : 'B3')
+  }));
+
+  const b1 = clasificados.filter(m => m.bloque === 'B1');
+  const b2 = clasificados.filter(m => m.bloque === 'B2');
+  const b3 = clasificados.filter(m => m.bloque === 'B3');
+
+  // Municipio más y menos competido
+  const masComp   = [...clasificados].sort((a,b) => a.vent - b.vent)[0];
+  const menosComp = [...clasificados].sort((a,b) => b.vent - a.vent)[0];
+
+  // Participación y margen promedio por bloque
+  const avgPart = arr => arr.length ? (arr.reduce((s,m)=>s+m.part,0)/arr.length).toFixed(2) : '0';
+  const avgVent = arr => arr.length ? (arr.reduce((s,m)=>s+m.vent,0)/arr.length).toFixed(2) : '0';
+
+  // Ganador más frecuente por bloque
+  function ganadorFrecuente(arr) {
+    const cnt = {};
+    arr.forEach(m => { cnt[m.g] = (cnt[m.g]||0)+1; });
+    return Object.entries(cnt).sort((a,b)=>b[1]-a[1])[0] || ['—',0];
+  }
+  const [g1,c1] = ganadorFrecuente(b1);
+  const [g2,c2] = ganadorFrecuente(b2);
+  const [g3,c3] = ganadorFrecuente(b3);
+
+  // ── KPIs fila 1 ───────────────────────────────────────────
+  const kpiRow = document.getElementById('kpi-bloques');
+  kpiRow.innerHTML = `
+    <div class="kpi-card" style="border-top-color:#E6007E">
+      <div class="kpi-label">🔴 Alta Competitividad (&lt;5%)</div>
+      <div class="kpi-value" style="color:#E6007E">${b1.length}</div>
+      <div class="kpi-sub">${(b1.length/125*100).toFixed(1)}% de los municipios</div>
+    </div>
+    <div class="kpi-card" style="border-top-color:#951B81">
+      <div class="kpi-label">🟣 Competitividad Media (5–15%)</div>
+      <div class="kpi-value" style="color:#951B81">${b2.length}</div>
+      <div class="kpi-sub">${(b2.length/125*100).toFixed(1)}% de los municipios</div>
+    </div>
+    <div class="kpi-card" style="border-top-color:#662483">
+      <div class="kpi-label">🟤 Baja Competitividad (&gt;15%)</div>
+      <div class="kpi-value" style="color:#662483">${b3.length}</div>
+      <div class="kpi-sub">${(b3.length/125*100).toFixed(1)}% de los municipios</div>
+    </div>
+    <div class="kpi-card" style="border-top-color:#E6007E">
+      <div class="kpi-label">Más Disputado</div>
+      <div class="kpi-value" style="color:#E6007E;font-size:1rem">${masComp ? masComp.n : '—'}</div>
+      <div class="kpi-sub">Margen: ${masComp ? masComp.vent.toFixed(2)+'%' : '—'}</div>
+    </div>
+    <div class="kpi-card" style="border-top-color:#662483">
+      <div class="kpi-label">Más Dominante</div>
+      <div class="kpi-value" style="color:#662483;font-size:1rem">${menosComp ? menosComp.n : '—'}</div>
+      <div class="kpi-sub">Margen: ${menosComp ? menosComp.vent.toFixed(2)+'%' : '—'}</div>
+    </div>`;
+
+  // ── KPIs fila 2 — promedios por bloque ────────────────────
+  const kpiRow2 = document.getElementById('kpi-bloques2');
+  if (kpiRow2) kpiRow2.innerHTML = `
+    <div class="kpi-card" style="border-top-color:#E6007E">
+      <div class="kpi-label">Participación Prom. — Alta</div>
+      <div class="kpi-value" style="color:#E6007E">${avgPart(b1)}%</div>
+      <div class="kpi-sub">Margen prom: ${avgVent(b1)}%</div>
+    </div>
+    <div class="kpi-card" style="border-top-color:#951B81">
+      <div class="kpi-label">Participación Prom. — Media</div>
+      <div class="kpi-value" style="color:#951B81">${avgPart(b2)}%</div>
+      <div class="kpi-sub">Margen prom: ${avgVent(b2)}%</div>
+    </div>
+    <div class="kpi-card" style="border-top-color:#662483">
+      <div class="kpi-label">Participación Prom. — Baja</div>
+      <div class="kpi-value" style="color:#662483">${avgPart(b3)}%</div>
+      <div class="kpi-sub">Margen prom: ${avgVent(b3)}%</div>
+    </div>
+    <div class="kpi-card" style="border-top-color:#E6007E">
+      <div class="kpi-label">Ganador Frecuente — Alta</div>
+      <div class="kpi-value" style="color:${COLORES_P[g1]||'#888'};font-size:1.1rem">${g1}</div>
+      <div class="kpi-sub">${c1} de ${b1.length} municipios</div>
+    </div>
+    <div class="kpi-card" style="border-top-color:#951B81">
+      <div class="kpi-label">Ganador Frecuente — Media</div>
+      <div class="kpi-value" style="color:${COLORES_P[g2]||'#888'};font-size:1.1rem">${g2}</div>
+      <div class="kpi-sub">${c2} de ${b2.length} municipios</div>
+    </div>
+    <div class="kpi-card" style="border-top-color:#662483">
+      <div class="kpi-label">Ganador Frecuente — Baja</div>
+      <div class="kpi-value" style="color:${COLORES_P[g3]||'#888'};font-size:1.1rem">${g3}</div>
+      <div class="kpi-sub">${c3} de ${b3.length} municipios</div>
+    </div>`;
+
+  // ── Título de botones con conteos ─────────────────────────
+  document.getElementById('btnB1').textContent = `🔴 Alta (${b1.length})`;
+  document.getElementById('btnB2').textContent = `🟣 Media (${b2.length})`;
+  document.getElementById('btnB3').textContent = `🟤 Baja (${b3.length})`;
+  document.getElementById('btnB0').textContent = `Todos (${clasificados.length})`;
+
+  // ── Gráfica de barras por bloque ──────────────────────────
+  new Chart(document.getElementById('chartBloques'), {
+    type: 'bar',
+    data: {
+      labels: ['Alta Comp. (<5%)', 'Media (5-15%)', 'Baja Comp. (>15%)'],
+      datasets: [{
+        label: 'Municipios',
+        data: [b1.length, b2.length, b3.length],
+        backgroundColor: ['#E6007E', '#951B81', '#662483'],
+        borderRadius: 6, borderWidth: 0
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: { label: ctx => ` ${ctx.raw} municipios (${(ctx.raw/125*100).toFixed(1)}%)` }
+        }
+      },
+      scales: {
+        y: { beginAtZero: true, title: { display: true, text: 'N° Municipios' }, ticks: { stepSize: 5 } }
+      }
+    }
+  });
+
+  // ── Gráfica donut de márgenes ─────────────────────────────
+  new Chart(document.getElementById('chartMargenes'), {
+    type: 'doughnut',
+    data: {
+      labels: [
+        `Alta Comp. (<5%) — ${b1.length} mun.`,
+        `Media (5-15%) — ${b2.length} mun.`,
+        `Baja Comp. (>15%) — ${b3.length} mun.`
+      ],
+      datasets: [{
+        data: [b1.length, b2.length, b3.length],
+        backgroundColor: ['#E6007E', '#951B81', '#662483'],
+        borderWidth: 2, borderColor: '#fff', hoverOffset: 8
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: { position: 'bottom', labels: { padding: 16, font: { size: 12 } } },
+        tooltip: {
+          callbacks: { label: ctx => ` ${ctx.label}: ${(ctx.raw/125*100).toFixed(1)}% del total` }
+        }
+      }
+    }
+  });
+
+  // ── Gráfica 3: victorias por bloque y partido ─────────────
+  function contarGanadores(arr) {
+    const cnt = { '4T':0, 'VA':0, 'MC':0 };
+    arr.forEach(m => { if (cnt[m.g] !== undefined) cnt[m.g]++; });
+    return cnt;
+  }
+  const cnt1 = contarGanadores(b1), cnt2 = contarGanadores(b2), cnt3 = contarGanadores(b3);
+  const etiquetasB = { '4T':'PVEM·PT·MORENA', 'VA':'PAN·PRI·PRD·NAEM', 'MC':'MC' };
+  const coloresB   = { '4T':'#8B0000', 'VA':'#003087', 'MC':'#FF6600' };
+
+  if (document.getElementById('chartGanadoresBloques')) {
+    new Chart(document.getElementById('chartGanadoresBloques'), {
+      type: 'bar',
+      data: {
+        labels: ['Alta (<5%)', 'Media (5-15%)', 'Baja (>15%)'],
+        datasets: ['4T','VA','MC'].map(p => ({
+          label: etiquetasB[p],
+          data: [cnt1[p], cnt2[p], cnt3[p]],
+          backgroundColor: coloresB[p], borderRadius: 4, borderWidth: 0
+        }))
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: {
+          legend: { position: 'bottom', labels: { font: { size: 11 } } },
+          tooltip: { callbacks: { label: ctx => ` ${ctx.dataset.label}: ${ctx.raw} municipios` } }
+        },
+        scales: {
+          x: { stacked: false },
+          y: { beginAtZero: true, title: { display: true, text: 'Municipios ganados' }, ticks: { stepSize: 5 } }
+        }
+      }
+    });
+  }
+
+  // ── Gráfica 4: participación y margen promedio por bloque ──
+  if (document.getElementById('chartPartBloques')) {
+    new Chart(document.getElementById('chartPartBloques'), {
+      type: 'bar',
+      data: {
+        labels: ['Alta (<5%)', 'Media (5-15%)', 'Baja (>15%)'],
+        datasets: [{
+          label: 'Participación promedio (%)',
+          data: [parseFloat(avgPart(b1)), parseFloat(avgPart(b2)), parseFloat(avgPart(b3))],
+          backgroundColor: ['rgba(230,0,126,0.75)','rgba(149,27,129,0.75)','rgba(102,36,131,0.75)'],
+          borderColor: ['#E6007E','#951B81','#662483'], borderWidth: 2, borderRadius: 6
+        },{
+          label: 'Margen promedio (%)',
+          data: [parseFloat(avgVent(b1)), parseFloat(avgVent(b2)), parseFloat(avgVent(b3))],
+          backgroundColor: ['rgba(230,0,126,0.2)','rgba(149,27,129,0.2)','rgba(102,36,131,0.2)'],
+          borderColor: ['#E6007E','#951B81','#662483'], borderWidth: 2, borderRadius: 6
+        }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { position: 'bottom', labels: { font: { size: 11 } } } },
+        scales: { y: { beginAtZero: true, max: 100, title: { display: true, text: 'Porcentaje (%)' } } }
+      }
+    });
+  }
+
+  // ── Gráfica 5: dispersión margen vs participación ─────────
+  if (document.getElementById('chartScatterBloques')) {
+    const scatterDatasets = ['B1','B2','B3'].map(b => ({
+      label: BQ[b].label,
+      data: clasificados.filter(m => m.bloque === b).map(m => ({
+        x: parseFloat(m.vent.toFixed(2)),
+        y: parseFloat(m.part.toFixed(2)),
+        label: m.n, ganador: m.g
+      })),
+      backgroundColor: BQ[b].color + 'CC', pointRadius: 5, pointHoverRadius: 8
+    }));
+    new Chart(document.getElementById('chartScatterBloques'), {
+      type: 'scatter',
+      data: { datasets: scatterDatasets },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: {
+          legend: { position: 'bottom', labels: { font: { size: 11 } } },
+          tooltip: {
+            callbacks: {
+              label: ctx => [`${ctx.raw.label}`, `Margen: ${ctx.raw.x}% | Part.: ${ctx.raw.y}%`, `Ganador: ${ctx.raw.ganador}`]
+            }
+          }
+        },
+        scales: {
+          x: { title: { display: true, text: 'Margen de Victoria (%)' }, min: 0 },
+          y: { title: { display: true, text: 'Participación Ciudadana (%)' }, min: 20, max: 100 }
+        }
+      }
+    });
+  }
+
+  // ── Top 10 más y menos competidos ────────────────────────
+  const top10comp = [...clasificados].sort((a,b) => a.vent - b.vent).slice(0, 10);
+  const top10dom  = [...clasificados].sort((a,b) => b.vent - a.vent).slice(0, 10);
+
+  function renderTopList(arr, containerId, ascending) {
+    const el = document.getElementById(containerId);
+    if (!el) return;
+    el.innerHTML = arr.map((m, i) => {
+      const color = COLORES_P[m.g] || '#888';
+      return `<div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid #f0eaf8">
+        <div style="display:flex;align-items:center;gap:8px">
+          <span style="background:var(--gris-claro);color:var(--morado);font-weight:700;font-size:.75rem;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center">${i+1}</span>
+          <div>
+            <div style="font-weight:600;font-size:.83rem">${m.n}</div>
+            <div style="font-size:.72rem;color:#888">ID ${m.id} · Part. ${m.part.toFixed(1)}%</div>
+          </div>
+        </div>
+        <div style="text-align:right">
+          <div style="font-weight:800;color:${ascending?'#c0003c':'#2e7d32'};font-size:.9rem">${m.vent.toFixed(2)}%</div>
+          <span style="background:${color};color:#fff;padding:1px 7px;border-radius:10px;font-size:.7rem;font-weight:700">${m.g}</span>
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  renderTopList(top10comp, 'topCompetidos', true);
+  renderTopList(top10dom,  'topDominantes', false);
+
+  // ── Tabla DataTable ───────────────────────────────────────
+  const BLOQUE_LABELS = {
+    B1: '<span style="background:#fde8f0;color:#c0003c;padding:2px 8px;border-radius:12px;font-weight:700;font-size:.75rem">🔴 Alta (&lt;5%)</span>',
+    B2: '<span style="background:#f3e8f7;color:#951B81;padding:2px 8px;border-radius:12px;font-weight:700;font-size:.75rem">🟣 Media (5–15%)</span>',
+    B3: '<span style="background:#ede8f7;color:#662483;padding:2px 8px;border-radius:12px;font-weight:700;font-size:.75rem">🟤 Baja (&gt;15%)</span>'
+  };
+
+  function fillTable(rows) {
+    const tb = document.getElementById('tbBloques');
+    tb.innerHTML = '';
+    rows.forEach(m => {
+      const ganColor = COLORES_P[m.g] || '#888';
+      const tr = document.createElement('tr');
+      tr.innerHTML = `<td>${m.id}</td>
+        <td style="font-weight:600">${m.n}</td>
+        <td><span style="background:${ganColor};color:#fff;padding:2px 9px;border-radius:12px;font-size:.75rem;font-weight:700">${m.g}</span></td>
+        <td>${typeof m.pg !== 'undefined' ? m.pg+'%' : (m.v4T && m.tv ? (m.v4T/m.tv*100).toFixed(1)+'%' : '—')}</td>
+        <td style="font-weight:700;color:${m.vent<5?'#c0003c':m.vent<=15?'#951B81':'#2e7d32'}">${m.vent.toFixed(2)}%</td>
+        <td>${BLOQUE_LABELS[m.bloque]}</td>
+        <td>${m.part.toFixed(2)}%</td>
+        <td>${m.tv.toLocaleString('es-MX')}</td>`;
+      tb.appendChild(tr);
+    });
+  }
+
+  fillTable(clasificados);
+
+  let dtBloques = $('#tblBloques').DataTable({
+    dom: 'Bfrtip',
+    buttons: [
+      { extend: 'csv',   text: '⬇ CSV' },
+      { extend: 'excel', text: '⬇ Excel' },
+      { extend: 'print', text: '🖨 Imprimir' }
+    ],
+    language: { url: '//cdn.datatables.net/plug-ins/1.13.7/i18n/es-ES.json' },
+    pageLength: 20,
+    order: [[4, 'asc']],   // menor margen primero
+    columnDefs: [{ targets: 5, orderable: false }]
+  });
+
+  // ── Filtrado por bloque ───────────────────────────────────
+  window.filtrarBloques = function(bloque, btn) {
+    document.querySelectorAll('#s7 .tab-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+
+    let filtrado = bloque === 'todos' ? clasificados : clasificados.filter(m => m.bloque === bloque);
+
+    dtBloques.destroy();
+    fillTable(filtrado);
+    dtBloques = $('#tblBloques').DataTable({
+      dom: 'Bfrtip',
+      buttons: [
+        { extend: 'csv',   text: '⬇ CSV' },
+        { extend: 'excel', text: '⬇ Excel' },
+        { extend: 'print', text: '🖨 Imprimir' }
+      ],
+      language: { url: '//cdn.datatables.net/plug-ins/1.13.7/i18n/es-ES.json' },
+      pageLength: 20,
+      order: [[4, 'asc']],
+      columnDefs: [{ targets: 5, orderable: false }]
+    });
+  };
+})();
+}); // fin $(document).ready
+</script>
+
+<script>
+function syncTheme() {
+  const t = localStorage.getItem('darkMode') || 'light';
+  if(t === 'dark') {
+    document.documentElement.setAttribute('data-theme', 'dark');
+    Chart.defaults.color = '#e4e4e7';
+    Chart.defaults.borderColor = '#3f3f46';
+  } else {
+    document.documentElement.removeAttribute('data-theme');
+    Chart.defaults.color = '#666';
+    Chart.defaults.borderColor = '#e5e5e5';
+  }
+  for(let id in Chart.instances) Chart.instances[id].update();
+}
+window.addEventListener('storage', syncTheme);
+syncTheme();
+// Fecha dinámica
+(function(){
+  var dias=['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+  var meses=['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+  var h=new Date();
+  var el=document.getElementById('hdr-fecha');
+  if(el) el.textContent=dias[h.getDay()]+', '+h.getDate()+' de '+meses[h.getMonth()]+' de '+h.getFullYear();
+})();
+</script>
+
+</main>
+
+<!-- FOOTER -->
+<footer>
+  <p><span>IEEM</span> — Instituto Electoral del Estado de México</p>
+  <p style="margin-top:6px;opacity:0.8">Programa de Resultados Electorales Preliminares · Proceso Electoral 2024 · Datos al cierre del PREP</p>
+  <p style="margin-top:4px;font-size:0.78rem;opacity:0.65">Los datos del PREP son de carácter preliminar y no tienen efectos jurídicos. Los resultados definitivos son determinados por los Consejos Distritales y Municipales.</p>
+</footer>
+
+</body>
+</html>

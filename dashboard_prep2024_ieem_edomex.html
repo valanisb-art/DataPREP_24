@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PREP 2024 – Estado de México | IEEM</title>
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/jquery.dataTables.min.css">
+<link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.2/css/buttons.dataTables.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',Arial,sans-serif;background:#F7F5FB;color:#333;scroll-behavior:smooth}
+:root{--morado:#662483;--magenta:#E6007E;--lila:#8173B3;--hover:#951B81;--fondo:#F7F5FB}
+/* HEADER */
+.header{background:linear-gradient(135deg,#662483 0%,#951B81 50%,#E6007E 100%);color:#fff;padding:28px 24px 20px;text-align:center}
+.header .logo{font-size:2.4rem;font-weight:900;letter-spacing:2px;display:inline-block;border:3px solid #fff;padding:4px 18px;border-radius:8px;margin-bottom:10px}
+.header h1{font-size:1.5rem;font-weight:700;margin-bottom:4px}
+.header .subtitle{font-size:.95rem;opacity:.9}
+.header .fecha{margin-top:8px;font-size:.85rem;background:rgba(255,255,255,.18);display:inline-block;padding:3px 14px;border-radius:20px}
+/* NAVBAR */
+nav{background:#662483;position:sticky;top:0;z-index:999;box-shadow:0 2px 8px rgba(0,0,0,.3)}
+nav ul{display:flex;flex-wrap:wrap;list-style:none;justify-content:center;gap:0}
+nav ul li a{display:block;color:#fff;text-decoration:none;padding:11px 14px;font-size:.82rem;font-weight:600;transition:background .2s}
+nav ul li a:hover,nav ul li a.active{background:#E6007E}
+/* SECTIONS */
+section{padding:32px 20px;max-width:1300px;margin:0 auto}
+section h2{color:#662483;font-size:1.35rem;font-weight:800;margin-bottom:20px;border-left:5px solid #E6007E;padding-left:12px}
+/* KPI CARDS */
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px;margin-bottom:24px}
+.kpi-card{background:#fff;border-radius:12px;padding:18px 16px;box-shadow:0 2px 10px rgba(102,36,131,.1);border-top:4px solid var(--lila);text-align:center}
+.kpi-card .kpi-val{font-size:1.7rem;font-weight:900;color:#662483}
+.kpi-card .kpi-label{font-size:.78rem;color:#666;margin-top:4px}
+.kpi-card .kpi-sub{font-size:.72rem;color:#999;margin-top:2px}
+/* CHARTS */
+.charts-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:20px;margin-bottom:24px}
+.chart-box{background:#fff;border-radius:12px;padding:20px;box-shadow:0 2px 10px rgba(102,36,131,.1)}
+.chart-box h3{font-size:.95rem;color:#662483;font-weight:700;margin-bottom:14px;text-align:center}
+canvas{max-height:320px}
+/* TABLES */
+.table-wrap{background:#fff;border-radius:12px;padding:20px;box-shadow:0 2px 10px rgba(102,36,131,.1);overflow-x:auto}
+table.dataTable thead th{background:#662483;color:#fff;font-size:.8rem}
+table.dataTable tbody tr:hover{background:#f3eef9}
+.dt-buttons button{background:#8173B3!important;color:#fff!important;border:none!important;border-radius:6px!important;font-size:.78rem!important;padding:5px 12px!important;margin-right:4px!important}
+.dt-buttons button:hover{background:#662483!important}
+/* BADGES */
+.badge{display:inline-block;padding:2px 9px;border-radius:12px;font-size:.72rem;font-weight:700;color:#fff}
+/* PROGRESS */
+.prog-wrap{background:#fff;border-radius:12px;padding:24px;box-shadow:0 2px 10px rgba(102,36,131,.1);margin-bottom:16px}
+.prog-label{display:flex;justify-content:space-between;font-size:.85rem;font-weight:600;color:#444;margin-bottom:6px}
+.prog-bar-bg{background:#e8e0f0;border-radius:8px;height:22px;overflow:hidden}
+.prog-bar{height:100%;border-radius:8px;transition:width 1s ease;display:flex;align-items:center;justify-content:flex-end;padding-right:8px;font-size:.75rem;font-weight:700;color:#fff}
+/* TABS */
+.tabs{display:flex;gap:8px;margin-bottom:16px}
+.tab-btn{padding:8px 20px;border:2px solid #8173B3;border-radius:8px;background:#fff;color:#8173B3;font-weight:700;cursor:pointer;font-size:.85rem;transition:.2s}
+.tab-btn.active{background:#662483;color:#fff;border-color:#662483}
+.tab-content{display:none}.tab-content.active{display:block}
+/* FOOTER */
+footer{background:#662483;color:#fff;text-align:center;padding:20px;font-size:.82rem;margin-top:40px}
+footer a{color:#E6007E}
+/* RESPONSIVE */
+@media(max-width:600px){nav ul li a{padding:8px 8px;font-size:.72rem}.header h1{font-size:1.1rem}}
+/* SCATTER */
+#scatterWrap{background:#fff;border-radius:12px;padding:20px;box-shadow:0 2px 10px rgba(102,36,131,.1)}
+/* WINS GRID */
+.wins-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px;margin-bottom:20px}
+.win-card{background:#fff;border-radius:10px;padding:14px 10px;text-align:center;box-shadow:0 2px 8px rgba(102,36,131,.1)}
+.win-card .wn{font-size:2rem;font-weight:900}
+.win-card .wp{font-size:.78rem;color:#555;margin-top:2px}
+/* DARK MODE OVERRIDES */
+[data-theme="dark"] body { background: #121212 !important; color: #f4f4f5 !important; }
+[data-theme="dark"] .kpi-card, [data-theme="dark"] .chart-box, [data-theme="dark"] .table-wrap, [data-theme="dark"] .prog-wrap, [data-theme="dark"] #scatterWrap, [data-theme="dark"] .win-card { background: #27272a !important; color: #f4f4f5 !important; box-shadow: 0 4px 12px rgba(0,0,0,0.5) !important; border-color: #3f3f46 !important; }
+[data-theme="dark"] table.dataTable tbody tr { background: transparent !important; color: #f4f4f5 !important; }
+[data-theme="dark"] table.dataTable tbody tr:hover { background: #3f3f46 !important; }
+[data-theme="dark"] .kpi-card .kpi-label, [data-theme="dark"] .prog-label, [data-theme="dark"] .chart-box h3, [data-theme="dark"] section h2, [data-theme="dark"] .kpi-card .kpi-val, [data-theme="dark"] label, [data-theme="dark"] .wins-grid h3 { color: #f4f4f5 !important; }
+[data-theme="dark"] .kpi-card .kpi-sub { color: #a1a1aa !important; }
+[data-theme="dark"] .dataTables_wrapper .dataTables_info, [data-theme="dark"] .dataTables_wrapper .dataTables_length, [data-theme="dark"] .dataTables_wrapper .dataTables_filter, [data-theme="dark"] .dataTables_wrapper .dataTables_paginate .paginate_button { color: #e4e4e7 !important; }
+[data-theme="dark"] .tab-btn { background: #3f3f46; color: #a1a1aa; border-color: #52525b; }
+[data-theme="dark"] .tab-btn.active { background: #18181b; color: #E6007E; border-color: #E6007E; }
+[data-theme="dark"] select { background: #3f3f46; color: #f4f4f5; border-color: #52525b; }
+[data-theme="dark"] .prog-bar-bg { background: #3f3f46; }
+/* ── Marca de agua "Prueba Piloto" (mosaico) ───── */
+#wm-piloto{
+  position:fixed;top:0;left:0;width:100%;height:100%;
+  z-index:9999;pointer-events:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='420' height='200'%3E%3Ctext x='210' y='110' text-anchor='middle' dominant-baseline='middle' font-family='Arial,sans-serif' font-weight='900' font-size='30' fill='%23cc0000' opacity='0.13' transform='rotate(-35,210,100)'%3EPRUEBA PILOTO%3C/text%3E%3C/svg%3E");
+  background-repeat:repeat;
+  background-size:420px 200px;
+}
+[data-theme="dark"] #wm-piloto{
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='420' height='200'%3E%3Ctext x='210' y='110' text-anchor='middle' dominant-baseline='middle' font-family='Arial,sans-serif' font-weight='900' font-size='30' fill='white' opacity='0.10' transform='rotate(-35,210,100)'%3EPRUEBA PILOTO%3C/text%3E%3C/svg%3E");
+}
+</style>
+</head>
+<body>
+<div id="wm-piloto"></div>
+
+<!-- HEADER -->
+<header class="header">
+  <div class="logo">IEEM</div>
+  <h1>PREP 2024 – Resultados Electorales Estado de México</h1>
+  <div class="subtitle">Programa de Resultados Electorales Preliminares</div>
+  <div class="fecha"><i class="fa fa-calendar"></i> Corte: 03/06/2024 20:00 hrs (UTC-6) &nbsp;|&nbsp; <i class="fa fa-clock"></i> Consulta: <span id="hdr-fecha"></span></div>
+</header>
+
+<!-- NAVBAR -->
+<nav>
+  <ul>
+    <li><a href="#resumen"><i class="fa fa-chart-pie"></i> Resumen</a></li>
+    <li><a href="#diputados"><i class="fa fa-landmark"></i> Diputados</a></li>
+    <li><a href="#ayuntamientos"><i class="fa fa-city"></i> Ayuntamientos</a></li>
+    <li><a href="#participacion"><i class="fa fa-users"></i> Participación</a></li>
+    <li><a href="#competitividad"><i class="fa fa-bullseye"></i> Competitividad</a></li>
+    <li><a href="#comparativa"><i class="fa fa-table"></i> Comparativa</a></li>
+    <li><a href="#avance"><i class="fa fa-tasks"></i> Avance PREP</a></li>
+    <li><a href="#datos"><i class="fa fa-database"></i> Datos</a></li>
+  </ul>
+</nav>
+
+<!-- RESUMEN KPIs -->
+<section id="resumen">
+  <h2><i class="fa fa-chart-pie"></i> Resumen General PREP 2024</h2>
+  <div class="kpi-grid">
+    <div class="kpi-card" style="border-top-color:#662483">
+      <div class="kpi-val">21,091</div>
+      <div class="kpi-label">Actas DIP Capturadas</div>
+      <div class="kpi-sub">100% de 21,091 esperadas</div>
+    </div>
+    <div class="kpi-card" style="border-top-color:#E6007E">
+      <div class="kpi-val">19,966</div>
+      <div class="kpi-label">Actas DIP Contabilizadas</div>
+      <div class="kpi-sub">94.67%</div>
+    </div>
+    <div class="kpi-card" style="border-top-color:#8173B3">
+      <div class="kpi-val">7,950,381</div>
+      <div class="kpi-label">Votos DIP Totales</div>
+      <div class="kpi-sub">Lista nominal: 12,354,078</div>
+    </div>
+    <div class="kpi-card" style="border-top-color:#951B81">
+      <div class="kpi-val">64.35%</div>
+      <div class="kpi-label">Participación DIP</div>
+      <div class="kpi-sub">Ciudadanos que votaron</div>
+    </div>
+    <div class="kpi-card" style="border-top-color:#662483">
+      <div class="kpi-val">20,823</div>
+      <div class="kpi-label">Actas AYU Capturadas</div>
+      <div class="kpi-sub">99.02% de 21,030 esperadas</div>
+    </div>
+    <div class="kpi-card" style="border-top-color:#E6007E">
+      <div class="kpi-val">20,063</div>
+      <div class="kpi-label">Actas AYU Contabilizadas</div>
+      <div class="kpi-sub">95.40%</div>
+    </div>
+    <div class="kpi-card" style="border-top-color:#8173B3">
+      <div class="kpi-val">7,978,900</div>
+      <div class="kpi-label">Votos AYU Totales</div>
+      <div class="kpi-sub">Lista nominal: 12,440,818</div>
+    </div>
+    <div class="kpi-card" style="border-top-color:#951B81">
+      <div class="kpi-val">64.13%</div>
+      <div class="kpi-label">Participación AYU</div>
+      <div class="kpi-sub">Ciudadanos que votaron</div>
+    </div>
+  </div>
+
+  <h2 style="margin-top:24px"><i class="fa fa-trophy"></i> Victorias por Partido</h2>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
+    <div>
+      <h3 style="color:#662483;margin-bottom:12px;font-size:1rem">Diputados Locales (45 distritos)</h3>
+      <div class="wins-grid">
+        <div class="win-card"><div class="wn" style="color:#8B0000">43</div><div class="wp">MORENA</div></div>
+        <div class="win-card"><div class="wn" style="color:#003087">2</div><div class="wp">PAN</div></div>
+      </div>
+    </div>
+    <div>
+      <h3 style="color:#662483;margin-bottom:12px;font-size:1rem">Ayuntamientos (125 municipios)</h3>
+      <div class="wins-grid">
+        <div class="win-card"><div class="wn" style="color:#8B0000">70</div><div class="wp">MORENA</div></div>
+        <div class="win-card"><div class="wn" style="color:#006847">17</div><div class="wp">PRI</div></div>
+        <div class="win-card"><div class="wn" style="color:#003087">12</div><div class="wp">PAN</div></div>
+        <div class="win-card"><div class="wn" style="color:#FF6600">10</div><div class="wp">MC</div></div>
+        <div class="win-card"><div class="wn" style="color:#5B8C2A">9</div><div class="wp">PVEM</div></div>
+        <div class="win-card"><div class="wn" style="color:#CC0000">3</div><div class="wp">PT</div></div>
+        <div class="win-card"><div class="wn" style="color:#CCAA00">2</div><div class="wp">PRD</div></div>
+        <div class="win-card"><div class="wn" style="color:#1B4B8A">2</div><div class="wp">NAEM</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- DIPUTADOS -->
+<section id="diputados">
+  <h2><i class="fa fa-landmark"></i> Diputados Locales – 45 Distritos</h2>
+  <div class="charts-row">
+    <div class="chart-box"><h3>Distribución de Votos DIP</h3><canvas id="dipPie"></canvas></div>
+    <div class="chart-box"><h3>Votos por Partido DIP</h3><canvas id="dipBar"></canvas></div>
+  </div>
+  <div class="table-wrap">
+    <table id="tblDip" class="display" style="width:100%">
+      <thead><tr>
+        <th>Dist.</th><th>Nombre</th><th>Ganador</th><th>Votos Gan.</th><th>% Gan.</th>
+        <th>2do Lugar</th><th>Votos 2do</th><th>% Ventaja</th><th>Total Votos</th><th>Participación</th>
+      </tr></thead>
+      <tbody id="dipTbody"></tbody>
+    </table>
+  </div>
+</section>
+
+<!-- AYUNTAMIENTOS -->
+<section id="ayuntamientos">
+  <h2><i class="fa fa-city"></i> Ayuntamientos – 125 Municipios</h2>
+  <div style="margin-bottom:14px">
+    <label style="font-weight:600;color:#662483">Filtrar por partido ganador: </label>
+    <select id="filtroPartido" style="padding:6px 12px;border-radius:6px;border:2px solid #8173B3;color:#662483;font-weight:600">
+      <option value="">Todos</option>
+      <option>MORENA</option><option>PRI</option><option>PAN</option><option>MC</option>
+      <option>PVEM</option><option>PT</option><option>PRD</option><option>NAEM</option>
+    </select>
+  </div>
+  <div class="charts-row">
+    <div class="chart-box"><h3>Distribución de Votos AYU</h3><canvas id="ayuPie"></canvas></div>
+    <div class="chart-box"><h3>Votos por Partido AYU</h3><canvas id="ayuBar"></canvas></div>
+  </div>
+  <div class="table-wrap">
+    <table id="tblAyu" class="display" style="width:100%">
+      <thead><tr>
+        <th>Mun.</th><th>Nombre</th><th>Ganador</th><th>Votos Gan.</th><th>% Gan.</th>
+        <th>2do Lugar</th><th>Votos 2do</th><th>% Ventaja</th><th>Total Votos</th><th>Participación</th>
+      </tr></thead>
+      <tbody id="ayuTbody"></tbody>
+    </table>
+  </div>
+</section>
+
+<!-- PARTICIPACIÓN -->
+<section id="participacion">
+  <h2><i class="fa fa-users"></i> Análisis de Participación</h2>
+  <div class="charts-row">
+    <div class="chart-box"><h3>Top 10 Mayor Participación (Municipios)</h3><canvas id="topPartHigh"></canvas></div>
+    <div class="chart-box"><h3>Top 10 Menor Participación (Municipios)</h3><canvas id="topPartLow"></canvas></div>
+  </div>
+</section>
+
+<!-- COMPETITIVIDAD -->
+<section id="competitividad">
+  <h2><i class="fa fa-bullseye"></i> Competitividad Electoral</h2>
+  <div id="scatterWrap"><h3 style="color:#662483;font-size:.95rem;margin-bottom:14px;text-align:center">Participación vs Ventaja (Municipios)</h3><canvas id="scatterChart" style="max-height:400px"></canvas></div>
+</section>
+
+<!-- COMPARATIVA -->
+<section id="comparativa">
+  <h2><i class="fa fa-table"></i> Comparativa DIP vs AYU por Municipio</h2>
+  <div class="table-wrap">
+    <table id="tblComp" class="display" style="width:100%">
+      <thead><tr>
+        <th>ID</th><th>Municipio</th><th>Ganador AYU</th><th>% AYU</th><th>Ventaja AYU</th><th>Participación AYU</th>
+      </tr></thead>
+      <tbody id="compTbody"></tbody>
+    </table>
+  </div>
+</section>
+
+<!-- AVANCE PREP -->
+<section id="avance">
+  <h2><i class="fa fa-tasks"></i> Avance PREP</h2>
+  <div class="prog-wrap">
+    <div class="prog-label"><span>DIP – Actas Capturadas</span><span>21,091 / 21,091 (100%)</span></div>
+    <div class="prog-bar-bg"><div class="prog-bar" style="width:100%;background:linear-gradient(90deg,#662483,#E6007E)">100%</div></div>
+  </div>
+  <div class="prog-wrap">
+    <div class="prog-label"><span>DIP – Actas Contabilizadas</span><span>19,966 / 21,091 (94.67%)</span></div>
+    <div class="prog-bar-bg"><div class="prog-bar" style="width:94.67%;background:linear-gradient(90deg,#8173B3,#951B81)">94.67%</div></div>
+  </div>
+  <div class="prog-wrap">
+    <div class="prog-label"><span>AYU – Actas Capturadas</span><span>20,823 / 21,030 (99.02%)</span></div>
+    <div class="prog-bar-bg"><div class="prog-bar" style="width:99.02%;background:linear-gradient(90deg,#662483,#E6007E)">99.02%</div></div>
+  </div>
+  <div class="prog-wrap">
+    <div class="prog-label"><span>AYU – Actas Contabilizadas</span><span>20,063 / 21,030 (95.40%)</span></div>
+    <div class="prog-bar-bg"><div class="prog-bar" style="width:95.40%;background:linear-gradient(90deg,#8173B3,#951B81)">95.40%</div></div>
+  </div>
+</section>
+
+<!-- DATOS COMPLETOS -->
+<section id="datos">
+  <h2><i class="fa fa-database"></i> Datos Completos Exportables</h2>
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab('tabDipFull',this)">Diputados (DIP)</button>
+    <button class="tab-btn" onclick="switchTab('tabAyuFull',this)">Ayuntamientos (AYU)</button>
+  </div>
+  <div id="tabDipFull" class="tab-content active">
+    <div class="table-wrap">
+      <table id="tblDipFull" class="display" style="width:100%">
+        <thead><tr>
+          <th>Dist.</th><th>Nombre</th><th>Ganador</th><th>MORENA</th><th>PAN</th><th>PRI</th>
+          <th>MC</th><th>PVEM</th><th>PT</th><th>PRD</th><th>NAEM</th><th>Nulos</th><th>Total</th><th>Participación</th>
+        </tr></thead>
+        <tbody id="dipFullTbody"></tbody>
+      </table>
+    </div>
+  </div>
+  <div id="tabAyuFull" class="tab-content">
+    <div class="table-wrap">
+      <table id="tblAyuFull" class="display" style="width:100%">
+        <thead><tr>
+          <th>Mun.</th><th>Nombre</th><th>Ganador</th><th>MORENA</th><th>PAN</th><th>PRI</th>
+          <th>MC</th><th>PVEM</th><th>PT</th><th>PRD</th><th>NAEM</th><th>Nulos</th><th>Total</th><th>Participación</th>
+        </tr></thead>
+        <tbody id="ayuFullTbody"></tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <p><strong>Instituto Electoral del Estado de México (IEEM)</strong></p>
+  <p>PREP 2024 – Resultados Preliminares | Corte: 03/06/2024 20:00 hrs</p>
+  <p style="margin-top:6px;font-size:.75rem;opacity:.8">Los resultados del PREP son de carácter preliminar y no tienen efectos jurídicos. Los resultados definitivos serán los que emanen del cómputo distrital.</p>
+</footer>
+
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.4.2/js/dataTables.buttons.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.html5.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.print.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script>
+// ===================== DATOS EMBEBIDOS =====================
+const PARTIDOS = ['MORENA','PAN','PRI','MC','PVEM','PT','PRD','NAEM'];
+const COLORES = {
+  MORENA:'#8B0000',PAN:'#003087',PRI:'#006847',MC:'#FF6600',
+  PVEM:'#5B8C2A',PT:'#CC0000',PRD:'#FFCC00',NAEM:'#1B4B8A',NULOS:'#999'
+};
+const totalesDip = {MORENA:3494227,PAN:1253984,PRI:1083903,MC:802955,PVEM:1128011,PT:197391,PRD:125114,NAEM:80837,NULOS:274379,TOTAL:7950381};
+const totalesAyu = {MORENA:3194078,PAN:1530049,PRI:1010110,MC:788639,PVEM:636840,PT:295749,PRD:93493,NAEM:51993,NULOS:310987,TOTAL:7978900};
+// Victorias por bloque (4T=MORENA+PVEM+PT, VA=PAN+PRI+PRD+NAEM, MC=MC)
+// Fuente: datos_integral.js — TOTALES_DIP y TOTALES_AYU
+const winsDip = {MORENA:39,PAN:6,MC:0};
+const winsAyu = {MORENA:90,PAN:28,MC:7};
+</script>
+<script>
+const municipios = [
+{id:'001',n:'ACAMBAY DE RUIZ CASTANEDA',g:'MORENA',vg:10725,pg:35.6,g2:'PAN',vs:8311,pv:8.01,tv:30130,nul:1392,ln:50601,part:59.54,vpp:{MORENA:10725,PAN:8311,PRI:7334,MC:1317,PVEM:1931,PT:512,PRD:0,NAEM:0}},
+{id:'002',n:'ACOLMAN',g:'MORENA',vg:28105,pg:47.36,g2:'PAN',vs:20624,pv:12.61,tv:59345,nul:1502,ln:94590,part:62.74,vpp:{MORENA:28105,PAN:20624,PRI:0,MC:5307,PVEM:4007,PT:1302,PRD:0,NAEM:0}},
+{id:'003',n:'ACULCO',g:'MORENA',vg:13505,pg:55.26,g2:'PRI',vs:6874,pv:27.13,tv:24439,nul:779,ln:37262,part:65.59,vpp:{MORENA:13505,PAN:808,PRI:6874,MC:823,PVEM:1738,PT:397,PRD:195,NAEM:99}},
+{id:'004',n:'ALMOLOYA DE ALQUISIRAS',g:'MORENA',vg:4055,pg:79.34,g2:'PRI',vs:311,pv:73.25,tv:5111,nul:1097,ln:12655,part:40.39,vpp:{MORENA:4055,PAN:154,PRI:311,MC:193,PVEM:164,PT:126,PRD:51,NAEM:57}},
+{id:'005',n:'ALMOLOYA DE JUAREZ',g:'PRI',vg:28310,pg:36.8,g2:'PVEM',vs:14144,pv:18.41,tv:76931,nul:3573,ln:128893,part:59.69,vpp:{MORENA:14033,PAN:2030,PRI:28310,MC:13508,PVEM:14144,PT:1056,PRD:2860,NAEM:990}},
+{id:'006',n:'ALMOLOYA DEL RIO',g:'NAEM',vg:2211,pg:32.9,g2:'PRI',vs:1430,pv:11.62,tv:6721,nul:258,ln:9565,part:70.27,vpp:{MORENA:462,PAN:470,PRI:1430,MC:267,PVEM:839,PT:30,PRD:1012,NAEM:2211}},
+{id:'007',n:'AMANALCO',g:'PAN',vg:4892,pg:38.48,g2:'MC',vs:3991,pv:7.09,tv:12714,nul:864,ln:19899,part:63.89,vpp:{MORENA:2935,PAN:4892,PRI:0,MC:3991,PVEM:588,PT:308,PRD:0,NAEM:0}},
+{id:'008',n:'AMATEPEC',g:'MORENA',vg:7850,pg:66.72,g2:'PT',vs:1484,pv:54.11,tv:11766,nul:777,ln:20527,part:57.32,vpp:{MORENA:7850,PAN:1202,PRI:0,MC:301,PVEM:929,PT:1484,PRD:0,NAEM:0}},
+{id:'009',n:'AMECAMECA',g:'PRI',vg:11127,pg:39.38,g2:'MORENA',vs:7746,pv:11.96,tv:28259,nul:826,ln:45830,part:61.66,vpp:{MORENA:7746,PAN:3064,PRI:11127,MC:4325,PVEM:1425,PT:148,PRD:129,NAEM:295}},
+{id:'010',n:'APAXCO',g:'PT',vg:4442,pg:35.59,g2:'MORENA',vs:3277,pv:9.33,tv:12481,nul:619,ln:24118,part:51.75,vpp:{MORENA:3277,PAN:982,PRI:0,MC:704,PVEM:3076,PT:4442,PRD:0,NAEM:0}},
+{id:'011',n:'ATENCO',g:'MORENA',vg:10394,pg:35.73,g2:'PVEM',vs:6462,pv:13.52,tv:29090,nul:1615,ln:51970,part:55.97,vpp:{MORENA:10394,PAN:6051,PRI:0,MC:2338,PVEM:6462,PT:3845,PRD:0,NAEM:0}},
+{id:'012',n:'ATIZAPAN',g:'MORENA',vg:3367,pg:53.55,g2:'PT',vs:1557,pv:28.79,tv:6287,nul:299,ln:9823,part:64.0,vpp:{MORENA:3367,PAN:109,PRI:551,MC:166,PVEM:478,PT:1557,PRD:23,NAEM:36}},
+{id:'013',n:'ATIZAPAN DE ZARAGOZA',g:'PAN',vg:106644,pg:41.24,g2:'MORENA',vs:88795,pv:6.9,tv:258581,nul:6395,ln:422236,part:61.24,vpp:{MORENA:88795,PAN:106644,PRI:21924,MC:15834,PVEM:16569,PT:3925,PRD:2716,NAEM:2174}},
+{id:'014',n:'ATLACOMULCO',g:'MORENA',vg:23607,pg:44.09,g2:'PRI',vs:17941,pv:10.58,tv:53541,nul:1466,ln:85268,part:62.79,vpp:{MORENA:23607,PAN:1947,PRI:17941,MC:5724,PVEM:2633,PT:1183,PRD:257,NAEM:249}},
+{id:'015',n:'ATLAUTLA',g:'PVEM',vg:4388,pg:38.87,g2:'PRD',vs:2824,pv:13.85,tv:11289,nul:539,ln:23911,part:47.21,vpp:{MORENA:1120,PAN:199,PRI:746,MC:153,PVEM:4388,PT:1381,PRD:2824,NAEM:478}},
+{id:'016',n:'AXAPUSCO',g:'PRI',vg:3729,pg:26.35,g2:'MORENA',vs:3212,pv:3.65,tv:14153,nul:798,ln:20322,part:69.64,vpp:{MORENA:3212,PAN:1528,PRI:3729,MC:162,PVEM:340,PT:1721,PRD:2822,NAEM:639}},
+{id:'017',n:'AYAPANGO',g:'PRD',vg:1674,pg:32.6,g2:'MC',vs:1455,pv:4.26,tv:5135,nul:128,ln:6833,part:75.15,vpp:{MORENA:900,PAN:44,PRI:813,MC:1455,PVEM:101,PT:65,PRD:1674,NAEM:83}},
+{id:'018',n:'CALIMAYA',g:'MORENA',vg:11739,pg:36.14,g2:'PAN',vs:10336,pv:4.32,tv:32479,nul:1086,ln:47227,part:68.77,vpp:{MORENA:11739,PAN:10336,PRI:2713,MC:3309,PVEM:1624,PT:2264,PRD:290,NAEM:204}},
+{id:'019',n:'CAPULHUAC',g:'MORENA',vg:4281,pg:31.02,g2:'MC',vs:4255,pv:0.19,tv:13801,nul:826,ln:28816,part:47.89,vpp:{MORENA:4281,PAN:409,PRI:3296,MC:4255,PVEM:656,PT:409,PRD:382,NAEM:113}},
+{id:'020',n:'COACALCO DE BERRIOZABAL',g:'MORENA',vg:58808,pg:39.36,g2:'PRI',vs:50796,pv:5.36,tv:149422,nul:3730,ln:234077,part:63.83,vpp:{MORENA:58808,PAN:13890,PRI:50796,MC:13479,PVEM:6917,PT:2055,PRD:1821,NAEM:1656}},
+{id:'021',n:'COATEPEC HARINAS',g:'PRI',vg:6585,pg:44.96,g2:'MORENA',vs:3946,pv:18.02,tv:14646,nul:932,ln:29975,part:48.86,vpp:{MORENA:3946,PAN:1003,PRI:6585,MC:910,PVEM:559,PT:1432,PRD:145,NAEM:66}},
+{id:'022',n:'COCOTITLAN',g:'PAN',vg:2708,pg:29.58,g2:'MC',vs:2213,pv:5.41,tv:9154,nul:376,ln:12887,part:71.03,vpp:{MORENA:1881,PAN:2708,PRI:0,MC:2213,PVEM:1021,PT:1331,PRD:0,NAEM:0}},
+{id:'023',n:'COYOTEPEC',g:'MORENA',vg:9960,pg:41.32,g2:'PAN',vs:9420,pv:2.24,tv:24106,nul:921,ln:41541,part:58.03,vpp:{MORENA:9960,PAN:9420,PRI:0,MC:2936,PVEM:1265,PT:525,PRD:0,NAEM:0}},
+{id:'024',n:'CUAUTITLAN',g:'MORENA',vg:30876,pg:44.69,g2:'PRI',vs:20225,pv:15.42,tv:69086,nul:1346,ln:108370,part:63.75,vpp:{MORENA:30876,PAN:7957,PRI:20225,MC:4334,PVEM:3099,PT:1005,PRD:805,NAEM:785}},
+{id:'025',n:'CUAUTITLAN IZCALLI',g:'MORENA',vg:122681,pg:44.67,g2:'PAN',vs:79819,pv:15.61,tv:274632,nul:6650,ln:431935,part:63.58,vpp:{MORENA:122681,PAN:79819,PRI:25692,MC:20335,PVEM:15625,PT:4916,PRD:2641,NAEM:2923}},
+{id:'026',n:'CHALCO',g:'MORENA',vg:78993,pg:52.66,g2:'PVEM',vs:35515,pv:28.99,tv:149994,nul:9198,ln:289760,part:51.76,vpp:{MORENA:78993,PAN:20872,PRI:0,MC:10660,PVEM:35515,PT:3954,PRD:0,NAEM:0}},
+{id:'027',n:'CHAPA DE MOTA',g:'MORENA',vg:7734,pg:43.8,g2:'PAN',vs:6072,pv:9.41,tv:17656,nul:497,ln:24056,part:73.4,vpp:{MORENA:7734,PAN:6072,PRI:1382,MC:1286,PVEM:736,PT:263,PRD:129,NAEM:54}},
+{id:'028',n:'CHAPULTEPEC',g:'PRI',vg:1734,pg:29.52,g2:'PVEM',vs:1482,pv:4.29,tv:5874,nul:231,ln:9678,part:60.69,vpp:{MORENA:1160,PAN:304,PRI:1734,MC:888,PVEM:1482,PT:245,PRD:29,NAEM:32}},
+{id:'029',n:'CHIAUTLA',g:'MC',vg:8110,pg:49.46,g2:'MORENA',vs:6349,pv:10.74,tv:16397,nul:442,ln:24263,part:67.58,vpp:{MORENA:6349,PAN:381,PRI:902,MC:8110,PVEM:385,PT:141,PRD:63,NAEM:66}},
+{id:'030',n:'CHICOLOAPAN',g:'MORENA',vg:42168,pg:49.04,g2:'PAN',vs:30452,pv:13.63,tv:85987,nul:2230,ln:146641,part:58.64,vpp:{MORENA:42168,PAN:30452,PRI:0,MC:6285,PVEM:5242,PT:1840,PRD:0,NAEM:0}},
+{id:'031',n:'CHICONCUAC',g:'PT',vg:3340,pg:25.4,g2:'MORENA',vs:2772,pv:4.32,tv:13148,nul:596,ln:22282,part:59.01,vpp:{MORENA:2772,PAN:2287,PRI:896,MC:384,PVEM:1220,PT:3340,PRD:1243,NAEM:1006}},
+{id:'032',n:'CHIMALHUACAN',g:'MORENA',vg:122246,pg:48.96,g2:'PRI',vs:77195,pv:18.04,tv:249682,nul:10236,ln:513126,part:48.66,vpp:{MORENA:122246,PAN:6407,PRI:77195,MC:15479,PVEM:15538,PT:5092,PRD:5521,NAEM:2204}},
+{id:'033',n:'DONATO GUERRA',g:'MORENA',vg:5891,pg:31.42,g2:'PAN',vs:5583,pv:1.64,tv:18750,nul:1084,ln:27361,part:68.53,vpp:{MORENA:5891,PAN:5583,PRI:0,MC:288,PVEM:3622,PT:3366,PRD:0,NAEM:0}},
+{id:'034',n:'ECATEPEC DE MORELOS',g:'MORENA',vg:312375,pg:46.17,g2:'PAN',vs:174994,pv:20.31,tv:676585,nul:41481,ln:1293604,part:52.3,vpp:{MORENA:312375,PAN:174994,PRI:0,MC:71807,PVEM:61382,PT:56027,PRD:0,NAEM:0}},
+{id:'035',n:'ECATZINGO',g:'PVEM',vg:2659,pg:47.0,g2:'PRI',vs:2166,pv:8.71,tv:5657,nul:208,ln:7904,part:71.57,vpp:{MORENA:533,PAN:191,PRI:2166,MC:92,PVEM:2659,PT:0,PRD:10,NAEM:6}},
+{id:'036',n:'HUEHUETOCA',g:'MORENA',vg:16221,pg:36.28,g2:'PAN',vs:11553,pv:10.44,tv:44709,nul:2359,ln:116992,part:38.22,vpp:{MORENA:16221,PAN:11553,PRI:2183,MC:5112,PVEM:7315,PT:833,PRD:304,NAEM:1188}},
+{id:'037',n:'HUEYPOXTLA',g:'PVEM',vg:6625,pg:28.11,g2:'MORENA',vs:6408,pv:0.92,tv:23572,nul:1023,ln:34763,part:67.81,vpp:{MORENA:6408,PAN:252,PRI:5805,MC:2987,PVEM:6625,PT:944,PRD:177,NAEM:374}},
+{id:'038',n:'HUIXQUILUCAN',g:'PAN',vg:74817,pg:53.39,g2:'MORENA',vs:39490,pv:25.21,tv:140138,nul:6428,ln:219842,part:63.74,vpp:{MORENA:39490,PAN:74817,PRI:0,MC:9555,PVEM:7453,PT:3048,PRD:4865,NAEM:910}},
+{id:'039',n:'ISIDRO FABELA',g:'PVEM',vg:1066,pg:18.41,g2:'NAEM',vs:969,pv:1.68,tv:5789,nul:221,ln:9323,part:62.09,vpp:{MORENA:559,PAN:684,PRI:937,MC:716,PVEM:1066,PT:43,PRD:815,NAEM:969}},
+{id:'040',n:'IXTAPALUCA',g:'MORENA',vg:81489,pg:39.11,g2:'PAN',vs:58069,pv:11.24,tv:208353,nul:11593,ln:377797,part:55.15,vpp:{MORENA:81489,PAN:58069,PRI:0,MC:18499,PVEM:43110,PT:7186,PRD:0,NAEM:0}},
+{id:'041',n:'IXTAPAN DE LA SAL',g:'MORENA',vg:7189,pg:41.79,g2:'PRI',vs:5379,pv:10.52,tv:17201,nul:709,ln:29202,part:58.9,vpp:{MORENA:7189,PAN:1261,PRI:5379,MC:1980,PVEM:671,PT:341,PRD:234,NAEM:146}},
+{id:'042',n:'IXTAPAN DEL ORO',g:'MORENA',vg:969,pg:51.6,g2:'PRD',vs:381,pv:31.31,tv:1878,nul:53,ln:5627,part:33.37,vpp:{MORENA:969,PAN:23,PRI:84,MC:21,PVEM:62,PT:287,PRD:381,NAEM:51}},
+{id:'043',n:'IXTLAHUACA',g:'MORENA',vg:38508,pg:48.68,g2:'PRI',vs:26968,pv:14.59,tv:79108,nul:3732,ln:121828,part:64.93,vpp:{MORENA:38508,PAN:1773,PRI:26968,MC:5413,PVEM:3013,PT:2625,PRD:394,NAEM:414}},
+{id:'044',n:'XALATLACO',g:'MORENA',vg:4944,pg:41.68,g2:'PT',vs:3307,pv:13.8,tv:11862,nul:522,ln:20718,part:57.25,vpp:{MORENA:4944,PAN:1757,PRI:0,MC:1046,PVEM:808,PT:3307,PRD:0,NAEM:0}},
+{id:'045',n:'JALTENCO',g:'MORENA',vg:6001,pg:49.64,g2:'PT',vs:2624,pv:27.93,tv:12090,nul:427,ln:21116,part:57.26,vpp:{MORENA:6001,PAN:1436,PRI:0,MC:1678,PVEM:351,PT:2624,PRD:0,NAEM:0}},
+{id:'046',n:'JILOTEPEC',g:'PRI',vg:24147,pg:47.87,g2:'MORENA',vs:18834,pv:10.53,tv:50441,nul:1170,ln:74888,part:67.36,vpp:{MORENA:18834,PAN:1587,PRI:24147,MC:1760,PVEM:2959,PT:587,PRD:303,NAEM:264}},
+{id:'047',n:'JILOTZINGO',g:'PAN',vg:3396,pg:27.14,g2:'PRI',vs:3302,pv:0.75,tv:12513,nul:484,ln:17459,part:71.67,vpp:{MORENA:1128,PAN:3396,PRI:3302,MC:1577,PVEM:2837,PT:135,PRD:25,NAEM:113}},
+{id:'048',n:'JIQUIPILCO',g:'MORENA',vg:12922,pg:33.04,g2:'MC',vs:11440,pv:3.79,tv:39105,nul:1952,ln:58213,part:67.18,vpp:{MORENA:12922,PAN:460,PRI:11027,MC:11440,PVEM:1516,PT:1153,PRD:303,NAEM:284}},
+{id:'049',n:'JOCOTITLAN',g:'MORENA',vg:10481,pg:34.95,g2:'PRI',vs:10389,pv:0.31,tv:29990,nul:1989,ln:53940,part:55.6,vpp:{MORENA:10481,PAN:2152,PRI:10389,MC:2607,PVEM:2363,PT:1425,PRD:573,NAEM:0}},
+{id:'050',n:'JOQUICINGO',g:'PVEM',vg:2411,pg:29.05,g2:'MC',vs:2395,pv:0.19,tv:8300,nul:250,ln:11286,part:73.54,vpp:{MORENA:1287,PAN:2129,PRI:0,MC:2395,PVEM:2411,PT:78,PRD:0,NAEM:0}}
+];
+</script>
+<script>
+municipios.push(...[
+{id:'051',n:'JUCHITEPEC',g:'MORENA',vg:5344,pg:40.5,g2:'PRI',vs:4536,pv:6.12,tv:13194,nul:867,ln:19825,part:66.55,vpp:{MORENA:5344,PAN:170,PRI:4536,MC:480,PVEM:505,PT:1912,PRD:188,NAEM:59}},
+{id:'052',n:'LERMA',g:'MORENA',vg:32812,pg:40.35,g2:'PRI',vs:29302,pv:4.32,tv:81316,nul:3759,ln:123905,part:65.63,vpp:{MORENA:32812,PAN:5146,PRI:29302,MC:3819,PVEM:7030,PT:2411,PRD:458,NAEM:338}},
+{id:'053',n:'MALINALCO',g:'MC',vg:6588,pg:52.21,g2:'PVEM',vs:3796,pv:22.13,tv:12618,nul:639,ln:21570,part:58.5,vpp:{MORENA:1156,PAN:104,PRI:287,MC:6588,PVEM:3796,PT:103,PRD:308,NAEM:276}},
+{id:'054',n:'MELCHOR OCAMPO',g:'MORENA',vg:9406,pg:41.44,g2:'PAN',vs:6455,pv:13.0,tv:22696,nul:1055,ln:46168,part:49.16,vpp:{MORENA:9406,PAN:6455,PRI:0,MC:2211,PVEM:4126,PT:498,PRD:0,NAEM:0}},
+{id:'055',n:'METEPEC',g:'PAN',vg:43887,pg:32.62,g2:'MORENA',vs:43008,pv:0.65,tv:134554,nul:2423,ln:198094,part:67.92,vpp:{MORENA:43008,PAN:43887,PRI:27000,MC:8150,PVEM:5599,PT:4906,PRD:1174,NAEM:830}},
+{id:'056',n:'MEXICALTZINGO',g:'PRI',vg:2194,pg:33.25,g2:'MC',vs:1878,pv:4.79,tv:6599,nul:216,ln:10978,part:60.11,vpp:{MORENA:1869,PAN:237,PRI:2194,MC:1878,PVEM:142,PT:151,PRD:57,NAEM:71}},
+{id:'057',n:'MORELOS',g:'MORENA',vg:6452,pg:37.44,g2:'PAN',vs:5370,pv:6.28,tv:17235,nul:712,ln:25299,part:68.13,vpp:{MORENA:6452,PAN:5370,PRI:0,MC:3696,PVEM:1329,PT:388,PRD:0,NAEM:0}},
+{id:'058',n:'NAUCALPAN DE JUAREZ',g:'MORENA',vg:198092,pg:45.95,g2:'PAN',vs:120659,pv:17.96,tv:431074,nul:10946,ln:710848,part:60.64,vpp:{MORENA:198092,PAN:120659,PRI:38870,MC:29020,PVEM:28701,PT:8383,PRD:4442,NAEM:2907}},
+{id:'059',n:'NEXTLALPAN',g:'MORENA',vg:12062,pg:50.23,g2:'MC',vs:5301,pv:28.15,tv:24015,nul:958,ln:37193,part:64.57,vpp:{MORENA:12062,PAN:4372,PRI:0,MC:5301,PVEM:624,PT:1656,PRD:0,NAEM:0}},
+{id:'060',n:'NEZAHUALCOYOTL',g:'MORENA',vg:281299,pg:54.27,g2:'PAN',vs:114500,pv:32.18,tv:518311,nul:26100,ln:878708,part:58.99,vpp:{MORENA:281299,PAN:114500,PRI:0,MC:76731,PVEM:29258,PT:16523,PRD:0,NAEM:0}},
+{id:'061',n:'NICOLAS ROMERO',g:'MORENA',vg:68986,pg:39.94,g2:'PAN',vs:37801,pv:18.06,tv:172706,nul:6516,ln:313688,part:55.06,vpp:{MORENA:68986,PAN:37801,PRI:21346,MC:18447,PVEM:11189,PT:3783,PRD:6985,NAEM:4169}},
+{id:'062',n:'NOPALTEPEC',g:'MC',vg:2128,pg:35.87,g2:'MORENA',vs:1750,pv:6.37,tv:5933,nul:301,ln:8616,part:68.86,vpp:{MORENA:1750,PAN:1501,PRI:319,MC:2128,PVEM:132,PT:80,PRD:12,NAEM:11}},
+{id:'063',n:'OCOYOACAC',g:'MC',vg:11267,pg:32.53,g2:'PAN',vs:11266,pv:0.0,tv:34634,nul:1783,ln:55507,part:62.4,vpp:{MORENA:7529,PAN:11266,PRI:0,MC:11267,PVEM:3953,PT:619,PRD:0,NAEM:0}},
+{id:'064',n:'OCUILAN',g:'MC',vg:5109,pg:34.71,g2:'MORENA',vs:3435,pv:11.37,tv:14721,nul:999,ln:23274,part:63.25,vpp:{MORENA:3435,PAN:564,PRI:1374,MC:5109,PVEM:215,PT:1694,PRD:1607,NAEM:723}},
+{id:'065',n:'EL ORO',g:'MORENA',vg:7595,pg:40.66,g2:'PRI',vs:5683,pv:10.24,tv:18678,nul:619,ln:29101,part:64.18,vpp:{MORENA:7595,PAN:3524,PRI:5683,MC:326,PVEM:665,PT:333,PRD:90,NAEM:462}},
+{id:'066',n:'OTUMBA',g:'MORENA',vg:5381,pg:33.1,g2:'PVEM',vs:4789,pv:3.64,tv:16256,nul:578,ln:29810,part:54.53,vpp:{MORENA:5381,PAN:289,PRI:4513,MC:131,PVEM:4789,PT:1030,PRD:92,NAEM:31}},
+{id:'067',n:'OTZOLOAPAN',g:'PAN',vg:1418,pg:55.76,g2:'PT',vs:1030,pv:15.26,tv:2543,nul:263,ln:4202,part:60.52,vpp:{MORENA:62,PAN:1418,PRI:0,MC:14,PVEM:19,PT:1030,PRD:0,NAEM:0}},
+{id:'068',n:'OTZOLOTEPEC',g:'PRI',vg:13653,pg:35.09,g2:'MORENA',vs:12455,pv:3.08,tv:38909,nul:1597,ln:65213,part:59.66,vpp:{MORENA:12455,PAN:4108,PRI:13653,MC:3692,PVEM:3027,PT:1648,PRD:326,NAEM:0}},
+{id:'069',n:'OZUMBA',g:'PVEM',vg:6875,pg:46.22,g2:'MORENA',vs:5052,pv:12.25,tv:14876,nul:391,ln:22258,part:66.83,vpp:{MORENA:5052,PAN:1119,PRI:0,MC:1662,PVEM:6875,PT:168,PRD:0,NAEM:0}},
+{id:'070',n:'PAPALOTLA',g:'MORENA',vg:1572,pg:44.95,g2:'PRI',vs:1211,pv:10.32,tv:3497,nul:73,ln:4471,part:78.22,vpp:{MORENA:1572,PAN:72,PRI:1211,MC:212,PVEM:134,PT:72,PRD:224,NAEM:0}},
+{id:'071',n:'LA PAZ',g:'MORENA',vg:56599,pg:45.5,g2:'PRI',vs:45590,pv:8.85,tv:124390,nul:3961,ln:214668,part:57.95,vpp:{MORENA:56599,PAN:4406,PRI:45590,MC:6713,PVEM:5956,PT:2086,PRD:1951,NAEM:1089}},
+{id:'072',n:'POLOTITLAN',g:'PRI',vg:2262,pg:27.81,g2:'MORENA',vs:2060,pv:2.48,tv:8135,nul:658,ln:12722,part:63.94,vpp:{MORENA:2060,PAN:298,PRI:2262,MC:1272,PVEM:1108,PT:1042,PRD:74,NAEM:19}},
+{id:'073',n:'RAYON',g:'PRI',vg:2671,pg:37.12,g2:'MC',vs:1727,pv:13.12,tv:7195,nul:276,ln:10244,part:70.24,vpp:{MORENA:1399,PAN:176,PRI:2671,MC:1727,PVEM:174,PT:946,PRD:80,NAEM:22}},
+{id:'074',n:'SAN ANTONIO LA ISLA',g:'PRI',vg:3444,pg:24.02,g2:'PVEM',vs:2948,pv:3.46,tv:14340,nul:415,ln:20680,part:69.34,vpp:{MORENA:2896,PAN:1932,PRI:3444,MC:1661,PVEM:2948,PT:707,PRD:752,NAEM:0}},
+{id:'075',n:'SAN FELIPE DEL PROGRESO',g:'MORENA',vg:27377,pg:43.5,g2:'PRI',vs:27231,pv:0.23,tv:62930,nul:2394,ln:103343,part:60.89,vpp:{MORENA:27377,PAN:1319,PRI:27231,MC:2049,PVEM:3003,PT:1381,PRD:261,NAEM:309}},
+{id:'076',n:'SAN MARTIN DE LAS PIRAMIDES',g:'MORENA',vg:4262,pg:27.83,g2:'MC',vs:3899,pv:2.37,tv:15315,nul:421,ln:22627,part:67.68,vpp:{MORENA:4262,PAN:1146,PRI:3459,MC:3899,PVEM:262,PT:110,PRD:30,NAEM:2147}},
+{id:'077',n:'SAN MATEO ATENCO',g:'MORENA',vg:18867,pg:37.21,g2:'PRI',vs:14528,pv:8.56,tv:50706,nul:1872,ln:75745,part:66.94,vpp:{MORENA:18867,PAN:3326,PRI:14528,MC:3688,PVEM:6010,PT:3028,PRD:877,NAEM:382}},
+{id:'078',n:'SAN SIMON DE GUERRERO',g:'MORENA',vg:1308,pg:32.13,g2:'MC',vs:1307,pv:0.02,tv:4071,nul:185,ln:5548,part:73.38,vpp:{MORENA:1308,PAN:28,PRI:73,MC:1307,PVEM:40,PT:72,PRD:1231,NAEM:12}},
+{id:'079',n:'SANTO TOMAS',g:'PRD',vg:1755,pg:38.58,g2:'MORENA',vs:1473,pv:6.2,tv:4549,nul:219,ln:7971,part:57.07,vpp:{MORENA:1473,PAN:60,PRI:241,MC:820,PVEM:132,PT:61,PRD:1755,NAEM:7}},
+{id:'080',n:'SOYANIQUILPAN DE JUAREZ',g:'MORENA',vg:4358,pg:49.07,g2:'PAN',vs:3860,pv:5.61,tv:8882,nul:236,ln:11734,part:75.69,vpp:{MORENA:4358,PAN:3860,PRI:300,MC:62,PVEM:163,PT:111,PRD:12,NAEM:16}},
+{id:'081',n:'SULTEPEC',g:'PAN',vg:4178,pg:39.55,g2:'PVEM',vs:3054,pv:10.64,tv:10565,nul:710,ln:20093,part:52.58,vpp:{MORENA:1476,PAN:4178,PRI:0,MC:1628,PVEM:3054,PT:229,PRD:0,NAEM:0}},
+{id:'082',n:'TECAMAC',g:'MORENA',vg:114655,pg:50.73,g2:'PRI',vs:58678,pv:24.77,tv:225994,nul:9668,ln:380698,part:59.36,vpp:{MORENA:114655,PAN:21649,PRI:58678,MC:13059,PVEM:9405,PT:5188,PRD:1807,NAEM:1553}},
+{id:'083',n:'TEJUPILCO',g:'PAN',vg:15395,pg:44.69,g2:'MORENA',vs:10351,pv:14.64,tv:34446,nul:1541,ln:61374,part:56.12,vpp:{MORENA:10351,PAN:15395,PRI:0,MC:6296,PVEM:1583,PT:821,PRD:0,NAEM:0}},
+{id:'084',n:'TEMAMATLA',g:'PVEM',vg:3066,pg:43.84,g2:'MC',vs:1729,pv:19.12,tv:6994,nul:397,ln:12100,part:57.8,vpp:{MORENA:1438,PAN:60,PRI:275,MC:1729,PVEM:3066,PT:329,PRD:53,NAEM:44}},
+{id:'085',n:'TEMASCALAPA',g:'MORENA',vg:7598,pg:56.01,g2:'PAN',vs:4600,pv:22.1,tv:13566,nul:1069,ln:32551,part:41.68,vpp:{MORENA:7598,PAN:4600,PRI:0,MC:356,PVEM:694,PT:318,PRD:0,NAEM:0}},
+{id:'086',n:'TEMASCALCINGO',g:'MORENA',vg:9782,pg:30.97,g2:'PRI',vs:8248,pv:4.86,tv:31589,nul:1779,ln:53687,part:58.84,vpp:{MORENA:9782,PAN:642,PRI:8248,MC:3319,PVEM:5006,PT:4252,PRD:236,NAEM:104}},
+{id:'087',n:'TEMASCALTEPEC',g:'MORENA',vg:4230,pg:31.68,g2:'MC',vs:3937,pv:2.19,tv:13353,nul:545,ln:26714,part:49.99,vpp:{MORENA:4230,PAN:2823,PRI:1330,MC:3937,PVEM:455,PT:284,PRD:200,NAEM:94}},
+{id:'088',n:'TEMOAYA',g:'MORENA',vg:17909,pg:41.98,g2:'PAN',vs:14625,pv:7.7,tv:42658,nul:1596,ln:78778,part:54.15,vpp:{MORENA:17909,PAN:14625,PRI:0,MC:6562,PVEM:2370,PT:1192,PRD:0,NAEM:0}},
+{id:'089',n:'TENANCINGO',g:'MORENA',vg:11723,pg:27.36,g2:'MC',vs:10984,pv:1.72,tv:42842,nul:1970,ln:77818,part:55.05,vpp:{MORENA:11723,PAN:1075,PRI:3962,MC:10984,PVEM:10708,PT:3803,PRD:280,NAEM:307}},
+{id:'090',n:'TENANGO DEL AIRE',g:'PVEM',vg:2224,pg:32.1,g2:'PAN',vs:2103,pv:1.75,tv:6929,nul:242,ln:9620,part:72.03,vpp:{MORENA:935,PAN:2103,PRI:215,MC:174,PVEM:2224,PT:1120,PRD:158,NAEM:0}},
+{id:'091',n:'TENANGO DEL VALLE',g:'MORENA',vg:10184,pg:27.15,g2:'PVEM',vs:8504,pv:4.48,tv:37506,nul:1691,ln:66715,part:56.22,vpp:{MORENA:10184,PAN:6989,PRI:0,MC:4571,PVEM:8504,PT:7258,PRD:0,NAEM:0}},
+{id:'092',n:'TEOLOYUCAN',g:'MORENA',vg:17646,pg:41.26,g2:'PAN',vs:12757,pv:11.43,tv:42771,nul:1673,ln:71358,part:59.94,vpp:{MORENA:17646,PAN:12757,PRI:2900,MC:3078,PVEM:4829,PT:769,PRD:493,NAEM:299}},
+{id:'093',n:'TEOTIHUACAN',g:'PRI',vg:17320,pg:53.11,g2:'MORENA',vs:11128,pv:18.99,tv:32612,nul:1077,ln:49994,part:65.23,vpp:{MORENA:11128,PAN:705,PRI:17320,MC:1066,PVEM:851,PT:525,PRD:191,NAEM:826}},
+{id:'094',n:'TEPETLAOXTOC',g:'MORENA',vg:5602,pg:35.93,g2:'PRI',vs:3777,pv:11.7,tv:15593,nul:605,ln:24445,part:63.79,vpp:{MORENA:5602,PAN:294,PRI:3777,MC:3736,PVEM:217,PT:1803,PRD:65,NAEM:99}},
+{id:'095',n:'TEPETLIXPA',g:'MC',vg:4280,pg:44.65,g2:'PVEM',vs:2569,pv:17.85,tv:9586,nul:523,ln:15757,part:60.84,vpp:{MORENA:1089,PAN:1175,PRI:278,MC:4280,PVEM:2569,PT:51,PRD:18,NAEM:126}},
+{id:'096',n:'TEPOTZOTLAN',g:'MC',vg:19280,pg:46.47,g2:'MORENA',vs:16413,pv:6.91,tv:41490,nul:1582,ln:67350,part:61.6,vpp:{MORENA:16413,PAN:1931,PRI:1274,MC:19280,PVEM:520,PT:1211,PRD:406,NAEM:455}},
+{id:'097',n:'TEQUIXQUIAC',g:'MORENA',vg:7377,pg:36.91,g2:'MC',vs:6517,pv:4.3,tv:19988,nul:799,ln:30450,part:65.64,vpp:{MORENA:7377,PAN:5131,PRI:0,MC:6517,PVEM:633,PT:330,PRD:0,NAEM:0}},
+{id:'098',n:'TEXCALTITLAN',g:'MC',vg:2452,pg:34.92,g2:'MORENA',vs:1772,pv:9.68,tv:7022,nul:284,ln:13979,part:50.23,vpp:{MORENA:1772,PAN:238,PRI:787,MC:2452,PVEM:134,PT:90,PRD:1416,NAEM:133}},
+{id:'099',n:'TEXCALYACAC',g:'NAEM',vg:953,pg:27.52,g2:'MC',vs:811,pv:4.1,tv:3463,nul:287,ln:4661,part:74.3,vpp:{MORENA:627,PAN:16,PRI:184,MC:811,PVEM:666,PT:0,PRD:206,NAEM:953}},
+{id:'100',n:'TEXCOCO',g:'MORENA',vg:61532,pg:47.15,g2:'PAN',vs:32768,pv:22.04,tv:130516,nul:3726,ln:220404,part:59.22,vpp:{MORENA:61532,PAN:32768,PRI:0,MC:23543,PVEM:9827,PT:2846,PRD:0,NAEM:0}}
+]);
+</script>
+<script>
+municipios.push(...[
+{id:'101',n:'TEZOYUCA',g:'PAN',vg:13214,pg:57.17,g2:'MORENA',vs:7936,pv:22.84,tv:23112,nul:758,ln:36958,part:62.54,vpp:{MORENA:7936,PAN:13214,PRI:0,MC:725,PVEM:822,PT:415,PRD:0,NAEM:0}},
+{id:'102',n:'TIANGUISTENCO',g:'MORENA',vg:15186,pg:38.9,g2:'PRI',vs:12637,pv:6.53,tv:39034,nul:1245,ln:62882,part:62.07,vpp:{MORENA:15186,PAN:1411,PRI:12637,MC:2283,PVEM:6137,PT:736,PRD:316,NAEM:328}},
+{id:'103',n:'TIMILPAN',g:'PRI',vg:6460,pg:58.55,g2:'MORENA',vs:3582,pv:26.08,tv:11034,nul:459,ln:14535,part:75.91,vpp:{MORENA:3582,PAN:267,PRI:6460,MC:156,PVEM:348,PT:164,PRD:37,NAEM:20}},
+{id:'104',n:'TLALMANALCO',g:'MORENA',vg:9634,pg:39.11,g2:'MC',vs:5023,pv:18.72,tv:24634,nul:1076,ln:40188,part:61.3,vpp:{MORENA:9634,PAN:516,PRI:1360,MC:5023,PVEM:1535,PT:4719,PRD:339,NAEM:1508}},
+{id:'105',n:'TLALNEPANTLA DE BAZ',g:'MORENA',vg:146676,pg:42.37,g2:'PAN',vs:78761,pv:19.62,tv:346156,nul:8921,ln:568800,part:60.86,vpp:{MORENA:146676,PAN:78761,PRI:61273,MC:27497,PVEM:19229,PT:6731,PRD:3629,NAEM:2360}},
+{id:'106',n:'TLATLAYA',g:'MORENA',vg:10505,pg:63.69,g2:'PAN',vs:4986,pv:33.46,tv:16494,nul:508,ln:25677,part:64.24,vpp:{MORENA:10505,PAN:4986,PRI:0,MC:405,PVEM:366,PT:232,PRD:0,NAEM:0}},
+{id:'107',n:'TOLUCA',g:'MORENA',vg:189533,pg:43.61,g2:'PRI',vs:102573,pv:20.01,tv:434595,nul:11059,ln:719862,part:60.37,vpp:{MORENA:189533,PAN:57210,PRI:102573,MC:40386,PVEM:28014,PT:8745,PRD:4161,NAEM:3973}},
+{id:'108',n:'TONATICO',g:'MC',vg:2928,pg:38.45,g2:'PAN',vs:2437,pv:6.45,tv:7616,nul:233,ln:11407,part:66.77,vpp:{MORENA:1803,PAN:2437,PRI:0,MC:2928,PVEM:190,PT:258,PRD:0,NAEM:0}},
+{id:'109',n:'TULTEPEC',g:'MORENA',vg:37356,pg:46.82,g2:'PAN',vs:24769,pv:15.78,tv:79782,nul:3308,ln:132971,part:60.0,vpp:{MORENA:37356,PAN:24769,PRI:0,MC:8999,PVEM:3090,PT:5568,PRD:0,NAEM:0}},
+{id:'110',n:'TULTITLAN',g:'MORENA',vg:121406,pg:54.37,g2:'PAN',vs:50391,pv:31.8,tv:223289,nul:12987,ln:385431,part:57.93,vpp:{MORENA:121406,PAN:50391,PRI:0,MC:26883,PVEM:18120,PT:6489,PRD:0,NAEM:0}},
+{id:'111',n:'VALLE DE BRAVO',g:'MORENA',vg:20226,pg:50.89,g2:'PAN',vs:15863,pv:10.98,tv:39742,nul:1167,ln:59293,part:67.03,vpp:{MORENA:20226,PAN:15863,PRI:0,MC:976,PVEM:1819,PT:858,PRD:0,NAEM:0}},
+{id:'112',n:'VILLA DE ALLENDE',g:'MORENA',vg:12044,pg:54.09,g2:'PRD',vs:6453,pv:25.11,tv:22268,nul:831,ln:38266,part:58.19,vpp:{MORENA:12044,PAN:399,PRI:1076,MC:589,PVEM:1059,PT:565,PRD:6453,NAEM:83}},
+{id:'113',n:'VILLA DEL CARBON',g:'PRI',vg:8807,pg:34.85,g2:'PAN',vs:6135,pv:10.57,tv:25269,nul:870,ln:38144,part:66.25,vpp:{MORENA:5699,PAN:6135,PRI:8807,MC:1234,PVEM:942,PT:2349,PRD:103,NAEM:0}},
+{id:'114',n:'VILLA GUERRERO',g:'PVEM',vg:9530,pg:35.37,g2:'MC',vs:7289,pv:8.32,tv:26942,nul:1026,ln:48509,part:55.54,vpp:{MORENA:2867,PAN:6654,PRI:0,MC:7289,PVEM:9530,PT:602,PRD:0,NAEM:0}},
+{id:'115',n:'VILLA VICTORIA',g:'PRI',vg:22095,pg:48.85,g2:'MORENA',vs:16805,pv:11.7,tv:45233,nul:2124,ln:76639,part:59.02,vpp:{MORENA:16805,PAN:984,PRI:22095,MC:952,PVEM:2983,PT:666,PRD:438,NAEM:310}},
+{id:'116',n:'XONACATLAN',g:'MC',vg:8758,pg:27.43,g2:'PVEM',vs:7491,pv:3.97,tv:31925,nul:1183,ln:48733,part:65.51,vpp:{MORENA:6248,PAN:6449,PRI:0,MC:8758,PVEM:7491,PT:2979,PRD:0,NAEM:0}},
+{id:'117',n:'ZACAZONAPAN',g:'MORENA',vg:1760,pg:64.09,g2:'MC',vs:601,pv:42.21,tv:2746,nul:133,ln:4076,part:67.37,vpp:{MORENA:1760,PAN:26,PRI:69,MC:601,PVEM:167,PT:73,PRD:37,NAEM:13}},
+{id:'118',n:'ZACUALPAN',g:'MORENA',vg:3608,pg:53.64,g2:'PAN',vs:2351,pv:18.69,tv:6726,nul:281,ln:11095,part:60.62,vpp:{MORENA:3608,PAN:2351,PRI:0,MC:153,PVEM:362,PT:252,PRD:0,NAEM:0}},
+{id:'119',n:'ZINACANTEPEC',g:'PRI',vg:35185,pg:37.27,g2:'MORENA',vs:30252,pv:5.23,tv:94394,nul:3545,ln:153876,part:61.34,vpp:{MORENA:30252,PAN:6647,PRI:35185,MC:11371,PVEM:6366,PT:2867,PRD:811,NAEM:895}},
+{id:'120',n:'ZUMPAHUACAN',g:'PT',vg:3481,pg:43.69,g2:'PAN',vs:1348,pv:26.77,tv:7968,nul:452,ln:13289,part:59.96,vpp:{MORENA:579,PAN:1348,PRI:820,MC:991,PVEM:643,PT:3481,PRD:18,NAEM:88}},
+{id:'121',n:'ZUMPANGO',g:'PAN',vg:29710,pg:41.04,g2:'MORENA',vs:27997,pv:2.37,tv:72394,nul:2418,ln:181303,part:39.93,vpp:{MORENA:27997,PAN:29710,PRI:0,MC:8367,PVEM:4723,PT:1597,PRD:0,NAEM:0}},
+{id:'122',n:'VALLE DE CHALCO SOLIDARIDAD',g:'MORENA',vg:70445,pg:46.91,g2:'PRI',vs:18028,pv:34.91,tv:150160,nul:11785,ln:282755,part:53.11,vpp:{MORENA:70445,PAN:5414,PRI:18028,MC:10852,PVEM:14177,PT:17408,PRD:11603,NAEM:2233}},
+{id:'123',n:'LUVIANOS',g:'PRI',vg:4604,pg:41.4,g2:'MORENA',vs:3366,pv:11.13,tv:11121,nul:925,ln:22803,part:48.77,vpp:{MORENA:3366,PAN:293,PRI:4604,MC:379,PVEM:874,PT:1140,PRD:405,NAEM:60}},
+{id:'124',n:'SAN JOSE DEL RINCON',g:'PAN',vg:11649,pg:29.88,g2:'MORENA',vs:11135,pv:1.32,tv:38987,nul:2316,ln:75381,part:51.72,vpp:{MORENA:11135,PAN:11649,PRI:0,MC:7656,PVEM:7479,PT:1068,PRD:0,NAEM:0}},
+{id:'125',n:'TONANITLA',g:'MORENA',vg:3136,pg:45.51,g2:'MC',vs:1344,pv:26.0,tv:6891,nul:272,ln:10703,part:64.38,vpp:{MORENA:3136,PAN:405,PRI:915,MC:1344,PVEM:236,PT:133,PRD:612,NAEM:110}}
+]);
+</script>
+<script>
+const distritos = [
+{id:'001',n:'CHALCO DE DIAZ COVARRUBIAS',g:'MORENA',vg:80916,pg:55.15,g2:'PVEM',vs:24820,pv:38.23,tv:146724,nul:9415,ln:289760,part:50.64,vpp:{MORENA:80916,PAN:7841,PRI:14489,MC:10737,PVEM:24820,PT:4951,PRD:1463,NAEM:1507}},
+{id:'002',n:'TOLUCA DE LERDO',g:'MORENA',vg:69866,pg:44.4,g2:'PRI',vs:34123,pv:22.72,tv:157349,nul:4589,ln:273838,part:57.46,vpp:{MORENA:69866,PAN:21093,PRI:34123,MC:17396,PVEM:8053,PT:3872,PRD:1490,NAEM:1456}},
+{id:'003',n:'CHIMALHUACAN',g:'MORENA',vg:72758,pg:51.33,g2:'PRI',vs:40534,pv:22.74,tv:141734,nul:5904,ln:301694,part:46.98,vpp:{MORENA:72758,PAN:4500,PRI:40534,MC:10003,PVEM:5712,PT:3448,PRD:3247,NAEM:1532}},
+{id:'004',n:'LERMA DE VILLADA',g:'MORENA',vg:61544,pg:39.18,g2:'PRI',vs:41539,pv:12.74,tv:157066,nul:4989,ln:254927,part:61.61,vpp:{MORENA:61544,PAN:13860,PRI:41539,MC:18398,PVEM:14080,PT:4278,PRD:1427,NAEM:1940}},
+{id:'005',n:'CHIMALHUACAN II',g:'MORENA',vg:69076,pg:50.75,g2:'PRI',vs:37040,pv:23.54,tv:136103,nul:4693,ln:285204,part:47.72,vpp:{MORENA:69076,PAN:5994,PRI:37040,MC:11686,PVEM:5239,PT:3163,PRD:2250,NAEM:1655}},
+{id:'006',n:'ECATEPEC DE MORELOS I',g:'MORENA',vg:77863,pg:47.61,g2:'PAN',vs:38695,pv:23.95,tv:163530,nul:10380,ln:302928,part:53.98,vpp:{MORENA:77863,PAN:38695,PRI:0,MC:20058,PVEM:13145,PT:13769,PRD:0,NAEM:0}},
+{id:'007',n:'TENANCINGO DE DEGOLLADO',g:'MORENA',vg:72614,pg:34.85,g2:'PVEM',vs:72614,pv:0.0,tv:208340,nul:6624,ln:239187,part:87.1,vpp:{MORENA:72614,PAN:6555,PRI:20014,MC:28955,PVEM:72614,PT:0,PRD:4605,NAEM:2983}},
+{id:'008',n:'ECATEPEC DE MORELOS II',g:'MORENA',vg:75944,pg:45.6,g2:'PAN',vs:48576,pv:16.43,tv:166558,nul:5427,ln:284238,part:58.6,vpp:{MORENA:75944,PAN:48576,PRI:0,MC:20076,PVEM:12727,PT:9235,PRD:0,NAEM:0}},
+{id:'009',n:'TEJUPILCO DE HIDALGO',g:'MORENA',vg:66233,pg:46.18,g2:'PRI',vs:37217,pv:20.23,tv:143430,nul:7914,ln:264335,part:54.26,vpp:{MORENA:66233,PAN:6015,PRI:37217,MC:12997,PVEM:7598,PT:5754,PRD:5812,NAEM:1804}},
+{id:'010',n:'VALLE DE BRAVO',g:'MORENA',vg:61784,pg:40.7,g2:'PRI',vs:36179,pv:16.87,tv:151816,nul:8070,ln:270048,part:56.22,vpp:{MORENA:61784,PAN:7193,PRI:36179,MC:8790,PVEM:7727,PT:4955,PRD:23790,NAEM:1398}},
+{id:'011',n:'TULTITLAN DE MARIANO ESCOBEDO',g:'MORENA',vg:76851,pg:50.97,g2:'PAN',vs:37947,pv:25.8,tv:150780,nul:4475,ln:268003,part:56.26,vpp:{MORENA:76851,PAN:37947,PRI:0,MC:21365,PVEM:10334,PT:4283,PRD:0,NAEM:0}},
+{id:'012',n:'TEOLOYUCAN',g:'MORENA',vg:97575,pg:36.56,g2:'PVEM',vs:97575,pv:0.0,tv:266908,nul:6870,ln:297241,part:89.8,vpp:{MORENA:97575,PAN:25855,PRI:11935,MC:27381,PVEM:97575,PT:0,PRD:2442,NAEM:4145}},
+{id:'013',n:'ATLACOMULCO DE FABELA',g:'MORENA',vg:92830,pg:34.43,g2:'PVEM',vs:92830,pv:0.0,tv:269614,nul:7550,ln:297377,part:90.66,vpp:{MORENA:92830,PAN:10137,PRI:53002,MC:16231,PVEM:92830,PT:0,PRD:2265,NAEM:2319}},
+{id:'014',n:'JILOTEPEC DE ANDRES MOLINA ENRIQUEZ',g:'MORENA',vg:102681,pg:35.37,g2:'PVEM',vs:102681,pv:0.0,tv:290337,nul:7517,ln:289241,part:100.38,vpp:{MORENA:102681,PAN:19387,PRI:49108,MC:12532,PVEM:102681,PT:0,PRD:1830,NAEM:2118}},
+{id:'015',n:'IXTLAHUACA DE RAYON',g:'MORENA',vg:93817,pg:34.3,g2:'PVEM',vs:93817,pv:0.0,tv:273539,nul:7614,ln:283384,part:96.53,vpp:{MORENA:93817,PAN:4620,PRI:57096,MC:19537,PVEM:93817,PT:0,PRD:2082,NAEM:2570}},
+{id:'016',n:'CIUDAD ADOLFO LOPEZ MATEOS',g:'PAN',vg:70100,pg:40.03,g2:'MORENA',vs:61817,pv:4.73,tv:175140,nul:4412,ln:304150,part:57.58,vpp:{MORENA:61817,PAN:70100,PRI:16506,MC:12430,PVEM:6815,PT:3426,PRD:2232,NAEM:1814}},
+{id:'017',n:'HUIXQUILUCAN DE DEGOLLADO',g:'PAN',vg:76329,pg:42.16,g2:'MORENA',vs:61115,pv:8.4,tv:181030,nul:5203,ln:291779,part:62.04,vpp:{MORENA:61115,PAN:76329,PRI:14088,MC:13509,PVEM:8065,PT:3620,PRD:2772,NAEM:1532}},
+{id:'018',n:'TLALNEPANTLA DE BAZ I',g:'MORENA',vg:82498,pg:38.2,g2:'PAN',vs:65056,pv:8.08,tv:215943,nul:5653,ln:351058,part:61.51,vpp:{MORENA:82498,PAN:65056,PRI:36888,MC:16391,PVEM:6772,PT:3810,PRD:2647,NAEM:1881}},
+{id:'019',n:'SANTA MARIA TULTEPEC',g:'MORENA',vg:97802,pg:51.61,g2:'PAN',vs:52944,pv:23.67,tv:189486,nul:5029,ln:313565,part:60.43,vpp:{MORENA:97802,PAN:52944,PRI:0,MC:20849,PVEM:11628,PT:6263,PRD:0,NAEM:0}},
+{id:'020',n:'ZUMPANGO DE OCAMPO',g:'MORENA',vg:74029,pg:35.56,g2:'PVEM',vs:74029,pv:0.0,tv:208206,nul:4718,ln:270634,part:76.93,vpp:{MORENA:74029,PAN:38609,PRI:0,MC:21539,PVEM:74029,PT:0,PRD:0,NAEM:0}},
+{id:'021',n:'ECATEPEC DE MORELOS III',g:'MORENA',vg:67560,pg:49.81,g2:'PRI',vs:20797,pv:34.48,tv:135630,nul:6303,ln:283142,part:47.9,vpp:{MORENA:67560,PAN:10069,PRI:20797,MC:14470,PVEM:10297,PT:8833,PRD:1863,NAEM:1741}},
+{id:'022',n:'OJO DE AGUA I',g:'MORENA',vg:78262,pg:50.81,g2:'PRI',vs:27117,pv:33.2,tv:154039,nul:4107,ln:265009,part:58.13,vpp:{MORENA:78262,PAN:16729,PRI:27117,MC:17634,PVEM:6105,PT:4548,PRD:1761,NAEM:1883}},
+{id:'023',n:'TEXCOCO DE MORA',g:'MORENA',vg:76527,pg:48.31,g2:'PAN',vs:41547,pv:22.08,tv:158424,nul:5028,ln:271420,part:58.37,vpp:{MORENA:76527,PAN:41547,PRI:0,MC:23933,PVEM:11116,PT:5301,PRD:0,NAEM:0}},
+{id:'024',n:'CD. NEZAHUALCOYOTL I',g:'MORENA',vg:78968,pg:48.44,g2:'PAN',vs:46185,pv:20.11,tv:163010,nul:4517,ln:279505,part:58.32,vpp:{MORENA:78968,PAN:46185,PRI:0,MC:23619,PVEM:9051,PT:5187,PRD:0,NAEM:0}},
+{id:'025',n:'CD. NEZAHUALCOYOTL II',g:'MORENA',vg:91834,pg:49.58,g2:'PAN',vs:41093,pv:27.4,tv:185207,nul:9679,ln:313615,part:59.06,vpp:{MORENA:91834,PAN:41093,PRI:0,MC:33842,PVEM:12244,PT:6194,PRD:0,NAEM:0}},
+{id:'026',n:'CUAUTITLAN IZCALLI I',g:'MORENA',vg:80896,pg:46.95,g2:'PAN',vs:41198,pv:23.04,tv:172300,nul:4762,ln:305432,part:56.41,vpp:{MORENA:80896,PAN:41198,PRI:19741,MC:15744,PVEM:7095,PT:3629,PRD:1793,NAEM:2204}},
+{id:'027',n:'VALLE DE CHALCO SOLIDARIDAD',g:'MORENA',vg:83177,pg:54.47,g2:'PRI',vs:14948,pv:44.68,tv:152692,nul:11740,ln:282755,part:54.0,vpp:{MORENA:83177,PAN:5875,PRI:14948,MC:11893,PVEM:10719,PT:13133,PRD:10033,NAEM:2914}},
+{id:'028',n:'AMECAMECA DE JUAREZ',g:'MORENA',vg:88957,pg:48.56,g2:'PRI',vs:27998,pv:33.27,tv:183199,nul:6866,ln:308615,part:59.36,vpp:{MORENA:88957,PAN:9204,PRI:27998,MC:20633,PVEM:22106,PT:7358,PRD:3275,NAEM:3668}},
+{id:'029',n:'TIANGUISTENCO DE GALEANA',g:'MORENA',vg:81638,pg:35.53,g2:'PVEM',vs:81638,pv:0.0,tv:229795,nul:6351,ln:237890,part:96.6,vpp:{MORENA:81638,PAN:13119,PRI:29283,MC:17886,PVEM:81638,PT:0,PRD:2714,NAEM:3517}},
+{id:'030',n:'NAUCALPAN DE JUAREZ I',g:'MORENA',vg:92792,pg:48.35,g2:'PAN',vs:43910,pv:25.47,tv:191937,nul:5717,ln:350608,part:54.74,vpp:{MORENA:92792,PAN:43910,PRI:21706,MC:16461,PVEM:8828,PT:4305,PRD:2268,NAEM:1667}},
+{id:'031',n:'LOS REYES ACAQUILPAN',g:'MORENA',vg:74473,pg:51.4,g2:'PRI',vs:41628,pv:22.67,tv:144887,nul:5220,ln:287537,part:50.39,vpp:{MORENA:74473,PAN:5997,PRI:41628,MC:10560,PVEM:4556,PT:3854,PRD:2283,NAEM:1536}},
+{id:'032',n:'NAUCALPAN DE JUAREZ II',g:'MORENA',vg:64096,pg:38.17,g2:'PAN',vs:58373,pv:3.41,tv:167920,nul:4561,ln:288303,part:58.24,vpp:{MORENA:64096,PAN:58373,PRI:18485,MC:12669,PVEM:7425,PT:3211,PRD:2105,NAEM:1556}},
+{id:'033',n:'OJO DE AGUA II',g:'MORENA',vg:95340,pg:49.7,g2:'PRI',vs:49529,pv:23.88,tv:191834,nul:5802,ln:318811,part:60.17,vpp:{MORENA:95340,PAN:17354,PRI:49529,MC:12991,PVEM:6213,PT:5510,PRD:2041,NAEM:2856}},
+{id:'034',n:'TOLUCA DE LERDO II',g:'MORENA',vg:75539,pg:40.05,g2:'PRI',vs:45488,pv:15.93,tv:188603,nul:5058,ln:314904,part:59.89,vpp:{MORENA:75539,PAN:30975,PRI:45488,MC:20211,PVEM:8505,PT:4112,PRD:2080,NAEM:1693}},
+{id:'035',n:'METEPEC',g:'MORENA',vg:85558,pg:30.62,g2:'PVEM',vs:85558,pv:0.0,tv:279374,nul:4964,ln:294495,part:94.87,vpp:{MORENA:85558,PAN:40239,PRI:44173,MC:19302,PVEM:85558,PT:0,PRD:2295,NAEM:2249}},
+{id:'036',n:'SAN MIGUEL ZINACANTEPEC',g:'MORENA',vg:67671,pg:31.49,g2:'PVEM',vs:67671,pv:0.0,tv:214880,nul:5282,ln:284996,part:75.4,vpp:{MORENA:67671,PAN:16925,PRI:41913,MC:16447,PVEM:67671,PT:0,PRD:1873,NAEM:2380}},
+{id:'037',n:'TLALNEPANTLA DE BAZ II',g:'MORENA',vg:81045,pg:52.91,g2:'PRI',vs:24940,pv:36.62,tv:153188,nul:5476,ln:297087,part:51.56,vpp:{MORENA:81045,PAN:14290,PRI:24940,MC:13936,PVEM:7633,PT:6989,PRD:1809,NAEM:2546}},
+{id:'038',n:'COACALCO DE BERRIOZABAL',g:'MORENA',vg:93321,pg:47.56,g2:'PAN',vs:62702,pv:15.61,tv:196197,nul:4864,ln:325449,part:60.29,vpp:{MORENA:93321,PAN:62702,PRI:0,MC:24774,PVEM:10412,PT:4988,PRD:0,NAEM:0}},
+{id:'039',n:'TEPEXPAN',g:'MORENA',vg:63678,pg:46.5,g2:'PRI',vs:26293,pv:27.3,tv:136951,nul:5019,ln:237773,part:57.6,vpp:{MORENA:63678,PAN:15258,PRI:26293,MC:12795,PVEM:9578,PT:5364,PRD:1732,NAEM:2253}},
+{id:'040',n:'IXTAPALUCA',g:'MORENA',vg:68197,pg:45.56,g2:'PAN',vs:41163,pv:18.06,tv:149689,nul:5553,ln:286295,part:52.28,vpp:{MORENA:68197,PAN:41163,PRI:0,MC:15763,PVEM:19975,PT:4591,PRD:0,NAEM:0}},
+{id:'041',n:'CD. NEZAHUALCOYOTL III',g:'MORENA',vg:89633,pg:55.52,g2:'MC',vs:24321,pv:40.45,tv:161446,nul:5163,ln:285588,part:56.53,vpp:{MORENA:89633,PAN:11386,PRI:17127,MC:24321,PVEM:7572,PT:4904,PRD:4543,NAEM:1960}},
+{id:'042',n:'ECATEPEC DE MORELOS IV',g:'MORENA',vg:76429,pg:48.74,g2:'PRI',vs:24542,pv:33.09,tv:156812,nul:4981,ln:284951,part:55.03,vpp:{MORENA:76429,PAN:16121,PRI:24542,MC:16796,PVEM:9610,PT:8441,PRD:2894,NAEM:1979}},
+{id:'043',n:'CUAUTITLAN IZCALLI II',g:'MORENA',vg:76206,pg:42.02,g2:'PAN',vs:51504,pv:13.62,tv:181378,nul:5220,ln:303589,part:59.74,vpp:{MORENA:76206,PAN:51504,PRI:18476,MC:19776,PVEM:6566,PT:3667,PRD:2427,NAEM:2756}},
+{id:'044',n:'NICOLAS ROMERO',g:'MORENA',vg:54857,pg:33.01,g2:'PAN',vs:33412,pv:12.91,tv:166169,nul:8098,ln:313688,part:52.97,vpp:{MORENA:54857,PAN:33412,PRI:27757,MC:20923,PVEM:6402,PT:3513,PRD:12611,NAEM:6694}},
+{id:'045',n:'BARRIO LA CABECERA 3A SECCION',g:'MORENA',vg:57960,pg:36.86,g2:'PRI',vs:42204,pv:10.02,tv:157228,nul:7002,ln:272884,part:57.62,vpp:{MORENA:57960,PAN:8050,PRI:42204,MC:24716,PVEM:14875,PT:4932,PRD:2360,NAEM:2131}}
+];
+</script>
+<script>
+// ===================== HELPERS =====================
+function badgeColor(p){return COLORES[p]||'#888'}
+function badge(p){return `<span class="badge" style="background:${badgeColor(p)}">${p}</span>`}
+function fmt(n){return n.toLocaleString('es-MX')}
+function switchTab(id,btn){
+  document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  btn.classList.add('active');
+}
+
+// ===================== POPULATE TABLES =====================
+function buildDipRows(){
+  const tb=document.getElementById('dipTbody');
+  distritos.forEach(d=>{
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td>${d.id}</td><td>${d.n}</td><td>${badge(d.g)}</td><td>${fmt(d.vg)}</td>
+    <td>${d.pg}%</td><td>${badge(d.g2)}</td><td>${fmt(d.vs)}</td>
+    <td>${d.pv}%</td><td>${fmt(d.tv)}</td><td>${d.part}%</td>`;
+    tb.appendChild(tr);
+  });
+}
+function buildAyuRows(filter){
+  const tb=document.getElementById('ayuTbody');
+  tb.innerHTML='';
+  const data=filter?municipios.filter(m=>m.g===filter):municipios;
+  data.forEach(m=>{
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td>${m.id}</td><td>${m.n}</td><td>${badge(m.g)}</td><td>${fmt(m.vg)}</td>
+    <td>${m.pg}%</td><td>${badge(m.g2)}</td><td>${fmt(m.vs)}</td>
+    <td>${m.pv}%</td><td>${fmt(m.tv)}</td><td>${m.part}%</td>`;
+    tb.appendChild(tr);
+  });
+}
+function buildCompRows(){
+  const tb=document.getElementById('compTbody');
+  municipios.forEach(m=>{
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td>${m.id}</td><td>${m.n}</td><td>${badge(m.g)}</td>
+    <td>${m.pg}%</td><td>${m.pv}%</td><td>${m.part}%</td>`;
+    tb.appendChild(tr);
+  });
+}
+function buildFullDip(){
+  const tb=document.getElementById('dipFullTbody');
+  distritos.forEach(d=>{
+    const v=d.vpp;
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td>${d.id}</td><td>${d.n}</td><td>${badge(d.g)}</td>
+    <td>${fmt(v.MORENA)}</td><td>${fmt(v.PAN)}</td><td>${fmt(v.PRI)}</td>
+    <td>${fmt(v.MC)}</td><td>${fmt(v.PVEM)}</td><td>${fmt(v.PT)}</td>
+    <td>${fmt(v.PRD)}</td><td>${fmt(v.NAEM)}</td><td>${fmt(d.nul)}</td>
+    <td>${fmt(d.tv)}</td><td>${d.part}%</td>`;
+    tb.appendChild(tr);
+  });
+}
+function buildFullAyu(){
+  const tb=document.getElementById('ayuFullTbody');
+  municipios.forEach(m=>{
+    const v=m.vpp;
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td>${m.id}</td><td>${m.n}</td><td>${badge(m.g)}</td>
+    <td>${fmt(v.MORENA)}</td><td>${fmt(v.PAN)}</td><td>${fmt(v.PRI)}</td>
+    <td>${fmt(v.MC)}</td><td>${fmt(v.PVEM)}</td><td>${fmt(v.PT)}</td>
+    <td>${fmt(v.PRD)}</td><td>${fmt(v.NAEM)}</td><td>${fmt(m.nul)}</td>
+    <td>${fmt(m.tv)}</td><td>${m.part}%</td>`;
+    tb.appendChild(tr);
+  });
+}
+
+// ===================== CHARTS =====================
+function makeCharts(){
+  const labels=PARTIDOS;
+  const dipVals=PARTIDOS.map(p=>totalesDip[p]);
+  const ayuVals=PARTIDOS.map(p=>totalesAyu[p]);
+  const bgColors=PARTIDOS.map(p=>COLORES[p]);
+
+  // DIP Pie
+  new Chart(document.getElementById('dipPie'),{
+    type:'doughnut',
+    data:{labels,datasets:[{data:dipVals,backgroundColor:bgColors,borderWidth:2}]},
+    options:{plugins:{legend:{position:'right',labels:{font:{size:11}}},tooltip:{callbacks:{label:ctx=>`${ctx.label}: ${fmt(ctx.raw)} (${(ctx.raw/totalesDip.TOTAL*100).toFixed(1)}%)`}}}}
+  });
+  // DIP Bar
+  new Chart(document.getElementById('dipBar'),{
+    type:'bar',
+    data:{labels,datasets:[{label:'Votos DIP',data:dipVals,backgroundColor:bgColors,borderRadius:4}]},
+    options:{plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>`${fmt(ctx.raw)}`}}},scales:{y:{ticks:{callback:v=>fmt(v)}}}}
+  });
+  // AYU Pie
+  new Chart(document.getElementById('ayuPie'),{
+    type:'doughnut',
+    data:{labels,datasets:[{data:ayuVals,backgroundColor:bgColors,borderWidth:2}]},
+    options:{plugins:{legend:{position:'right',labels:{font:{size:11}}},tooltip:{callbacks:{label:ctx=>`${ctx.label}: ${fmt(ctx.raw)} (${(ctx.raw/totalesAyu.TOTAL*100).toFixed(1)}%)`}}}}
+  });
+  // AYU Bar
+  new Chart(document.getElementById('ayuBar'),{
+    type:'bar',
+    data:{labels,datasets:[{label:'Votos AYU',data:ayuVals,backgroundColor:bgColors,borderRadius:4}]},
+    options:{plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>`${fmt(ctx.raw)}`}}},scales:{y:{ticks:{callback:v=>fmt(v)}}}}
+  });
+
+  // Participación top/bottom
+  const sorted=[...municipios].sort((a,b)=>b.part-a.part);
+  const top10=sorted.slice(0,10);
+  const bot10=sorted.slice(-10).reverse();
+  new Chart(document.getElementById('topPartHigh'),{
+    type:'bar',
+    data:{labels:top10.map(m=>m.n.length>18?m.n.substring(0,18)+'…':m.n),
+      datasets:[{label:'Participación %',data:top10.map(m=>m.part),backgroundColor:'#662483',borderRadius:4}]},
+    options:{indexAxis:'y',plugins:{legend:{display:false}},scales:{x:{min:0,max:100}}}
+  });
+  new Chart(document.getElementById('topPartLow'),{
+    type:'bar',
+    data:{labels:bot10.map(m=>m.n.length>18?m.n.substring(0,18)+'…':m.n),
+      datasets:[{label:'Participación %',data:bot10.map(m=>m.part),backgroundColor:'#E6007E',borderRadius:4}]},
+    options:{indexAxis:'y',plugins:{legend:{display:false}},scales:{x:{min:0,max:100}}}
+  });
+
+  // Scatter
+  const scatterData=municipios.map(m=>({x:m.part,y:m.pv,label:m.n,g:m.g}));
+  const scatterDatasets=PARTIDOS.map(p=>({
+    label:p,
+    data:scatterData.filter(d=>d.g===p).map(d=>({x:d.x,y:d.y,label:d.label})),
+    backgroundColor:COLORES[p]+'CC',pointRadius:5
+  }));
+  new Chart(document.getElementById('scatterChart'),{
+    type:'scatter',
+    data:{datasets:scatterDatasets},
+    options:{plugins:{tooltip:{callbacks:{label:ctx=>`${ctx.raw.label}: Part=${ctx.raw.x}%, Vent=${ctx.raw.y}%`}}},
+      scales:{x:{title:{display:true,text:'Participación (%)'}},y:{title:{display:true,text:'Ventaja (%)'}}}}
+  });
+}
+
+// ===================== DATATABLES =====================
+function initTables(){
+  const btnCfg={dom:'Bfrtip',buttons:['csv','excel','pdf','print']};
+  $('#tblDip').DataTable({...btnCfg,language:{url:'//cdn.datatables.net/plug-ins/1.13.7/i18n/es-ES.json'},pageLength:10,order:[[0,'asc']]});
+  const ayuDT=$('#tblAyu').DataTable({...btnCfg,language:{url:'//cdn.datatables.net/plug-ins/1.13.7/i18n/es-ES.json'},pageLength:10,order:[[0,'asc']]});
+  $('#filtroPartido').on('change',function(){
+    const val=$(this).val();
+    ayuDT.destroy();
+    buildAyuRows(val);
+    $('#tblAyu').DataTable({...btnCfg,language:{url:'//cdn.datatables.net/plug-ins/1.13.7/i18n/es-ES.json'},pageLength:10,order:[[0,'asc']]});
+  });
+  $('#tblComp').DataTable({...btnCfg,language:{url:'//cdn.datatables.net/plug-ins/1.13.7/i18n/es-ES.json'},pageLength:15,order:[[0,'asc']]});
+  $('#tblDipFull').DataTable({...btnCfg,language:{url:'//cdn.datatables.net/plug-ins/1.13.7/i18n/es-ES.json'},pageLength:10,scrollX:true});
+  $('#tblAyuFull').DataTable({...btnCfg,language:{url:'//cdn.datatables.net/plug-ins/1.13.7/i18n/es-ES.json'},pageLength:10,scrollX:true});
+}
+
+// ===================== INIT =====================
+$(document).ready(function(){
+  buildDipRows();
+  buildAyuRows('');
+  buildCompRows();
+  buildFullDip();
+  buildFullAyu();
+  makeCharts();
+  initTables();
+  // Navbar active on scroll
+  const sections=document.querySelectorAll('section[id]');
+  window.addEventListener('scroll',()=>{
+    let cur='';
+    sections.forEach(s=>{if(window.scrollY>=s.offsetTop-80)cur=s.id});
+    document.querySelectorAll('nav a').forEach(a=>{
+      a.classList.toggle('active',a.getAttribute('href')==='#'+cur);
+    });
+  });
+});
+function syncTheme() {
+  const t = localStorage.getItem('darkMode') || 'light';
+  if(t === 'dark') {
+    document.documentElement.setAttribute('data-theme', 'dark');
+    Chart.defaults.color = '#e4e4e7';
+    Chart.defaults.borderColor = '#3f3f46';
+  } else {
+    document.documentElement.removeAttribute('data-theme');
+    Chart.defaults.color = '#666';
+    Chart.defaults.borderColor = '#e5e5e5';
+  }
+  for(let id in Chart.instances) Chart.instances[id].update();
+}
+window.addEventListener('storage', syncTheme);
+syncTheme();
+// Fecha dinámica
+(function(){
+  var dias=['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+  var meses=['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+  var h=new Date();
+  var el=document.getElementById('hdr-fecha');
+  if(el) el.textContent=dias[h.getDay()]+', '+h.getDate()+' de '+meses[h.getMonth()]+' de '+h.getFullYear();
+})();
+</script>
+</body>
+</html>

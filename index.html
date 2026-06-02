@@ -1,0 +1,2566 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="description" content="PREP 2024 IEEM — Sistema Integral de Resultados Electorales Preliminares del Estado de México">
+<meta name="keywords" content="PREP,IEEM,elecciones,Estado de México,2024,resultados electorales">
+<meta name="author" content="Instituto Electoral del Estado de México">
+<meta property="og:title" content="PREP 2024 IEEM — Estado de México">
+<meta property="og:description" content="Sistema de visualización y consulta de resultados electorales preliminares">
+<title>PREP 2024 IEEM — Estado de México</title>
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/jquery.dataTables.min.css">
+<link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.2/css/buttons.dataTables.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/15.7.1/nouislider.min.css">
+<style>
+/* ══════════════════════════════════════════════════
+   TOKENS DE DISEÑO — Modo Claro (por defecto)
+══════════════════════════════════════════════════ */
+:root{
+  /* Marca IEEM */
+  --m:#662483;--mg:#E6007E;--li:#8173B3;--mm:#951B81;
+  --grad:linear-gradient(135deg,#662483 0%,#951B81 50%,#E6007E 100%);
+  /* Bloques electorales */
+  --t4T:#8B0000;--tVA:#003087;--tMC:#FF6600;--warn:#FFC107;
+  /* Superficies */
+  --bg:#F7F5FB;--surface:#FFFFFF;--surface-2:#F0EDF7;--surface-3:#E8E0F0;
+  /* Texto */
+  --tx:#1A1A2E;--tx-2:#444455;--tx-muted:#666677;
+  /* Bordes */
+  --border:#E0D8EE;--border-2:#C8BEE0;
+  /* Inputs */
+  --input-bg:#FFFFFF;--input-border:#C8BEE0;
+  /* Sombras */
+  --shadow-sm:0 1px 4px rgba(102,36,131,.08);
+  --shadow-md:0 2px 12px rgba(102,36,131,.12);
+  --shadow-lg:0 6px 24px rgba(102,36,131,.16);
+  /* Aliases de compatibilidad */
+  --wh:#FFFFFF;--gc:#C6C6C6;--gs:#575756;
+  --card-bg:#FFFFFF;--card-shadow:rgba(102,36,131,.1);
+  --border-color:#E0D8EE;--text-muted:#666677;--input-bg:#FFFFFF;
+  /* Transición global */
+  --transition:background .25s ease,color .25s ease,border-color .25s ease,box-shadow .25s ease;
+}
+
+/* ══════════════════════════════════════════════════
+   TOKENS DE DISEÑO — Modo Oscuro
+   Paleta: negros profundos + acentos vibrantes
+══════════════════════════════════════════════════ */
+[data-theme="dark"]{
+  /* Superficies escalonadas */
+  --bg:#121212;
+  --surface:#27272a;
+  --surface-2:#27272a;
+  --surface-3:#3f3f46;
+  /* Texto — alta legibilidad */
+  --tx:#f4f4f5;
+  --tx-2:#e4e4e7;
+  --tx-muted:#a1a1aa;
+  /* Bordes sutiles */
+  --border:#3f3f46;
+  --border-2:#52525b;
+  /* Inputs sin resplandor blanco */
+  --input-bg:#18181b;
+  --input-border:#3f3f46;
+  /* Sombras profundas */
+  --shadow-sm:0 1px 4px rgba(0,0,0,.4);
+  --shadow-md:0 2px 12px rgba(0,0,0,.5);
+  --shadow-lg:0 6px 24px rgba(0,0,0,.6);
+  /* Acentos vibrantes sobre oscuro */
+  --mg:#FF1A8C;--li:#9B8FCC;
+  /* Aliases de compatibilidad */
+  --wh:#18181b;--gc:#3f3f46;--gs:#a1a1aa;
+  --card-bg:#27272a;--card-shadow:rgba(0,0,0,.5);
+  --border-color:#3f3f46;--text-muted:#a1a1aa;--input-bg:#18181b;
+}
+
+/* ══════════════════════════════════════════════════
+   DARK MODE — Aplicación global por token
+   Un solo bloque, sin !important innecesarios
+══════════════════════════════════════════════════ */
+[data-theme="dark"]{
+  background:var(--bg);
+  color:var(--tx);
+  color-scheme:dark; /* mejora selects/scrollbars nativos */
+}
+
+/* ── Base ── */
+[data-theme="dark"] body{background:var(--bg);color:var(--tx)}
+
+/* ── Navbar y subnav ── */
+[data-theme="dark"] #subnav{background:var(--surface);border-bottom-color:var(--border)}
+[data-theme="dark"] .sub-link{color:var(--li)}
+[data-theme="dark"] .sub-link:hover,[data-theme="dark"] .sub-link.activo{color:var(--mg);border-bottom-color:var(--mg)}
+
+/* ── Secciones ── */
+[data-theme="dark"] .sec-title{color:var(--li)}
+[data-theme="dark"] .sub-title{color:var(--li)}
+[data-theme="dark"] .info-box{background:var(--surface-2);border-left-color:var(--mg);color:var(--tx-2)}
+[data-theme="dark"] hr.sep{border-top-color:var(--border)}
+
+/* ── Cards universales ── */
+[data-theme="dark"] .kcard,
+[data-theme="dark"] .ccard,
+[data-theme="dark"] .tcard,
+[data-theme="dark"] .prog-wrap,
+[data-theme="dark"] .access-card,
+[data-theme="dark"] .total-card,
+[data-theme="dark"] .panel-content,
+[data-theme="dark"] .win-card,
+[data-theme="dark"] .sc-kpi,
+[data-theme="dark"] .sc-partido-card,
+[data-theme="dark"] .sc-bloque-card,
+[data-theme="dark"] .sc-geo-header,
+[data-theme="dark"] .sc-chart-card{
+  background:var(--surface);
+  border-color:var(--border);
+  box-shadow:var(--shadow-md);
+}
+[data-theme="dark"] .ccard h3{color:var(--li)}
+
+/* ── Textos en cards ── */
+[data-theme="dark"] .kval{color:var(--tx)}
+[data-theme="dark"] .klbl,[data-theme="dark"] .ksub{color:var(--tx-muted)}
+[data-theme="dark"] .prog-lbl{color:var(--tx-2)}
+[data-theme="dark"] .total-val{color:var(--tx)}
+[data-theme="dark"] .total-lbl{color:var(--tx-muted)}
+[data-theme="dark"] .sc-kpi-val{color:var(--tx)}
+[data-theme="dark"] .sc-kpi-lbl,[data-theme="dark"] .sc-kpi-sub{color:var(--tx-muted)}
+[data-theme="dark"] .sc-geo-title{color:var(--li)}
+[data-theme="dark"] .sc-partido-nombre{color:var(--tx-muted)}
+[data-theme="dark"] .sc-bloque-mun{color:var(--tx-muted)}
+[data-theme="dark"] .sc-section-title{color:var(--tx-muted)}
+
+/* ── Progress bars ── */
+[data-theme="dark"] .prog-bg,[data-theme="dark"] .sc-partido-bar-bg,
+[data-theme="dark"] .sc-bloque-bar-bg{background:var(--surface-3)}
+
+/* ── Landing ── */
+[data-theme="dark"] .access-section{background:var(--bg)}
+[data-theme="dark"] .access-card{background:var(--surface);border-color:var(--border)}
+[data-theme="dark"] .access-card:hover{border-color:var(--mg)}
+[data-theme="dark"] .access-card h3{color:var(--li)}
+[data-theme="dark"] .access-card p{color:var(--tx-muted)}
+[data-theme="dark"] .totales-grid .total-card{background:var(--surface)}
+
+/* ── Tablas DataTables ── */
+[data-theme="dark"] table.dataTable thead th{background:var(--surface-3)!important;color:var(--tx)!important;border-bottom-color:var(--border)!important}
+[data-theme="dark"] table.dataTable tbody tr td{background:var(--surface)!important;color:var(--tx)!important}
+[data-theme="dark"] table.dataTable tbody tr:hover td{background:var(--surface-2)!important}
+[data-theme="dark"] table.dataTable{border-color:var(--border)!important}
+[data-theme="dark"] .dataTables_wrapper .dataTables_filter input,
+[data-theme="dark"] .dataTables_wrapper select{background:var(--input-bg);color:var(--tx);border-color:var(--input-border)}
+[data-theme="dark"] .dataTables_wrapper .dataTables_info,
+[data-theme="dark"] .dataTables_wrapper .dataTables_length label,
+[data-theme="dark"] .dataTables_wrapper .dataTables_filter label{color:var(--tx-muted)}
+[data-theme="dark"] .dataTables_paginate .paginate_button{color:var(--tx)!important;background:transparent!important}
+[data-theme="dark"] .dataTables_paginate .paginate_button.current{background:var(--surface-3)!important;color:var(--mg)!important}
+[data-theme="dark"] .dataTables_paginate .paginate_button:hover{background:var(--surface-2)!important;color:var(--tx)!important}
+[data-theme="dark"] .dataTables_wrapper{color:var(--tx)}
+[data-theme="dark"] tr.conflicto td{background:#2A1E00!important}
+
+/* ── Inputs y selects (sin resplandor blanco) ── */
+[data-theme="dark"] select,
+[data-theme="dark"] input[type=text],
+[data-theme="dark"] input[type=search],
+[data-theme="dark"] input[type=number]{
+  background:var(--input-bg);
+  color:var(--tx);
+  border-color:var(--input-border);
+  color-scheme:dark;
+}
+[data-theme="dark"] select option{background:var(--surface-2);color:var(--tx)}
+
+/* ── Geo chips ── */
+[data-theme="dark"] .geo-chip{background:var(--surface-3);color:var(--tx)}
+
+/* ── Badges de modalidad ── */
+[data-theme="dark"] .bm-coal{background:#0D2B0D;color:#81C784;border:1px solid #1B5E20}
+[data-theme="dark"] .bm-cc{background:#0D1B2B;color:#64B5F6;border:1px solid #0D47A1}
+[data-theme="dark"] .bm-ind{background:#1B0D2B;color:#CE93D8;border:1px solid #4A148C}
+[data-theme="dark"] .bm-conf{background:#2B1A0D;color:#FFB74D;border:1px solid #E65100}
+
+/* ── Dashboard tabs ── */
+[data-theme="dark"] .dash-tabs{background:var(--surface);border-bottom-color:var(--mg)}
+[data-theme="dark"] .dash-tab{color:var(--li);background:transparent}
+[data-theme="dark"] .dash-tab:hover{background:var(--surface-2);color:var(--tx)}
+[data-theme="dark"] .dash-tab.activo{color:var(--mg);background:var(--bg)}
+
+/* ── Panel tabs ── */
+[data-theme="dark"] .panel-tabs{border-bottom-color:var(--border)}
+[data-theme="dark"] .panel-tab{color:var(--tx-muted);background:transparent}
+[data-theme="dark"] .panel-tab:hover{background:var(--surface-2);color:var(--tx)}
+[data-theme="dark"] .panel-tab.activo{color:var(--mg);border-bottom-color:var(--mg)}
+
+/* ── Status bar ── */
+[data-theme="dark"] .status-bar{background:var(--surface-2);border-color:var(--border);color:var(--li)}
+
+/* ── Botones ── */
+[data-theme="dark"] .btn-clear{background:var(--surface);color:var(--li);border-color:var(--border-2)}
+[data-theme="dark"] .btn-clear:hover{background:var(--surface-2)}
+
+/* ── Sistema de Consulta ── */
+[data-theme="dark"] .sc-filterbar{background:var(--surface);border-bottom-color:var(--border)}
+[data-theme="dark"] .sc-select{background:var(--input-bg);color:var(--tx);border-color:var(--input-border);color-scheme:dark}
+[data-theme="dark"] .sc-select option{background:var(--surface-2);color:var(--tx)}
+[data-theme="dark"] .sc-radio-opt{background:var(--surface-2);color:var(--tx-2);border-color:var(--border)}
+[data-theme="dark"] .sc-radio-opt:has(input:checked){background:var(--m);color:#fff;border-color:var(--m)}
+[data-theme="dark"] .sc-btn-reset{border-color:var(--border);color:var(--tx-muted)}
+[data-theme="dark"] .sc-btn-reset:hover{border-color:var(--mg);color:var(--mg)}
+[data-theme="dark"] .sc-tabs{border-bottom-color:var(--border)}
+[data-theme="dark"] .sc-tab{color:var(--tx-muted)}
+[data-theme="dark"] .sc-tab:hover{background:var(--surface-2);color:var(--tx)}
+[data-theme="dark"] .sc-tab.activo{color:var(--mg);border-bottom-color:var(--mg)}
+
+/* ── Mapas ── */
+[data-theme="dark"] #mapDIP,[data-theme="dark"] #mapAYU,[data-theme="dark"] #mapConsulta{
+  border-color:var(--border)!important;
+  filter:brightness(.82) saturate(1.15) contrast(1.05);
+}
+
+/* ── Footer ── */
+[data-theme="dark"] footer{background:#0A0A0F}
+
+/* ── Tablas inline (no DataTables) ── */
+[data-theme="dark"] table:not(.dataTable) tbody tr td{background:var(--surface);color:var(--tx)}
+[data-theme="dark"] table:not(.dataTable) tbody tr{background:var(--surface)}
+[data-theme="dark"] table:not(.dataTable) thead tr th{background:var(--surface-3)!important;color:var(--tx)!important}
+
+/* ── Scrollbar ── */
+[data-theme="dark"] ::-webkit-scrollbar-track{background:var(--surface-2)}
+[data-theme="dark"] ::-webkit-scrollbar-thumb{background:var(--surface-3)}
+/* ── Botón dark mode ────────────────────────────── */
+#btn-dark{padding:8px 12px;border:none;background:rgba(255,255,255,.12);
+  color:#fff;cursor:pointer;border-radius:20px;font-size:.82rem;
+  display:flex;align-items:center;gap:6px;transition:.2s;white-space:nowrap;margin-left:8px}
+#btn-dark:hover{background:rgba(255,255,255,.22)}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'Segoe UI',Arial,sans-serif;background:var(--bg);color:var(--tx);transition:var(--transition)}
+/* ── Scrollbar ──────────────────────────────────── */
+::-webkit-scrollbar{width:7px}
+::-webkit-scrollbar-thumb{background:var(--li);border-radius:4px}
+/* ── Vistas SPA ─────────────────────────────────── */
+.vista{display:none;opacity:0;transition:opacity .3s}
+.vista.activa{display:block;opacity:1}
+/* ── Navbar principal ───────────────────────────── */
+#navbar{position:fixed;top:0;left:0;right:0;z-index:1000;background:var(--m);
+  box-shadow:0 2px 8px rgba(0,0,0,.3);display:flex;align-items:center;
+  justify-content:space-between;padding:0 20px;min-height:52px}
+.nav-brand{color:#fff;font-weight:800;font-size:.95rem;display:flex;align-items:center;gap:8px;white-space:nowrap}
+.nav-links{display:flex;gap:2px}
+.nav-btn{padding:12px 16px;border:none;background:transparent;color:rgba(255,255,255,.7);
+  cursor:pointer;font-size:.82rem;font-weight:600;border-bottom:3px solid transparent;
+  transition:.2s;white-space:nowrap}
+.nav-btn:hover,.nav-btn.activo{color:#fff;border-bottom-color:var(--mg);background:rgba(255,255,255,.08)}
+/* ── Sub-navbar resultados ──────────────────────── */
+#subnav{background:var(--surface);border-bottom:2px solid var(--border);position:sticky;
+  top:52px;z-index:999;box-shadow:0 1px 4px rgba(102,36,131,.08)}
+.subnav-inner{display:flex;max-width:1400px;margin:0 auto;padding:0 20px;overflow-x:auto}
+.sub-link{padding:10px 16px;text-decoration:none;color:var(--m);font-size:.82rem;
+  font-weight:600;border-bottom:3px solid transparent;white-space:nowrap;transition:.2s}
+.sub-link:hover,.sub-link.activo{border-bottom-color:var(--mg);color:var(--mg)}
+/* ── Contenido ──────────────────────────────────── */
+.contenido{padding-top:52px}
+.sec{padding:28px 20px;max-width:1400px;margin:0 auto}
+.sec-title{font-size:1.2rem;font-weight:800;color:var(--m);border-left:5px solid var(--mg);
+  padding-left:12px;margin-bottom:20px;display:flex;align-items:center;gap:8px}
+.sec-title i{color:var(--mg)}
+.sub-title{font-size:.95rem;font-weight:700;color:var(--m);margin:22px 0 14px;
+  display:flex;align-items:center;gap:7px}
+/* ── KPI Cards ──────────────────────────────────── */
+.kgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(175px,1fr));gap:14px;margin-bottom:20px}
+.kcard{background:var(--surface);border-radius:10px;border-top:4px solid var(--mg);
+  padding:16px 14px;box-shadow:var(--shadow-sm);transition:.2s}
+.kcard:hover{transform:translateY(-2px);box-shadow:0 5px 16px rgba(102,36,131,.16)}
+.kcard.k4T{border-top-color:var(--t4T)}.kcard.kVA{border-top-color:var(--tVA)}.kcard.kMC{border-top-color:var(--tMC)}
+.kval{font-size:1.5rem;font-weight:900;color:var(--m);line-height:1}
+.klbl{font-size:.75rem;color:var(--tx-muted);margin-top:5px;line-height:1.3}
+.ksub{font-size:.7rem;color:var(--li);margin-top:3px;font-weight:600}
+/* ── Progress ───────────────────────────────────── */
+.prog-wrap{background:var(--surface);border-radius:10px;padding:16px 18px;
+  box-shadow:var(--shadow-sm);margin-bottom:14px}
+.prog-lbl{display:flex;justify-content:space-between;font-size:.82rem;font-weight:600;color:var(--tx-2);margin-bottom:5px}
+.prog-bg{background:var(--surface-3);border-radius:8px;height:22px;overflow:hidden}
+.prog-bar{height:100%;border-radius:8px;background:var(--grad);
+  display:flex;align-items:center;justify-content:flex-end;
+  padding-right:8px;font-size:.75rem;font-weight:700;color:#fff}
+/* ── Charts ─────────────────────────────────────── */
+.cgrid{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:22px;width:100%}
+.ccard{background:var(--surface);border-radius:10px;padding:18px;box-shadow:var(--shadow-sm)}
+.ccard h3{font-size:.87rem;color:var(--m);font-weight:700;margin-bottom:12px;text-align:center}
+.chart-wrap{position:relative;width:100%}
+/* ── Tables ─────────────────────────────────────── */
+.tcard{background:var(--surface);border-radius:10px;padding:18px;
+  box-shadow:var(--shadow-sm);margin-bottom:20px;overflow-x:auto}
+table.dataTable thead th{background:var(--m)!important;color:#fff!important;font-size:.78rem;padding:8px 7px!important}
+table.dataTable tbody tr:hover td{background:var(--surface-2)!important}
+table.dataTable tbody td{font-size:.79rem;padding:6px 7px!important}
+.dt-buttons .dt-button{background:var(--mg)!important;color:#fff!important;border:none!important;
+  border-radius:5px!important;font-size:.77rem!important;padding:5px 11px!important;margin-right:3px!important;cursor:pointer}
+.dt-buttons .dt-button:hover{background:var(--mm)!important}
+tr.conflicto td{background:#FFF3CD!important}
+/* ── Badges ─────────────────────────────────────── */
+.badge{display:inline-block;padding:2px 8px;border-radius:12px;font-size:.7rem;font-weight:700;color:#fff}
+.b4T{background:var(--t4T)}.bVA{background:var(--tVA)}.bMC{background:var(--tMC)}
+.badge-mod{display:inline-block;padding:1px 7px;border-radius:10px;font-size:.68rem;font-weight:600}
+.bm-coal{background:#e8f5e9;color:#2e7d32}.bm-cc{background:#e3f2fd;color:#1565c0}
+.bm-ind{background:#f3e5f5;color:#6a1b9a}.bm-conf{background:#fff3e0;color:#e65100}
+/* ── Info box ───────────────────────────────────── */
+.info-box{background:var(--surface-2);border-left:4px solid var(--mg);padding:10px 14px;
+  border-radius:6px;font-size:.82rem;color:var(--tx-2);margin-bottom:16px}
+hr.sep{border:none;border-top:1px solid var(--border);margin:20px 0}
+/* ── Footer ─────────────────────────────────────── */
+footer{background:var(--m);color:#fff;text-align:center;padding:22px;font-size:.82rem;margin-top:40px}
+footer p{margin:3px 0;opacity:.85}
+/* ── Consulta layout ────────────────────────────── */
+.consulta-wrap{display:flex;min-height:calc(100vh - 52px)}
+.filter-panel{width:280px;min-width:280px;background:var(--surface);border-right:1px solid var(--border);
+  overflow-y:auto;max-height:calc(100vh - 52px);position:sticky;top:52px}
+.filter-sec{border-bottom:1px solid var(--border)}
+.filter-hdr{background:var(--m);color:#fff;padding:8px 14px;font-size:.8rem;font-weight:700;
+  cursor:pointer;display:flex;justify-content:space-between;align-items:center}
+.filter-body{padding:10px 14px}
+.filter-body label{display:flex;align-items:center;gap:7px;font-size:.8rem;color:var(--tx-2);margin-bottom:6px;cursor:pointer}
+.filter-body input[type=radio],.filter-body input[type=checkbox]{accent-color:var(--m);width:14px;height:14px}
+.chip-bloque{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:10px;
+  font-size:.72rem;font-weight:700;color:#fff;margin-right:4px}
+.main-panel{flex:1;padding:20px;overflow-y:auto}
+.panel-tabs{display:flex;gap:4px;margin-bottom:16px;border-bottom:2px solid var(--border)}
+.panel-tab{padding:8px 16px;border:none;background:none;cursor:pointer;font-size:.85rem;
+  font-weight:600;color:var(--tx-muted);border-bottom:3px solid transparent;margin-bottom:-2px;transition:.2s}
+.panel-tab.activo{color:var(--m);border-bottom-color:var(--mg)}
+.panel-content{display:none}.panel-content.activo{display:block}
+.status-bar{background:var(--surface-2);border:1px solid var(--border);border-radius:8px;
+  padding:8px 14px;font-size:.8rem;color:var(--m);margin-bottom:14px;font-weight:600}
+.btn-apply{width:100%;padding:10px;background:var(--mg);color:#fff;border:none;
+  border-radius:7px;font-size:.88rem;font-weight:700;cursor:pointer;margin-top:10px;transition:.2s}
+.btn-apply:hover{background:var(--mm)}
+.btn-clear{width:100%;padding:8px;background:var(--surface);color:var(--m);border:2px solid var(--li);
+  border-radius:7px;font-size:.85rem;font-weight:600;cursor:pointer;margin-top:6px;transition:.2s}
+.btn-clear:hover{background:var(--surface-2)}
+.geo-chips{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px}
+.geo-chip{background:var(--surface-3);color:var(--tx-2);padding:2px 8px;border-radius:10px;
+  font-size:.72rem;font-weight:600;display:flex;align-items:center;gap:4px}
+.geo-chip button{background:none;border:none;cursor:pointer;color:var(--mg);font-size:.8rem;padding:0;line-height:1}
+.export-btn{display:block;width:100%;padding:12px;border:none;border-radius:8px;
+  font-size:.9rem;font-weight:700;cursor:pointer;margin-bottom:10px;color:#fff;transition:.2s}
+/* ── Landing ────────────────────────────────────── */
+.hero{background:var(--grad);color:#fff;min-height:60vh;display:flex;
+  flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:40px 20px}
+.hero-logo{width:72px;height:72px;border-radius:50%;background:rgba(0,0,0,.25);
+  border:3px solid rgba(255,255,255,.35);display:flex;flex-direction:column;
+  align-items:center;justify-content:center;margin-bottom:20px;gap:2px}
+.hero-logo i{font-size:1.4rem}.hero-logo span{font-size:.55rem;font-weight:900;letter-spacing:1px}
+.hero h1{font-size:clamp(.9rem,2vw,1.1rem);letter-spacing:3px;opacity:.9;margin-bottom:12px;font-weight:600}
+.hero h2{font-size:clamp(1.2rem,3vw,2rem);font-weight:900;margin-bottom:8px;line-height:1.2}
+.hero p{font-size:.9rem;opacity:.85;margin-bottom:20px}
+.hero-badges{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:16px}
+.hero-badge{background:rgba(255,255,255,.18);padding:5px 14px;border-radius:20px;font-size:.78rem;font-weight:600}
+.access-section{background:var(--bg);padding:40px 20px;min-height:40vh;
+  display:flex;flex-direction:column;align-items:center;justify-content:center}
+.access-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
+  gap:24px;max-width:700px;width:100%;margin-bottom:32px}
+.access-card{background:var(--surface);border-radius:14px;padding:32px 24px;text-align:center;
+  box-shadow:var(--shadow-md);transition:.3s;cursor:pointer;border:2px solid transparent}
+.access-card:hover{transform:translateY(-6px);box-shadow:var(--shadow-lg);border-color:var(--mg)}
+.access-card i{font-size:2.5rem;margin-bottom:16px;display:block}
+.access-card h3{font-size:1.2rem;font-weight:800;margin-bottom:10px;color:var(--m)}
+.access-card p{font-size:.85rem;color:var(--tx-muted);margin-bottom:20px;line-height:1.5}
+.access-btn{display:inline-block;padding:10px 24px;border-radius:8px;font-size:.88rem;
+  font-weight:700;color:#fff;border:none;cursor:pointer;transition:.2s}
+.totales-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));
+  gap:12px;max-width:1100px;width:100%;margin-top:8px}
+.total-card{background:var(--surface);border-radius:10px;padding:14px 12px;text-align:center;
+  box-shadow:var(--shadow-sm);border-top:3px solid var(--mg)}
+.total-val{font-size:1.3rem;font-weight:900;color:var(--m)}
+.total-lbl{font-size:.72rem;color:var(--tx-muted);margin-top:3px}
+/* ── Responsive ─────────────────────────────────── */
+@media(max-width:900px){.consulta-wrap{flex-direction:column}.filter-panel{width:100%;min-width:unset;position:static;max-height:none}}
+@media(max-width:600px){.cgrid{grid-template-columns:1fr}.kgrid{grid-template-columns:repeat(2,1fr)}.nav-btn{padding:10px 10px;font-size:.75rem}}
+/* ── Logos partidos ─────────────────────────────── */
+.logo-partido{height:22px;width:auto;vertical-align:middle;margin-right:3px;object-fit:contain}
+.logos-bloque{display:flex;align-items:center;gap:4px;flex-wrap:wrap}
+.logos-bloque img{height:24px;width:auto;object-fit:contain}
+/* ── Dashboard tabs ─────────────────────────────── */
+.dash-tabs{display:flex;gap:0;border-bottom:3px solid var(--mg);background:var(--surface);
+  position:sticky;top:52px;z-index:998;box-shadow:0 2px 6px rgba(102,36,131,.1)}
+.dash-tab{padding:12px 22px;border:none;background:transparent;color:var(--m);
+  font-size:.88rem;font-weight:700;cursor:pointer;border-bottom:3px solid transparent;
+  margin-bottom:-3px;transition:.2s;white-space:nowrap}
+.dash-tab:hover{background:var(--surface-2);color:var(--mg)}
+.dash-tab.activo{color:var(--mg);border-bottom-color:var(--mg);background:var(--surface-2)}
+.dash-frame-wrap{display:none;width:100%;height:calc(100vh - 90px)}
+.dash-frame-wrap.activo{display:block}
+.dash-frame-wrap iframe{width:100%;height:100%;border:none;display:block}
+/* ── Marca de agua "Prueba Piloto" (mosaico) ───── */
+#wm-piloto{
+  position:fixed;top:0;left:0;width:100%;height:100%;
+  z-index:9999;pointer-events:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='420' height='200'%3E%3Ctext x='210' y='110' text-anchor='middle' dominant-baseline='middle' font-family='Arial,sans-serif' font-weight='900' font-size='30' fill='%23cc0000' opacity='0.13' transform='rotate(-35,210,100)'%3EPRUEBA PILOTO%3C/text%3E%3C/svg%3E");
+  background-repeat:repeat;
+  background-size:420px 200px;
+}
+[data-theme="dark"] #wm-piloto{
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='420' height='200'%3E%3Ctext x='210' y='110' text-anchor='middle' dominant-baseline='middle' font-family='Arial,sans-serif' font-weight='900' font-size='30' fill='white' opacity='0.10' transform='rotate(-35,210,100)'%3EPRUEBA PILOTO%3C/text%3E%3C/svg%3E");
+}
+/* ── Print ──────────────────────────────────────── */
+@media print{#navbar,#subnav,.filter-panel,.btn-apply,.btn-clear,.dt-buttons{display:none!important}
+  .vista{display:block!important;opacity:1!important}.contenido{padding-top:0}}
+/* ── noUiSlider ─────────────────────────────────── */
+.noUi-connect{background:var(--mg)}.noUi-handle{border-color:var(--m)}
+
+/* ══════════════════════════════════════════════════
+   SISTEMA DE CONSULTA — Sidebar colapsable
+══════════════════════════════════════════════════ */
+
+/* ── Layout raíz ── */
+.sc-layout{display:flex;min-height:calc(100vh - 52px);position:relative;overflow:hidden}
+
+/* ── Sidebar ── */
+.sc-sidebar{
+  width:272px;min-width:272px;
+  background:var(--surface);
+  border-right:1px solid var(--border);
+  display:flex;flex-direction:column;
+  transition:width .28s cubic-bezier(.4,0,.2,1),
+             min-width .28s cubic-bezier(.4,0,.2,1);
+  position:sticky;top:52px;
+  height:calc(100vh - 52px);
+  overflow-y:auto;overflow-x:hidden;
+  z-index:200;flex-shrink:0;
+}
+.sc-sidebar.collapsed{width:0;min-width:0;border-right-color:transparent}
+
+/* ── Cabecera sidebar ── */
+.sc-sidebar-hdr{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:14px 16px 10px;border-bottom:1px solid var(--border);
+  position:sticky;top:0;background:var(--surface);z-index:1;
+  flex-shrink:0;
+}
+.sc-sidebar-title{
+  font-size:.75rem;font-weight:800;color:var(--m);
+  text-transform:uppercase;letter-spacing:.8px;
+  display:flex;align-items:center;gap:7px;
+  white-space:nowrap;overflow:hidden;
+}
+.sc-sidebar-title i{color:var(--mg)}
+
+/* ── Botón colapso ── */
+.sc-toggle{
+  width:32px;height:32px;border:none;
+  background:var(--surface-2);border-radius:8px;
+  cursor:pointer;display:flex;align-items:center;justify-content:center;
+  color:var(--tx-muted);font-size:.9rem;flex-shrink:0;
+  transition:background .2s,color .2s,transform .1s;
+  border:1px solid var(--border);
+}
+.sc-toggle:hover{background:var(--mg);color:#fff;border-color:var(--mg)}
+.sc-toggle:active{transform:scale(.92)}
+/* La flecha del botón dentro del sidebar rota al colapsar */
+#scToggleBtn i{transition:transform .28s cubic-bezier(.4,0,.2,1)}
+.sc-sidebar.collapsed #scToggleBtn i{transform:rotate(180deg)}
+
+/* Botón flotante para reabrir (desktop) */
+.sc-toggle-float{
+  position:fixed;top:calc(52px + 14px);left:0;
+  width:26px;height:48px;
+  background:var(--m);border:none;border-radius:0 10px 10px 0;
+  color:#fff;font-size:.8rem;cursor:pointer;
+  display:none;align-items:center;justify-content:center;
+  z-index:201;box-shadow:var(--shadow-md);
+  transition:background .2s,width .15s;
+}
+.sc-toggle-float:hover{background:var(--mg);width:30px}
+.sc-sidebar.collapsed ~ .sc-toggle-float{display:flex}
+
+/* ── Cuerpo sidebar ── */
+.sc-sidebar-body{
+  padding:16px;display:flex;flex-direction:column;gap:18px;
+  overflow-y:auto;overflow-x:hidden;
+  flex:1;
+}
+
+/* ── Grupos de filtro ── */
+.sc-filter-group{display:flex;flex-direction:column;gap:6px;white-space:normal}
+.sc-flabel{
+  font-size:.68rem;font-weight:800;color:var(--m);
+  text-transform:uppercase;letter-spacing:.6px;
+  display:flex;align-items:center;gap:5px;
+  white-space:nowrap;flex-wrap:nowrap;
+}
+.sc-flabel i{color:var(--mg);font-size:.7rem}
+
+/* ── Selects ── */
+.sc-select{
+  padding:8px 28px 8px 10px;
+  border:1.5px solid var(--border);border-radius:8px;
+  font-size:.82rem;color:var(--tx);background:var(--input-bg);
+  cursor:pointer;transition:border-color .2s,box-shadow .2s;
+  width:100%;appearance:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%238173B3' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 10px center;
+}
+.sc-select:focus{outline:none;border-color:var(--mg);box-shadow:0 0 0 3px rgba(230,0,126,.12)}
+.sc-select:disabled{opacity:.4;cursor:not-allowed}
+
+/* ── Radio pills verticales ── */
+.sc-radio-group{display:flex;flex-direction:column;gap:5px}
+.sc-radio-opt{
+  display:flex;align-items:center;gap:8px;
+  padding:7px 10px;border:1.5px solid var(--border);border-radius:8px;
+  font-size:.82rem;font-weight:600;color:var(--tx-2);
+  cursor:pointer;transition:all .18s;background:var(--input-bg);
+  white-space:normal;
+}
+.sc-radio-opt:hover{border-color:var(--li);color:var(--tx)}
+.sc-radio-opt:has(input:checked){
+  background:var(--m);color:#fff;border-color:var(--m);
+  box-shadow:0 2px 8px rgba(102,36,131,.25);
+}
+.sc-radio-opt input{display:none}
+.sc-radio-dot{
+  width:13px;height:13px;border-radius:50%;
+  border:2px solid currentColor;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+}
+.sc-radio-opt:has(input:checked) .sc-radio-dot::after{
+  content:'';width:5px;height:5px;border-radius:50%;background:#fff;display:block;
+}
+
+/* ── Divisor ── */
+.sc-divider{height:1px;background:var(--border);margin:0 -16px}
+
+/* ── Botón limpiar ── */
+.sc-btn-clear{
+  display:flex;align-items:center;justify-content:center;gap:7px;
+  padding:9px 14px;background:transparent;
+  border:1.5px solid var(--border);border-radius:8px;
+  color:var(--tx-muted);font-size:.8rem;font-weight:700;
+  cursor:pointer;transition:all .2s;width:100%;
+}
+.sc-btn-clear:hover{border-color:var(--mg);color:var(--mg);background:rgba(230,0,126,.06)}
+
+/* ── Badge filtro activo ── */
+.sc-active-badge{
+  display:inline-flex;align-items:center;gap:3px;
+  padding:1px 7px;border-radius:10px;
+  background:var(--mg);color:#fff;
+  font-size:.62rem;font-weight:800;margin-left:auto;
+}
+
+/* ── Panel principal ── */
+.sc-main{flex:1;min-width:0;display:flex;flex-direction:column;overflow-y:auto;overflow-x:hidden;min-height:0}
+
+/* ── Topbar ── */
+.sc-topbar{
+  display:flex;align-items:center;
+  justify-content:space-between;
+  gap:16px;
+  padding:14px 20px;background:var(--surface);
+  border-bottom:2px solid var(--border);
+  position:sticky;top:0;z-index:10;flex-wrap:wrap;
+  min-height:56px;
+  flex-shrink:0;
+}
+.sc-topbar-title{
+  font-size:.9rem;font-weight:800;color:var(--tx);
+  display:flex;align-items:center;gap:8px;
+  flex:1;min-width:180px;
+}
+.sc-topbar-title span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sc-topbar-meta{
+  font-size:.78rem;color:var(--tx-muted);
+  display:flex;align-items:center;gap:14px;
+  flex-wrap:wrap;justify-content:flex-end;
+  flex-shrink:0;
+}
+.sc-topbar-meta strong{color:var(--tx);font-size:.85rem;font-weight:700}
+
+/* ── Tabs ── */
+.sc-tabs{
+  display:flex;gap:0;border-bottom:2px solid var(--border);
+  background:var(--surface);padding:0 18px;overflow-x:auto;
+  flex-shrink:0;
+}
+.sc-tab{
+  padding:9px 16px;border:none;background:transparent;
+  color:var(--tx-muted);font-size:.82rem;font-weight:700;
+  cursor:pointer;border-bottom:3px solid transparent;
+  margin-bottom:-2px;transition:.2s;
+  display:flex;align-items:center;gap:6px;white-space:nowrap;flex-shrink:0;
+}
+.sc-tab:hover{color:var(--tx);background:var(--surface-2)}
+.sc-tab.activo{color:var(--mg);border-bottom-color:var(--mg)}
+.sc-tab-content{display:none}
+.sc-tab-content.activo{display:block}
+
+/* ── Área de contenido (ahora el scroll va en sc-main) ── */
+.sc-content{flex:1;min-height:0;padding:18px 18px 48px}
+
+/* ── KPI row ── */
+.sc-kpi-row{
+  display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));
+  gap:12px;margin-bottom:22px;
+  flex-shrink:0;
+}
+.sc-kpi{
+  background:var(--surface);border-radius:10px;
+  padding:14px 16px 14px;box-shadow:var(--shadow-sm);
+  border-left:4px solid var(--mg);
+  min-height:110px;
+  display:flex;flex-direction:column;justify-content:flex-start;
+  gap:5px;
+  flex-shrink:0;
+}
+.sc-kpi-val{
+  font-size:1.35rem;font-weight:900;color:var(--m);line-height:1.1;
+  display:block;word-break:break-word;
+}
+.sc-kpi-lbl{
+  font-size:.7rem;color:var(--tx-muted);
+  text-transform:uppercase;letter-spacing:.5px;font-weight:700;
+  line-height:1.4;
+}
+.sc-kpi-sub{
+  font-size:.68rem;color:var(--li);font-weight:700;
+  line-height:1.3;word-break:break-word;
+}
+
+/* ── Header geográfico ── */
+.sc-geo-header{
+  background:var(--surface);border-radius:10px;
+  padding:13px 16px;margin-bottom:14px;
+  box-shadow:var(--shadow-sm);border-left:4px solid var(--mg);
+  display:flex;align-items:center;justify-content:space-between;
+  flex-wrap:wrap;gap:8px;
+}
+.sc-geo-title{font-size:.95rem;font-weight:800;color:var(--m)}
+.sc-geo-meta{font-size:.76rem;color:var(--tx-muted);display:flex;gap:12px;flex-wrap:wrap}
+.sc-geo-meta span{display:flex;align-items:center;gap:4px}
+
+/* ── Grid partidos ── */
+.sc-partido-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(165px,1fr));
+  gap:11px;margin-bottom:20px;
+}
+.sc-partido-card{
+  background:var(--surface);border-radius:10px;
+  box-shadow:var(--shadow-sm);padding:13px 11px;
+  display:flex;flex-direction:column;gap:7px;
+  border-top:4px solid var(--border);
+  transition:transform .18s,box-shadow .18s;
+  position:relative;overflow:hidden;
+}
+.sc-partido-card:hover{transform:translateY(-2px);box-shadow:var(--shadow-md)}
+.sc-partido-card.ganador::after{
+  content:'GANADOR';position:absolute;top:7px;right:-20px;
+  background:var(--mg);color:#fff;font-size:.52rem;font-weight:900;
+  padding:2px 24px;transform:rotate(45deg);letter-spacing:.5px;
+}
+.sc-partido-logo{height:30px;width:auto;object-fit:contain;align-self:center}
+.sc-partido-nombre{font-size:.68rem;font-weight:700;color:var(--tx-muted);
+  text-align:center;text-transform:uppercase;letter-spacing:.3px}
+.sc-partido-votos{font-size:1.55rem;font-weight:900;color:var(--m);
+  text-align:center;line-height:1;margin:4px 0}
+.sc-partido-pct{font-size:.78rem;font-weight:700;text-align:center}
+.sc-partido-bar-bg{background:var(--surface-3);border-radius:4px;
+  height:5px;overflow:hidden;margin-top:2px}
+.sc-partido-bar{height:100%;border-radius:4px;transition:width .6s ease}
+
+/* ── Grid bloques ── */
+.sc-bloque-grid{
+  display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));
+  gap:12px;margin-bottom:20px;
+}
+.sc-bloque-card{
+  background:var(--surface);border-radius:12px;
+  box-shadow:var(--shadow-sm);padding:16px;
+  border-left:5px solid var(--border);
+}
+.sc-bloque-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.sc-bloque-badge{padding:3px 9px;border-radius:12px;font-size:.68rem;font-weight:900;color:#fff}
+.sc-bloque-logos{display:flex;gap:3px;align-items:center}
+.sc-bloque-logos img{height:19px;width:auto;object-fit:contain}
+.sc-bloque-votos{font-size:1.6rem;font-weight:900;line-height:1;margin-bottom:3px}
+.sc-bloque-pct{font-size:.82rem;font-weight:700;margin-bottom:7px}
+.sc-bloque-bar-bg{background:var(--surface-3);border-radius:6px;height:8px;overflow:hidden}
+.sc-bloque-bar{height:100%;border-radius:6px;transition:width .7s ease}
+.sc-bloque-mun{font-size:.7rem;color:var(--tx-muted);margin-top:6px}
+
+/* ── Section title ── */
+.sc-section-title{
+  font-size:.7rem;font-weight:800;color:var(--tx-muted);
+  text-transform:uppercase;letter-spacing:.8px;
+  margin:16px 0 10px;display:flex;align-items:center;gap:8px;
+}
+.sc-section-title::after{content:'';flex:1;height:1px;background:var(--border)}
+
+/* ── Chart card ── */
+.sc-chart-card{
+  background:var(--surface);border-radius:10px;
+  padding:16px;box-shadow:var(--shadow-sm);
+  width:100%;box-sizing:border-box;
+}
+.sc-chart-card canvas{width:100%!important;max-width:100%}
+
+/* ── Overlay móvil ── */
+.sc-overlay{
+  display:none;position:fixed;inset:0;
+  background:rgba(0,0,0,.52);z-index:199;
+  backdrop-filter:blur(2px);
+}
+.sc-overlay.visible{display:block}
+
+/* ── Responsive móvil ── */
+@media(max-width:768px){
+  .sc-sidebar{
+    position:fixed;top:52px;left:0;
+    height:calc(100vh - 52px);z-index:300;
+    transform:translateX(0);box-shadow:var(--shadow-lg);
+    width:272px!important;min-width:272px!important;
+  }
+  .sc-sidebar.collapsed{transform:translateX(-100%)}
+  .sc-toggle-float{display:none!important}
+  .sc-kpi-row{grid-template-columns:repeat(2,1fr)}
+  .sc-partido-grid{grid-template-columns:repeat(auto-fill,minmax(140px,1fr))}
+  .sc-bloque-grid{grid-template-columns:1fr}
+  .sc-tab{padding:8px 11px;font-size:.76rem}
+  .sc-content{padding:12px}
+}
+
+/* ── Dark mode ── */
+[data-theme="dark"] .sc-sidebar{background:var(--surface);border-right-color:var(--border)}
+[data-theme="dark"] .sc-sidebar-hdr{background:var(--surface);border-bottom-color:var(--border)}
+[data-theme="dark"] .sc-topbar{background:var(--surface);border-bottom-color:var(--border)}
+[data-theme="dark"] .sc-tabs{background:var(--surface);border-bottom-color:var(--border)}
+[data-theme="dark"] .sc-toggle{background:var(--surface-3);color:var(--tx-muted)}
+[data-theme="dark"] .sc-toggle:hover{background:var(--border-2);color:var(--mg)}
+[data-theme="dark"] .sc-toggle-float{background:var(--m)}
+[data-theme="dark"] .sc-radio-opt{background:var(--surface-2);color:var(--tx-2);border-color:var(--border)}
+[data-theme="dark"] .sc-radio-opt:has(input:checked){background:var(--m);color:#fff;border-color:var(--m)}
+[data-theme="dark"] .sc-select{
+  background:var(--input-bg);color:var(--tx);border-color:var(--border);color-scheme:dark;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%239B8FCC' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 10px center;
+}
+[data-theme="dark"] .sc-select option{background:var(--surface-2);color:var(--tx)}
+[data-theme="dark"] .sc-btn-clear{border-color:var(--border);color:var(--tx-muted)}
+[data-theme="dark"] .sc-btn-clear:hover{border-color:var(--mg);color:var(--mg)}
+[data-theme="dark"] .sc-kpi,[data-theme="dark"] .sc-partido-card,
+[data-theme="dark"] .sc-bloque-card,[data-theme="dark"] .sc-geo-header,
+[data-theme="dark"] .sc-chart-card{background:var(--surface);box-shadow:var(--shadow-md)}
+[data-theme="dark"] .sc-kpi-val{color:var(--tx)}
+[data-theme="dark"] .sc-partido-votos{color:var(--tx)}
+[data-theme="dark"] .sc-geo-title{color:var(--li)}
+[data-theme="dark"] .sc-tab.activo{color:var(--mg);border-bottom-color:var(--mg)}
+</style>
+<!-- Anti-FOUC: aplica el tema antes del primer render -->
+<script>
+(function(){
+  var s=localStorage.getItem('darkMode');
+  var p=window.matchMedia&&window.matchMedia('(prefers-color-scheme:dark)').matches;
+  var t=s?s:(p?'dark':'light');
+  document.documentElement.setAttribute('data-theme',t);
+  document.documentElement.style.colorScheme=t;
+  if(t==='dark') document.documentElement.style.background='#121212';
+})();
+</script>
+</head>
+<body>
+<div id="wm-piloto"></div>
+
+<!-- ══════════════════════════════════════════════════
+     NAVBAR PRINCIPAL FIJA
+══════════════════════════════════════════════════ -->
+<nav id="navbar">
+  <div class="nav-brand">
+    <i class="fas fa-landmark"></i> IEEM · PREP 2024
+  </div>
+  <div class="nav-links">
+    <button class="nav-btn activo" onclick="irA('inicio')">🏠 Inicio</button>
+    <button class="nav-btn" onclick="irA('resultados')">📊 Análisis</button>
+    <button class="nav-btn" onclick="irA('dashboards')">🗳️ Sistema de Resultados</button>
+    <button class="nav-btn" onclick="irA('consulta')">🔍 Sistema de Consulta</button>
+    <span id="nav-fecha" style="color:rgba(255,255,255,.75);font-size:.76rem;white-space:nowrap;padding:0 8px;display:flex;align-items:center;gap:5px"><i class="fas fa-calendar-alt" style="opacity:.7"></i><span id="nav-fecha-txt"></span></span>
+    <button id="btn-dark" onclick="toggleDark()" title="Cambiar modo claro/oscuro">
+      <i class="fas fa-moon" id="icon-dark"></i><span id="lbl-dark">Oscuro</span>
+    </button>
+  </div>
+</nav>
+
+<div class="contenido">
+
+<!-- ══════════════════════════════════════════════════
+     VISTA 0: BIENVENIDA / LANDING PAGE
+══════════════════════════════════════════════════ -->
+<div id="vista-inicio" class="vista activa">
+
+  <!-- Hero -->
+  <div class="hero">
+    <div class="hero-logo"><i class="fas fa-landmark"></i><span>IEEM</span></div>
+    <h1>INSTITUTO ELECTORAL DEL ESTADO DE MÉXICO</h1>
+    <h2>SISTEMA INTEGRAL DE CONSULTA Y ANÁLISIS<br>PREP 2024</h2>
+    <p>Programa de Resultados Electorales Preliminares · Estado de México · 2 de junio de 2024</p>
+    <div class="hero-badges">
+      <span class="hero-badge"><i class="fas fa-gavel"></i> 45 Distritos</span>
+      <span class="hero-badge"><i class="fas fa-city"></i> 125 Municipios</span>
+      <span class="hero-badge"><i class="fas fa-check-circle"></i> 95.4% Actas Aytos</span>
+      <span class="hero-badge"><i class="fas fa-check-circle"></i> 94.7% Actas Diput.</span>
+    </div>
+  </div>
+
+  <!-- Cards de acceso -->
+  <div class="access-section">
+    <div class="access-cards">
+      <div class="access-card" onclick="irA('dashboards')">
+        <i class="fas fa-vote-yea" style="color:var(--mg)"></i>
+        <h3>SISTEMA DE RESULTADOS</h3>
+        <p>Consulta el dashboard PREP 2024, análisis avanzado y comparativo entre diputaciones y ayuntamientos.</p>
+        <button class="access-btn" style="background:var(--mg)">ENTRAR →</button>
+      </div>
+      <div class="access-card" onclick="irA('consulta')">
+        <i class="fas fa-search" style="color:var(--m)"></i>
+        <h3>SISTEMA DE CONSULTA</h3>
+        <p>Filtra y exporta datos por bloque, partido, municipio o distrito de forma personalizada.</p>
+        <button class="access-btn" style="background:var(--m)">ENTRAR →</button>
+      </div>
+    </div>
+
+    <!-- Totales globales -->
+    <h3 style="color:var(--m);font-size:1rem;margin-bottom:16px;font-weight:700">
+      <i class="fas fa-chart-bar" style="color:var(--mg)"></i> Resultados Globales PREP 2024
+    </h3>
+    <div class="totales-grid">
+      <div class="total-card" style="border-top-color:var(--t4T)">
+        <div class="logos-bloque" style="justify-content:center;margin-bottom:4px"><img src="img/PVEM.svg" class="logo-partido" alt="PVEM"><img src="img/PT.svg" class="logo-partido" alt="PT"><img src="img/MORENA.svg" class="logo-partido" alt="MORENA"></div>
+        <div class="total-val" style="color:var(--t4T)">4,083,467</div>
+        <div class="total-lbl"><span class="badge b4T">4T</span> Ayuntamientos</div>
+        <div style="font-size:.7rem;color:var(--tx-muted);margin-top:2px">88 municipios</div>
+      </div>
+      <div class="total-card" style="border-top-color:var(--tVA)">
+        <div class="logos-bloque" style="justify-content:center;margin-bottom:4px"><img src="img/PAN.svg" class="logo-partido" alt="PAN"><img src="img/PRI.svg" class="logo-partido" alt="PRI"><img src="img/PRD.svg" class="logo-partido" alt="PRD"><img src="img/NAEM.svg" class="logo-partido" alt="NAEM"></div>
+        <div class="total-val" style="color:var(--tVA)">2,017,900</div>
+        <div class="total-lbl"><span class="badge bVA">VA</span> Ayuntamientos</div>
+        <div style="font-size:.7rem;color:var(--tx-muted);margin-top:2px">29 municipios</div>
+      </div>
+      <div class="total-card" style="border-top-color:var(--tMC)">
+        <div class="logos-bloque" style="justify-content:center;margin-bottom:4px"><img src="img/MC.svg" class="logo-partido" alt="MC"></div>
+        <div class="total-val" style="color:var(--tMC)">788,639</div>
+        <div class="total-lbl"><span class="badge bMC">MC</span> Ayuntamientos</div>
+        <div style="font-size:.7rem;color:var(--tx-muted);margin-top:2px">8 municipios</div>
+      </div>
+      <div class="total-card" style="border-top-color:var(--t4T)">
+        <div class="logos-bloque" style="justify-content:center;margin-bottom:4px"><img src="img/PVEM.svg" class="logo-partido" alt="PVEM"><img src="img/PT.svg" class="logo-partido" alt="PT"><img src="img/MORENA.svg" class="logo-partido" alt="MORENA"></div>
+        <div class="total-val" style="color:var(--t4T)">4,248,971</div>
+        <div class="total-lbl"><span class="badge b4T">4T</span> Diputaciones</div>
+        <div style="font-size:.7rem;color:var(--tx-muted);margin-top:2px">36 distritos</div>
+      </div>
+      <div class="total-card" style="border-top-color:var(--tVA)">
+        <div class="logos-bloque" style="justify-content:center;margin-bottom:4px"><img src="img/PAN.svg" class="logo-partido" alt="PAN"><img src="img/PRI.svg" class="logo-partido" alt="PRI"><img src="img/PRD.svg" class="logo-partido" alt="PRD"><img src="img/NAEM.svg" class="logo-partido" alt="NAEM"></div>
+        <div class="total-val" style="color:var(--tVA)">2,630,753</div>
+        <div class="total-lbl"><span class="badge bVA">VA</span> Diputaciones</div>
+        <div style="font-size:.7rem;color:var(--tx-muted);margin-top:2px">9 distritos</div>
+      </div>
+      <div class="total-card" style="border-top-color:var(--tMC)">
+        <div class="logos-bloque" style="justify-content:center;margin-bottom:4px"><img src="img/MC.svg" class="logo-partido" alt="MC"></div>
+        <div class="total-val" style="color:var(--tMC)">802,955</div>
+        <div class="total-lbl"><span class="badge bMC">MC</span> Diputaciones</div>
+        <div style="font-size:.7rem;color:var(--tx-muted);margin-top:2px">0 distritos</div>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <p><strong>Instituto Electoral del Estado de México — IEEM</strong></p>
+    <p>PREP 2024 — Datos preliminares, sujetos a verificación oficial</p>
+    <p>Elección del 2 de junio de 2024 — Estado de México</p>
+  </footer>
+</div>
+
+<!-- ══════════════════════════════════════════════════
+     VISTA 1: SISTEMA DE RESULTADOS
+══════════════════════════════════════════════════ -->
+<div id="vista-resultados" class="vista">
+
+  <!-- Sub-navbar -->
+  <div id="subnav">
+    <div class="subnav-inner">
+      <a href="#r1" class="sub-link activo" onclick="activarSublink(this)">📊 Resumen</a>
+      <a href="#r2" class="sub-link" onclick="activarSublink(this)">⚖️ Diputaciones</a>
+      <a href="#r3" class="sub-link" onclick="activarSublink(this)">🏛️ Ayuntamientos</a>
+      <a href="#r4" class="sub-link" onclick="activarSublink(this)">🔄 Comparativa</a>
+      <a href="#r5" class="sub-link" onclick="activarSublink(this)">📋 Avance PREP</a>
+    </div>
+  </div>
+
+  <!-- R1: RESUMEN EJECUTIVO -->
+  <div class="sec" id="r1">
+    <div class="sec-title"><i class="fas fa-chart-pie"></i> Resumen Ejecutivo — PREP 2024</div>
+
+    <div class="info-box">
+      <i class="fas fa-info-circle" style="color:var(--mg)"></i>
+      <strong>Nota PREP:</strong> Los votos mostrados corresponden a los asentados en las Actas PREP hasta el corte del 03/06/2024 20:00 hrs (UTC-6). Los porcentajes se calculan con todos los decimales aunque se presenten 4 dígitos. Los votos de coalición se consolidan según la modalidad detectada por unidad geográfica.
+    </div>
+
+    <!-- Barras de progreso -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px">
+      <div class="prog-wrap">
+        <div class="prog-lbl"><span>Ayuntamientos — Actas capturadas</span><span>20,063 / 21,030</span></div>
+        <div class="prog-bg"><div class="prog-bar" style="width:95.4%">95.4%</div></div>
+      </div>
+      <div class="prog-wrap">
+        <div class="prog-lbl"><span>Diputaciones — Actas capturadas</span><span>19,966 / 21,091</span></div>
+        <div class="prog-bg"><div class="prog-bar" style="width:94.7%">94.7%</div></div>
+      </div>
+    </div>
+
+    <!-- KPIs generales -->
+    <div class="kgrid">
+      <div class="kcard"><div class="kval">7,667,913</div><div class="klbl">Votos válidos Aytos</div><div class="ksub">+ 310,987 nulos = 7,978,900 total</div></div>
+      <div class="kcard"><div class="kval">7,676,002</div><div class="klbl">Votos válidos DIP</div><div class="ksub">+ 274,379 nulos = 7,950,381 total</div></div>
+      <div class="kcard"><div class="kval">64.13%</div><div class="klbl">Participación Aytos</div><div class="ksub">Lista nominal: 12,440,818</div></div>
+      <div class="kcard"><div class="kval">64.35%</div><div class="klbl">Participación DIP</div><div class="ksub">Lista nominal: 12,354,078</div></div>
+      <div class="kcard"><div class="kval">125</div><div class="klbl">Municipios con resultado</div><div class="ksub">Ayuntamientos</div></div>
+      <div class="kcard"><div class="kval">45</div><div class="klbl">Distritos con resultado</div><div class="ksub">Diputaciones Locales</div></div>
+    </div>
+
+    <!-- KPIs por bloque -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
+      <div>
+        <div class="sub-title"><i class="fas fa-city"></i> Ayuntamientos — por Bloque</div>
+        <div class="kgrid" style="grid-template-columns:repeat(3,1fr)">
+          <div class="kcard k4T"><div class="logos-bloque" style="margin-bottom:4px"><img src="img/PVEM.svg" class="logo-partido" alt="PVEM"><img src="img/PT.svg" class="logo-partido" alt="PT"><img src="img/MORENA.svg" class="logo-partido" alt="MORENA"></div><div class="kval" style="color:var(--t4T)">4,083,467</div><div class="klbl">Votos 4T</div><div class="ksub">88 municipios</div></div>
+          <div class="kcard kVA"><div class="logos-bloque" style="margin-bottom:4px"><img src="img/PAN.svg" class="logo-partido" alt="PAN"><img src="img/PRI.svg" class="logo-partido" alt="PRI"><img src="img/PRD.svg" class="logo-partido" alt="PRD"><img src="img/NAEM.svg" class="logo-partido" alt="NAEM"></div><div class="kval" style="color:var(--tVA)">2,017,900</div><div class="klbl">Votos VA</div><div class="ksub">29 municipios</div></div>
+          <div class="kcard kMC"><div class="logos-bloque" style="margin-bottom:4px"><img src="img/MC.svg" class="logo-partido" alt="MC"></div><div class="kval" style="color:var(--tMC)">788,639</div><div class="klbl">Votos MC</div><div class="ksub">8 municipios</div></div>
+        </div>
+      </div>
+      <div>
+        <div class="sub-title"><i class="fas fa-gavel"></i> Diputaciones — por Bloque</div>
+        <div class="kgrid" style="grid-template-columns:repeat(3,1fr)">
+          <div class="kcard k4T"><div class="logos-bloque" style="margin-bottom:4px"><img src="img/PVEM.svg" class="logo-partido" alt="PVEM"><img src="img/PT.svg" class="logo-partido" alt="PT"><img src="img/MORENA.svg" class="logo-partido" alt="MORENA"></div><div class="kval" style="color:var(--t4T)">4,248,971</div><div class="klbl">Votos 4T</div><div class="ksub">36 distritos</div></div>
+          <div class="kcard kVA"><div class="logos-bloque" style="margin-bottom:4px"><img src="img/PAN.svg" class="logo-partido" alt="PAN"><img src="img/PRI.svg" class="logo-partido" alt="PRI"><img src="img/PRD.svg" class="logo-partido" alt="PRD"><img src="img/NAEM.svg" class="logo-partido" alt="NAEM"></div><div class="kval" style="color:var(--tVA)">2,630,753</div><div class="klbl">Votos VA</div><div class="ksub">9 distritos</div></div>
+          <div class="kcard kMC"><div class="logos-bloque" style="margin-bottom:4px"><img src="img/MC.svg" class="logo-partido" alt="MC"></div><div class="kval" style="color:var(--tMC)">802,955</div><div class="klbl">Votos MC</div><div class="ksub">0 distritos</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- R2: DIPUTACIONES -->
+  <div class="sec" id="r2">
+    <div class="sec-title"><i class="fas fa-gavel"></i> Diputaciones Locales — 45 Distritos</div>
+
+    <div class="sub-title"><i class="fas fa-chart-pie"></i> R2.1 Distribución por Bloque</div>
+    <div class="cgrid">
+      <div class="ccard"><h3>Votos por Bloque (Pastel)</h3><div class="chart-wrap" style="height:260px;width:100%"><canvas id="dipPie"></canvas></div></div>
+      <div class="ccard"><h3>Votos por Bloque (Barras)</h3><div class="chart-wrap" style="height:260px;width:100%"><canvas id="dipBar"></canvas></div></div>
+    </div>iv>
+    <div class="tcard">
+      <table id="tblDipBloque" class="display" style="width:100%">
+        <thead><tr><th>Bloque</th><th>Partidos</th><th>Votos</th><th>%</th><th>Distritos Ganados</th><th>Modalidad principal</th></tr></thead>
+        <tbody>
+          <tr><td><span class="badge b4T">4T</span></td><td><div class="logos-bloque"><img src="img/PVEM.svg" class="logo-partido" alt="PVEM"><img src="img/PT.svg" class="logo-partido" alt="PT"><img src="img/MORENA.svg" class="logo-partido" alt="MORENA"></div>PVEM · PT · MORENA</td><td>4,248,971</td><td>53.4%</td><td>36</td><td><span class="badge-mod bm-coal">Coalición / CC</span></td></tr>
+          <tr><td><span class="badge bVA">VA</span></td><td><div class="logos-bloque"><img src="img/PAN.svg" class="logo-partido" alt="PAN"><img src="img/PRI.svg" class="logo-partido" alt="PRI"><img src="img/PRD.svg" class="logo-partido" alt="PRD"><img src="img/NAEM.svg" class="logo-partido" alt="NAEM"></div>PAN · PRI · PRD · NAEM</td><td>2,630,753</td><td>33.1%</td><td>9</td><td><span class="badge-mod bm-coal">Coalición / CC</span></td></tr>
+          <tr><td><span class="badge bMC">MC</span></td><td><div class="logos-bloque"><img src="img/MC.svg" class="logo-partido" alt="MC"></div>Movimiento Ciudadano</td><td>802,955</td><td>10.1%</td><td>0</td><td><span class="badge-mod bm-ind">Individual</span></td></tr>
+          <tr><td>Nulos</td><td>—</td><td>274,379</td><td>3.4%</td><td>—</td><td>—</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="sub-title"><i class="fas fa-chart-bar"></i> R2.2 Distribución por Partido Individual</div>
+    <div class="ccard" style="width:100%;box-sizing:border-box"><h3>Votos por Partido — Diputaciones</h3><div class="chart-wrap" style="height:320px;width:100%;position:relative"><canvas id="dipPartBar"></canvas></div></div>
+
+    <div class="sub-title"><i class="fas fa-map"></i> R2.3 Mapa de Distritos</div>
+    <div class="info-box">
+      <i class="fas fa-info-circle" style="color:var(--mg)"></i>
+      Color por bloque ganador: <span style="color:var(--t4T);font-weight:700">■ 4T</span> &nbsp;
+      <span style="color:var(--tVA);font-weight:700">■ VA</span> &nbsp;
+      <span style="color:var(--tMC);font-weight:700">■ MC</span>.
+      Los distritos <strong>Ecatepec de Morelos</strong> (006, 008, 011) y <strong>CD. Nezahualcóyotl</strong> (020, 023, 024) presentan candidatura común (CC_PVEM_PT_MORENA) como modalidad 4T.
+    </div>
+    <div id="mapDIP" style="height:500px;width:100%;border-radius:10px;box-shadow:var(--shadow-md);border:2px solid var(--border);margin-bottom:20px;background:var(--surface-2)"></div>
+
+    <div class="sub-title"><i class="fas fa-table"></i> R2.4 Tabla de Resultados por Distrito</div>
+    <div class="tcard">
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:10px;align-items:center">
+        <label style="font-size:.8rem;font-weight:600;color:var(--m)">Ganador:</label>
+        <select id="filtDipG" style="border:1px solid var(--li);border-radius:5px;padding:4px 10px;font-size:.8rem" onchange="rebuildDipTable()">
+          <option value="">Todos</option><option>4T</option><option>VA</option><option>MC</option>
+        </select>
+        <label style="font-size:.8rem;font-weight:600;color:var(--m)">Modalidad VA:</label>
+        <select id="filtDipMVA" style="border:1px solid var(--li);border-radius:5px;padding:4px 10px;font-size:.8rem" onchange="rebuildDipTable()">
+          <option value="">Todas</option><option value="coalicion">Coalición</option>
+          <option value="cc">Cand. Común</option><option value="individual">Individual</option>
+          <option value="conflicto">⚠️ Conflicto</option>
+        </select>
+      </div>
+      <table id="tblDip" class="display" style="width:100%">
+        <thead><tr><th>Dist.</th><th>Nombre</th><th>Mod.VA</th><th>Mod.4T</th><th>Ganador</th>
+          <th>Votos 4T</th><th>Votos VA</th><th>Votos MC</th><th>Nulos</th>
+          <th>Total</th><th>Part.%</th><th>Ventaja%</th><th>⚠️</th></tr></thead>
+        <tbody id="tbDip"></tbody>
+      </table>
+    </div>
+
+    <div class="sub-title"><i class="fas fa-bullseye"></i> R2.5 Competitividad</div>
+    <div class="cgrid">
+      <div class="ccard"><h3>Top 5 Distritos Más Reñidos (ventaja &lt;5%)</h3><div id="dipCompetidos"></div></div>
+      <div class="ccard"><h3>Dispersión: Participación vs Ventaja</h3><div class="chart-wrap" style="height:260px"><canvas id="dipScatter"></canvas></div></div>
+    </div>
+  </div>
+
+  <!-- R3: AYUNTAMIENTOS -->
+  <div class="sec" id="r3">
+    <div class="sec-title"><i class="fas fa-city"></i> Ayuntamientos — 125 Municipios</div>
+
+    <div class="sub-title"><i class="fas fa-chart-pie"></i> R3.1 Distribución por Bloque</div>
+    <div class="cgrid">
+      <div class="ccard"><h3>Votos por Bloque (Pastel)</h3><div class="chart-wrap" style="height:260px;width:100%"><canvas id="ayuPie"></canvas></div></div>
+      <div class="ccard"><h3>Votos por Bloque (Barras)</h3><div class="chart-wrap" style="height:260px;width:100%"><canvas id="ayuBar"></canvas></div></div>
+    </div>
+    <div class="tcard">
+      <table id="tblAyuBloque" class="display" style="width:100%">
+        <thead><tr><th>Bloque</th><th>Partidos</th><th>Votos</th><th>%</th><th>Municipios Ganados</th></tr></thead>
+        <tbody>
+          <tr><td><span class="badge b4T">4T</span></td><td><div class="logos-bloque"><img src="img/PVEM.svg" class="logo-partido" alt="PVEM"><img src="img/PT.svg" class="logo-partido" alt="PT"><img src="img/MORENA.svg" class="logo-partido" alt="MORENA"></div>PVEM · PT · MORENA</td><td>4,083,467</td><td>56.7%</td><td>88</td></tr>
+          <tr><td><span class="badge bVA">VA</span></td><td><div class="logos-bloque"><img src="img/PAN.svg" class="logo-partido" alt="PAN"><img src="img/PRI.svg" class="logo-partido" alt="PRI"><img src="img/PRD.svg" class="logo-partido" alt="PRD"><img src="img/NAEM.svg" class="logo-partido" alt="NAEM"></div>PAN · PRI · PRD · NAEM</td><td>2,017,900</td><td>28.0%</td><td>29</td></tr>
+          <tr><td><span class="badge bMC">MC</span></td><td><div class="logos-bloque"><img src="img/MC.svg" class="logo-partido" alt="MC"></div>Movimiento Ciudadano</td><td>788,639</td><td>11.0%</td><td>8</td></tr>
+          <tr><td>Nulos</td><td>—</td><td>310,987</td><td>4.3%</td><td>—</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="sub-title"><i class="fas fa-chart-bar"></i> R3.2 Distribución por Partido Individual</div>
+    <div class="ccard" style="width:100%;box-sizing:border-box"><h3>Votos por Partido — Ayuntamientos</h3><div class="chart-wrap" style="height:320px;width:100%;position:relative"><canvas id="ayuPartBar"></canvas></div></div>
+
+    <div class="sub-title"><i class="fas fa-map"></i> R3.3 Mapa Municipal</div>
+    <div id="mapAYU" style="height:500px;width:100%;border-radius:10px;box-shadow:var(--shadow-md);border:2px solid var(--border);margin-bottom:20px;background:var(--surface-2)"></div>
+
+    <div class="sub-title"><i class="fas fa-table"></i> R3.4 Tabla de Resultados por Municipio</div>
+    <div class="tcard">
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:10px;align-items:center">
+        <label style="font-size:.8rem;font-weight:600;color:var(--m)">Ganador:</label>
+        <select id="filtAyuG" style="border:1px solid var(--li);border-radius:5px;padding:4px 10px;font-size:.8rem" onchange="rebuildAyuTable()">
+          <option value="">Todos</option><option>4T</option><option>VA</option><option>MC</option>
+        </select>
+        <label style="font-size:.8rem;font-weight:600;color:var(--m)">Modalidad VA:</label>
+        <select id="filtAyuMVA" style="border:1px solid var(--li);border-radius:5px;padding:4px 10px;font-size:.8rem" onchange="rebuildAyuTable()">
+          <option value="">Todas</option><option value="coalicion">Coalición</option><option value="individual">Individual</option>
+        </select>
+      </div>
+      <table id="tblAyu" class="display" style="width:100%">
+        <thead><tr><th>ID</th><th>Municipio</th><th>Mod.VA</th><th>Mod.4T</th><th>Ganador</th>
+          <th>Votos 4T</th><th>Votos VA</th><th>Votos MC</th><th>Nulos</th>
+          <th>Total</th><th>Lista Nom.</th><th>Part.%</th><th>Ventaja%</th></tr></thead>
+        <tbody id="tbAyu"></tbody>
+      </table>
+    </div>
+
+    <div class="sub-title"><i class="fas fa-users"></i> R3.5 Participación Ciudadana</div>
+    <div class="cgrid">
+      <div class="ccard"><h3>Top 10 Mayor Participación</h3><div class="chart-wrap" style="height:280px"><canvas id="ayuPartAlta"></canvas></div></div>
+      <div class="ccard"><h3>Top 10 Menor Participación</h3><div class="chart-wrap" style="height:280px"><canvas id="ayuPartBaja"></canvas></div></div>
+    </div>
+
+    <div class="sub-title"><i class="fas fa-trophy"></i> R3.6 Competitividad Municipal</div>
+    <div class="cgrid">
+      <div class="ccard"><h3>Dispersión: Participación vs Ventaja</h3><div style="height:280px"><canvas id="ayuScatter"></canvas></div></div>
+      <div class="ccard"><h3>Municipios Muy Competidos (ventaja &lt;5%)</h3><div id="ayuCompetidos" style="max-height:280px;overflow-y:auto"></div></div>
+    </div>
+  </div>
+
+  <!-- R4: COMPARATIVA -->
+  <div class="sec" id="r4">
+    <div class="sec-title"><i class="fas fa-balance-scale"></i> Comparativa entre Elecciones</div>
+    <div class="kgrid" style="grid-template-columns:repeat(3,1fr);margin-bottom:20px">
+      <div class="kcard"><div class="kval" id="kSplit">—</div><div class="klbl">Municipios con voto diferenciado</div><div class="ksub">Split ticket</div></div>
+      <div class="kcard"><div class="kval" id="kCoinc">—</div><div class="klbl">Municipios consistentes</div><div class="ksub">Mismo bloque ganador</div></div>
+      <div class="kcard"><div class="kval">125</div><div class="klbl">Total municipios analizados</div></div>
+    </div>
+    <div class="cgrid">
+      <div class="ccard"><h3>Bloques: Ambas / Solo AYU / Solo DIP</h3><div style="height:260px"><canvas id="compBar"></canvas></div></div>
+      <div class="ccard"><h3>Consistencia de Voto</h3><div style="height:260px"><canvas id="compDona"></canvas></div></div>
+    </div>
+    <div class="tcard">
+      <table id="tblComp" class="display" style="width:100%">
+        <thead><tr><th>ID</th><th>Municipio</th><th>Ganador AYU</th><th>Distrito</th><th>Ganador DIP</th><th>¿Coinciden?</th></tr></thead>
+        <tbody id="tbComp"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- R5: AVANCE PREP -->
+  <div class="sec" id="r5">
+    <div class="sec-title"><i class="fas fa-tasks"></i> Avance del PREP</div>
+    <div class="cgrid">
+      <div class="ccard"><h3>Ayuntamientos — 95.4%</h3><div style="height:220px"><canvas id="gaugeAyu"></canvas></div></div>
+      <div class="ccard"><h3>Diputaciones — 94.7%</h3><div style="height:220px"><canvas id="gaugeDip"></canvas></div></div>
+    </div>
+    <div class="tcard">
+      <table style="width:100%;border-collapse:collapse;font-size:.85rem">
+        <thead><tr style="background:var(--m);color:#fff">
+          <th style="padding:8px 12px">Tipo</th><th style="padding:8px 12px;text-align:right">Contabilizadas</th>
+          <th style="padding:8px 12px;text-align:right">Esperadas</th><th style="padding:8px 12px;text-align:center">% Avance</th>
+          <th style="padding:8px 12px;text-align:right">Faltantes</th>
+        </tr></thead>
+        <tbody>
+          <tr style="background:var(--surface-2)"><td style="padding:8px 12px">Ayuntamientos</td><td style="padding:8px 12px;text-align:right">20,063</td><td style="padding:8px 12px;text-align:right">21,030</td><td style="padding:8px 12px;text-align:center"><strong>95.4%</strong></td><td style="padding:8px 12px;text-align:right">967</td></tr>
+          <tr><td style="padding:8px 12px">Diputaciones</td><td style="padding:8px 12px;text-align:right">19,966</td><td style="padding:8px 12px;text-align:right">21,091</td><td style="padding:8px 12px;text-align:center"><strong>94.7%</strong></td><td style="padding:8px 12px;text-align:right">1,125</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <footer>
+    <p><strong>Instituto Electoral del Estado de México — IEEM</strong></p>
+    <p>PREP 2024 — Datos preliminares, sujetos a verificación oficial</p>
+    <p>Elección del 2 de junio de 2024 — Estado de México</p>
+  </footer>
+</div>
+
+<!-- ══════════════════════════════════════════════════
+     VISTA 2: SISTEMA DE CONSULTA
+══════════════════════════════════════════════════ -->
+<div id="vista-consulta" class="vista">
+
+  <!-- Overlay para móvil -->
+  <div class="sc-overlay" id="scOverlay" onclick="scCloseSidebar()"></div>
+
+  <!-- Botón flotante para reabrir sidebar (desktop colapsado) -->
+  <button class="sc-toggle-float" id="scToggleFloat"
+          onclick="scToggleSidebar()" title="Mostrar filtros"
+          aria-label="Mostrar panel de filtros">
+    <i class="fas fa-chevron-right"></i>
+  </button>
+
+  <div class="sc-layout">
+
+    <!-- ══ SIDEBAR ══ -->
+    <aside class="sc-sidebar" id="scSidebar" aria-label="Panel de filtros">
+
+      <!-- Cabecera -->
+      <div class="sc-sidebar-hdr">
+        <div class="sc-sidebar-title">
+          <i class="fas fa-sliders-h"></i> Filtros
+        </div>
+        <button class="sc-toggle" id="scToggleBtn"
+                onclick="scToggleSidebar()" title="Colapsar panel"
+                aria-label="Colapsar panel de filtros">
+          <i class="fas fa-chevron-left"></i>
+        </button>
+      </div>
+
+      <!-- Cuerpo de filtros -->
+      <div class="sc-sidebar-body">
+
+        <!-- Tipo de elección -->
+        <div class="sc-filter-group">
+          <label class="sc-flabel"><i class="fas fa-vote-yea"></i> Elección</label>
+          <div class="sc-radio-group">
+            <label class="sc-radio-opt">
+              <input type="radio" name="scElec" value="ayu" checked onchange="scOnElecChange()">
+              <span class="sc-radio-dot"></span>
+              <span>Ayuntamientos</span>
+            </label>
+            <label class="sc-radio-opt">
+              <input type="radio" name="scElec" value="dip" onchange="scOnElecChange()">
+              <span class="sc-radio-dot"></span>
+              <span>Diputaciones</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="sc-divider"></div>
+
+        <!-- Municipio / Distrito -->
+        <div class="sc-filter-group">
+          <label class="sc-flabel" id="scGeoLabel">
+            <i class="fas fa-map-marker-alt"></i> Municipio
+            <span class="sc-active-badge" id="scGeoBadge" style="display:none">1</span>
+          </label>
+          <select id="scGeoSel" class="sc-select" onchange="scOnGeoChange()">
+            <option value="">— Todos —</option>
+          </select>
+        </div>
+
+        <!-- Sección (cascada) -->
+        <div class="sc-filter-group">
+          <label class="sc-flabel">
+            <i class="fas fa-layer-group"></i> Sección
+            <span class="sc-active-badge" id="scSecBadge" style="display:none">1</span>
+          </label>
+          <select id="scSecSel" class="sc-select" onchange="scApply()" disabled>
+            <option value="">— Todas —</option>
+          </select>
+        </div>
+
+        <div class="sc-divider"></div>
+
+        <!-- Bloque de Competitividad (a081_24) -->
+        <div class="sc-filter-group" id="scBloqueGroup">
+          <label class="sc-flabel">
+            <i class="fas fa-layer-group"></i> Bloque Competitividad
+            <span class="sc-active-badge" id="scBloqueBadge" style="display:none">1</span>
+          </label>
+          <select id="scBloqueSel" class="sc-select" onchange="scApply()">
+            <option value="">— Todos —</option>
+            <option value="B1">🔴 Alta (&lt;5% margen)</option>
+            <option value="B2">🟣 Media (5–15%)</option>
+            <option value="B3">🟤 Baja (&gt;15%)</option>
+          </select>
+          <div style="font-size:.7rem;color:var(--tx-muted);margin-top:4px;padding-left:2px">
+            Solo disponible en Ayuntamientos
+          </div>
+        </div>
+
+        <div class="sc-divider"></div>
+
+        <!-- Vista -->
+        <div class="sc-filter-group">
+          <label class="sc-flabel"><i class="fas fa-eye"></i> Mostrar por</label>
+          <div class="sc-radio-group">
+            <label class="sc-radio-opt">
+              <input type="radio" name="scVista" value="partidos" checked onchange="scApply()">
+              <span class="sc-radio-dot"></span>
+              <span>Partido político</span>
+            </label>
+            <label class="sc-radio-opt">
+              <input type="radio" name="scVista" value="bloques" onchange="scApply()">
+              <span class="sc-radio-dot"></span>
+              <span>Bloque / Coalición</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="sc-divider"></div>
+
+        <!-- Limpiar -->
+        <button class="sc-btn-clear" onclick="scReset()">
+          <i class="fas fa-undo"></i> Limpiar filtros
+        </button>
+
+      </div><!-- fin sc-sidebar-body -->
+    </aside><!-- fin sidebar -->
+
+    <!-- ══ PANEL PRINCIPAL ══ -->
+    <main class="sc-main" id="scMain">
+
+      <!-- Topbar contextual -->
+      <div class="sc-topbar">
+        <!-- Botón toggle sidebar (siempre visible) -->
+        <button class="sc-toggle" id="scMobileBtn"
+                onclick="scToggleSidebar()" aria-label="Mostrar/ocultar filtros"
+                title="Mostrar/ocultar filtros">
+          <i class="fas fa-bars"></i>
+        </button>
+        <div class="sc-topbar-title">
+          <i class="fas fa-chart-bar" style="color:var(--mg)"></i>
+          <span id="scTopbarTitle">Resultados — Todos los municipios</span>
+        </div>
+        <div class="sc-topbar-meta" id="scTopbarMeta"></div>
+      </div>
+
+      <!-- KPIs: bloque no-sticky, visible tras el topbar -->
+      <div style="padding:16px 20px 12px;flex-shrink:0;background:var(--bg);">
+        <div class="sc-kpi-row" id="scKpiRow"></div>
+      </div>
+
+      <!-- Tabs -->
+      <div class="sc-tabs">
+        <button class="sc-tab activo" onclick="scSwitchTab('scTabCards',this)">
+          <i class="fas fa-th-large"></i> Resultados
+        </button>
+        <button class="sc-tab" onclick="scSwitchTab('scTabGrafica',this)">
+          <i class="fas fa-chart-bar"></i> Gráfica
+        </button>
+        <button class="sc-tab" onclick="scSwitchTab('scTabTabla',this)">
+          <i class="fas fa-table"></i> Tabla
+        </button>
+        <button class="sc-tab" onclick="scSwitchTab('scTabMapa',this)">
+          <i class="fas fa-map"></i> Mapa
+        </button>
+      </div>
+
+      <!-- Área de contenido scrollable -->
+      <div class="sc-content">
+
+        <!-- TAB: Cards -->
+        <div id="scTabCards" class="sc-tab-content activo">
+          <div id="scCardsWrap"></div>
+        </div>
+
+        <!-- TAB: Gráfica -->
+        <div id="scTabGrafica" class="sc-tab-content">
+          <div class="sc-chart-card">
+            <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:14px">
+              <label class="sc-flabel" style="margin:0">Tipo:</label>
+              <select id="scGTipo" class="sc-select" style="width:auto;min-width:160px" onchange="scRenderChart()">
+                <option value="bar">Barras verticales</option>
+                <option value="barH">Barras horizontales</option>
+                <option value="doughnut">Dona</option>
+              </select>
+              <button onclick="scDlChart()" style="margin-left:auto;padding:6px 14px;background:var(--li);color:#fff;border:none;border-radius:7px;font-size:.78rem;cursor:pointer;display:flex;align-items:center;gap:5px">
+                <i class="fas fa-download"></i> PNG
+              </button>
+            </div>
+            <div style="position:relative;height:380px;width:100%">
+              <canvas id="scChart"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB: Tabla -->
+        <div id="scTabTabla" class="sc-tab-content">
+          <div class="tcard">
+            <table id="tblConsulta" class="display" style="width:100%">
+              <thead><tr id="thConsulta"></tr></thead>
+              <tbody id="tbConsulta"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- TAB: Mapa -->
+        <div id="scTabMapa" class="sc-tab-content">
+          <div style="display:flex;gap:10px;margin-bottom:10px;align-items:center;flex-wrap:wrap">
+            <label class="sc-flabel" style="margin:0">Color por:</label>
+            <select id="mapaColor" class="sc-select" style="width:auto;min-width:160px" onchange="renderCMapa()">
+              <option value="bloque">Bloque ganador</option>
+              <option value="part">Participación %</option>
+              <option value="vent">Ventaja %</option>
+            </select>
+          </div>
+          <div id="mapConsulta" style="height:calc(100vh - 280px);min-height:420px;width:100%;border-radius:10px;box-shadow:var(--shadow-md);border:2px solid var(--border)"></div>
+        </div>
+
+      </div><!-- fin sc-content -->
+    </main><!-- fin sc-main -->
+
+  </div><!-- fin sc-layout -->
+
+  <footer>
+    <p><strong>Instituto Electoral del Estado de México — IEEM</strong></p>
+    <p>PREP 2024 — Datos preliminares, sujetos a verificación oficial</p>
+    <p>Elección del 2 de junio de 2024 — Estado de México</p>
+  </footer>
+</div>
+
+<!-- ══════════════════════════════════════════════════
+     VISTA 3: SISTEMA DE RESULTADOS (Dashboards)
+══════════════════════════════════════════════════ -->
+<div id="vista-dashboards" class="vista">
+  <div class="dash-tabs">
+    <button class="dash-tab activo" onclick="switchDash('dash-prep',this)">
+      🗳️ Dashboard PREP 2024
+    </button>
+    <button class="dash-tab" onclick="switchDash('dash-analisis',this)">
+      📊 Análisis Avanzado
+    </button>
+    <button class="dash-tab" onclick="switchDash('dash-comparativo',this)">
+      ⚖️ Comparativo DIP / AYU
+    </button>
+  </div>
+
+  <div id="dash-prep" class="dash-frame-wrap activo">
+    <iframe src="dashboard_prep2024_ieem_edomex.html" title="Dashboard PREP 2024 IEEM Estado de México" loading="lazy"></iframe>
+  </div>
+  <div id="dash-analisis" class="dash-frame-wrap">
+    <iframe src="analisis_avanzado_prep2024.html" title="Análisis Avanzado PREP 2024" loading="lazy"></iframe>
+  </div>
+  <div id="dash-comparativo" class="dash-frame-wrap">
+    <iframe src="comparativo_dip_ayu_2024.html" title="Comparativo Diputaciones y Ayuntamientos 2024" loading="lazy"></iframe>
+  </div>
+</div>
+
+</div><!-- fin .contenido -->
+
+<!-- LIBRERÍAS CDN -->
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.4.2/js/dataTables.buttons.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.html5.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.print.min.js"></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/topojson-client@3/dist/topojson-client.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/15.7.1/nouislider.min.js"></script>
+<!-- Centroides municipales INEGI 2025 — igecemdivpolmunene2025cg.shp -->
+<script src="mun_centroids.js"></script>
+
+<script>
+// ============================================================
+// BLOQUE 0 — DATOS Y CONSTANTES
+// ============================================================
+
+// Totales de referencia IEEM (validación)
+const TOTALES_REF = {
+  aytos: { t4T:4083467, tVA:2017900, tMC:788639, nulos:310987, noreg:0, w4T:90, wVA:28, wMC:7 },
+  diput: { t4T:4248971, tVA:2630753, tMC:802955, nulos:274379, w4T:39, wVA:6, wMC:0 }
+};
+
+// Mapeo municipio_id → distrito_id
+const MUN_TO_DIST = {
+  1:45,2:39,3:13,4:9,5:43,6:29,7:10,8:9,9:28,10:22,
+  11:39,12:29,13:17,14:13,15:15,16:22,17:28,18:35,19:29,20:38,
+  21:9,22:28,23:19,24:32,25:26,26:1,27:13,28:35,29:22,30:6,
+  31:39,32:3,33:10,34:6,35:28,36:22,37:20,38:17,39:13,40:40,
+  41:9,42:10,43:15,44:29,45:19,46:14,47:17,48:15,49:13,50:35,
+  51:28,52:4,53:9,54:19,55:35,56:35,57:10,58:30,59:19,60:24,
+  61:44,62:22,63:41,64:9,65:10,66:39,67:10,68:15,69:28,70:39,
+  71:31,72:13,73:13,74:35,75:15,76:39,77:35,78:9,79:28,80:13,
+  81:10,82:33,83:9,84:28,85:22,86:13,87:10,88:15,89:7,90:28,
+  91:35,92:12,93:39,94:39,95:28,96:33,97:22,98:9,99:28,100:23,
+  101:39,102:29,103:13,104:28,105:18,106:10,107:2,108:9,109:19,110:11,
+  111:10,112:10,113:17,114:9,115:15,116:35,117:10,118:9,119:36,120:9,
+  121:20,122:27,123:9,124:15,125:19
+};
+
+// Colores
+const C_BLOQUE = {'4T':'#8B0000', VA:'#003087', MC:'#FF6600'};
+const C_PARTIDO = {MORENA:'#8B0000',PAN:'#003087',PRI:'#006847',MC:'#FF6600',PT:'#CC0000',PVEM:'#5B8C2A',PRD:'#FFCC00',NAEM:'#1B4B8A',CC:'#1565c0',IND:'#6a1b9a'};
+const TOPO_URL = 'https://gist.githubusercontent.com/diegovalle/5129746/raw/mx_tj.json';
+
+// ============================================================
+// BLOQUE 1 — HELPERS
+// ============================================================
+function fmtN(n) { return Number(n).toLocaleString('es-MX'); }
+function cBloque(g) { return C_BLOQUE[g] || '#888'; }
+
+function badgeG(g) {
+  const cls = {'4T':'b4T',VA:'bVA',MC:'bMC'};
+  return `<span class="badge ${cls[g]||''}">${g}</span>`;
+}
+
+function labelMod(m) {
+  const mp = {
+    coalicion: '<span class="badge-mod bm-coal">Coalición</span>',
+    cc:        '<span class="badge-mod bm-cc">Cand. Común</span>',
+    individual:'<span class="badge-mod bm-ind">Individual</span>',
+    conflicto: '<span class="badge-mod bm-conf">⚠️ Mixto</span>'
+  };
+  return mp[m] || m;
+}
+
+// ============================================================
+// BLOQUE 2 — NAVEGACIÓN SPA
+// ============================================================
+function irA(vista) {
+  document.querySelectorAll('.vista').forEach(v => { v.classList.remove('activa'); v.style.display = 'none'; });
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('activo'));
+  const el = document.getElementById('vista-' + vista);
+  if (el) { el.style.display = 'block'; setTimeout(() => el.classList.add('activa'), 10); }
+  document.querySelectorAll('.nav-btn').forEach(b => {
+    const txt = b.textContent.toLowerCase();
+    if (vista === 'inicio' && txt.includes('inicio')) b.classList.add('activo');
+    else if (vista === 'resultados' && txt.includes('análisis')) b.classList.add('activo');
+    else if (vista === 'dashboards' && txt.includes('resultados')) b.classList.add('activo');
+    else if (vista === 'consulta' && txt.includes('consulta')) b.classList.add('activo');
+  });
+  // Sub-navbar solo en resultados (análisis)
+  const sn = document.getElementById('subnav');
+  if (sn) sn.style.display = vista === 'resultados' ? 'block' : 'none';
+  // Mapas R2.3/R3.3: lazy init cuando se abre la vista resultados
+  if (vista === 'resultados') {
+    if (!window._mapDIPInit) {
+      window._mapDIPInit = true;
+      setTimeout(() => { initMapDIP(); }, 200);
+    } else {
+      const mDIP = window._leafletMapDIP;
+      if (mDIP) { setTimeout(() => mDIP.invalidateSize(), 200); setTimeout(() => mDIP.invalidateSize(), 600); }
+    }
+    if (!window._mapAYUInit) {
+      window._mapAYUInit = true;
+      setTimeout(() => { initMapAYU(); }, 300);
+    } else {
+      const mAYU = window._leafletMapAYU;
+      if (mAYU) { setTimeout(() => mAYU.invalidateSize(), 200); setTimeout(() => mAYU.invalidateSize(), 600); }
+    }
+  }
+  // Inicializar consulta
+  if (vista === 'consulta' && !window._consultaInit) { initConsulta(); window._consultaInit = true; }
+  if (vista === 'consulta' && window._scMapInst) setTimeout(() => window._scMapInst.invalidateSize(), 100);
+  // URL hash
+  location.hash = vista;
+}
+
+function switchDash(id, btn) {
+  document.querySelectorAll('.dash-frame-wrap').forEach(f => f.classList.remove('activo'));
+  document.querySelectorAll('.dash-tab').forEach(b => b.classList.remove('activo'));
+  document.getElementById(id).classList.add('activo');
+  btn.classList.add('activo');
+}
+
+function toggleDark() {
+  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+  setTheme(isDark ? 'light' : 'dark');
+}
+
+function setTheme(theme) {
+  document.documentElement.setAttribute('data-theme', theme);
+  document.documentElement.style.colorScheme = theme;
+  // Mantener body.dark para compatibilidad con iframes hijos
+  document.body.classList.toggle('dark', theme === 'dark');
+  const icon = document.getElementById('icon-dark');
+  const lbl  = document.getElementById('lbl-dark');
+  if (icon) icon.className = theme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+  if (lbl)  lbl.textContent = theme === 'dark' ? 'Claro' : 'Oscuro';
+  localStorage.setItem('darkMode', theme);
+  // Actualizar gráficas Chart.js si existen
+  if (window.Chart) {
+    applyChartTheme();
+    // Redibujar todas las instancias activas sin animación
+    Object.values(Chart.instances).forEach(c => c.update('none'));
+  }
+}
+
+function activarSublink(el) {
+  document.querySelectorAll('.sub-link').forEach(l => l.classList.remove('activo'));
+  el.classList.add('activo');
+}
+
+// Scroll spy sub-nav
+window.addEventListener('scroll', () => {
+  ['r1','r2','r3','r4','r5'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el && window.scrollY >= el.offsetTop - 130) {
+      document.querySelectorAll('.sub-link').forEach(l => l.classList.toggle('activo', l.getAttribute('href') === '#' + id));
+    }
+  });
+});
+</script>
+<script>
+// PREP 2024 - Estado de Mexico - Datos procesados con logica de coaliciones
+// Corte: 03/06/2024 20:00 UTC-6
+const TOTALES_DIP={t4T:4248971,tVA:2630753,tMC:802955,nulos:274379,w4T:39,wVA:6,wMC:0,actas:19966,actasEsp:21091};
+const TOTALES_AYU={t4T:4083467,tVA:2017900,tMC:788639,nulos:310987,w4T:90,wVA:28,wMC:7,actas:20063,actasEsp:21030};
+const DISTRITOS=[{id:'001',n:'CHALCO DE DIAZ COVARRUBIAS',v4T:110687,vVA:26306,vMC:10737,nul:9415,noreg:181,tv:157326,ln:289760,part:54.2953,g:'4T',vent:53.6345,mVA:'coalicion',m4T:'individual',conf:false,PAN:7841,PRI:14489,PRD:1463,NAEM:1507,MORENA:80916,PVEM:24820,PT:4951,MC:10737},{id:'002',n:'TOLUCA DE LERDO',v4T:88555,vVA:61543,vMC:17396,nul:4589,noreg:196,tv:172279,ln:273838,part:62.9127,g:'4T',vent:15.6792,mVA:'coalicion',m4T:'coalicion',conf:false,PAN:21093,PRI:34123,PRD:1490,NAEM:1456,MORENA:69866,PVEM:8053,PT:3872,MC:17396},{id:'003',n:'CHIMALHUACAN',v4T:88607,vVA:49813,vMC:10003,nul:5904,noreg:149,tv:154476,ln:301694,part:51.2029,g:'4T',vent:25.1133,mVA:'individual',m4T:'coalicion',conf:false,PAN:4500,PRI:40534,PRD:3247,NAEM:1532,MORENA:72758,PVEM:5712,PT:3448,MC:10003},{id:'004',n:'LERMA DE VILLADA',v4T:90739,vVA:61039,vMC:18398,nul:4989,noreg:206,tv:175371,ln:254927,part:68.7926,g:'4T',vent:16.9355,mVA:'coalicion',m4T:'coalicion',conf:false,PAN:13860,PRI:41539,PRD:1427,NAEM:1940,MORENA:61544,PVEM:14080,PT:4278,MC:18398},{id:'005',n:'CHIMALHUACAN',v4T:83533,vVA:48819,vMC:11686,nul:4693,noreg:219,tv:148950,ln:285204,part:52.2258,g:'4T',vent:23.3058,mVA:'coalicion',m4T:'coalicion',conf:false,PAN:5994,PRI:37040,PRD:2250,NAEM:1655,MORENA:69076,PVEM:5239,PT:3163,MC:11686},{id:'006',n:'ECATEPEC DE MORELOS',v4T:104777,vVA:38695,vMC:20058,nul:10380,noreg:265,tv:174175,ln:302928,part:57.4972,g:'4T',vent:37.94,mVA:'cc',m4T:'individual',conf:false,PAN:0,PRI:0,PRD:0,NAEM:0,MORENA:77863,PVEM:13145,PT:13769,MC:20058},{id:'007',n:'TENANCINGO DE DEGOLLADO',v4T:72614,vVA:35079,vMC:28955,nul:6624,noreg:241,tv:143513,ln:239187,part:60.0003,g:'4T',vent:26.1544,mVA:'coalicion',m4T:'cc',conf:false,PAN:6555,PRI:20014,PRD:4605,NAEM:2983,MORENA:0,PVEM:0,PT:0,MC:28955},{id:'008',n:'ECATEPEC DE MORELOS',v4T:104197,vVA:48576,vMC:20076,nul:5427,noreg:214,tv:178490,ln:284238,part:62.796,g:'4T',vent:31.162,mVA:'cc',m4T:'coalicion',conf:false,PAN:0,PRI:0,PRD:0,NAEM:0,MORENA:75944,PVEM:12727,PT:9235,MC:20076},{id:'009',n:'TEJUPILCO DE HIDALGO',v4T:83254,vVA:53404,vMC:12997,nul:7914,noreg:328,tv:157897,ln:264335,part:59.7337,g:'4T',vent:18.9047,mVA:'coalicion',m4T:'coalicion',conf:false,PAN:6015,PRI:37217,PRD:5812,NAEM:1804,MORENA:66233,PVEM:7598,PT:5754,MC:12997},{id:'010',n:'VALLE DE BRAVO',v4T:79043,vVA:68560,vMC:8790,nul:8070,noreg:155,tv:164618,ln:270048,part:60.9588,g:'4T',vent:6.3681,mVA:'individual',m4T:'coalicion',conf:false,PAN:7193,PRI:36179,PRD:23790,NAEM:1398,MORENA:61784,PVEM:7727,PT:4955,MC:8790},{id:'011',n:'TULTITLAN DE MARIANO ESCOBEDO',v4T:98012,vVA:37947,vMC:21365,nul:4475,noreg:172,tv:161971,ln:268003,part:60.4363,g:'4T',vent:37.0838,mVA:'cc',m4T:'coalicion',conf:false,PAN:0,PRI:0,PRD:0,NAEM:0,MORENA:76851,PVEM:10334,PT:4283,MC:21365},{id:'012',n:'TEOLOYUCAN',v4T:97575,vVA:45841,vMC:27381,nul:6870,noreg:523,tv:178190,ln:297241,part:59.948,g:'4T',vent:29.0331,mVA:'coalicion',m4T:'cc',conf:false,PAN:25855,PRI:11935,PRD:2442,NAEM:4145,MORENA:0,PVEM:0,PT:0,MC:27381},{id:'013',n:'ATLACOMULCO DE FABELA',v4T:92830,vVA:69641,vMC:16231,nul:7550,noreg:589,tv:186841,ln:297377,part:62.8297,g:'4T',vent:12.4111,mVA:'coalicion',m4T:'cc',conf:false,PAN:10137,PRI:53002,PRD:2265,NAEM:2319,MORENA:0,PVEM:0,PT:0,MC:16231},{id:'014',n:'JILOTEPEC DE ANDRES MOLINA ENRIQUEZ',v4T:102681,vVA:74122,vMC:12532,nul:7517,noreg:554,tv:197406,ln:289241,part:68.2497,g:'4T',vent:14.4671,mVA:'coalicion',m4T:'cc',conf:false,PAN:19387,PRI:49108,PRD:1830,NAEM:2118,MORENA:0,PVEM:0,PT:0,MC:12532},{id:'015',n:'IXTLAHUACA DE RAYON',v4T:93817,vVA:69063,vMC:19537,nul:7614,noreg:403,tv:190434,ln:283384,part:67.2,g:'4T',vent:12.9987,mVA:'coalicion',m4T:'cc',conf:false,PAN:4620,PRI:57096,PRD:2082,NAEM:2570,MORENA:0,PVEM:0,PT:0,MC:19537},{id:'016',n:'CIUDAD ADOLFO LOPEZ MATEOS',v4T:78349,vVA:94903,vMC:12430,nul:4412,noreg:204,tv:190298,ln:304150,part:62.5672,g:'VA',vent:8.699,mVA:'coalicion',m4T:'coalicion',conf:false,PAN:70100,PRI:16506,PRD:2232,NAEM:1814,MORENA:61817,PVEM:6815,PT:3426,MC:12430},{id:'017',n:'HUIXQUILUCAN DE DEGOLLADO',v4T:78181,vVA:98039,vMC:13509,nul:5203,noreg:158,tv:195090,ln:291779,part:66.8622,g:'VA',vent:10.1789,mVA:'coalicion',m4T:'coalicion',conf:false,PAN:76329,PRI:14088,PRD:2772,NAEM:1532,MORENA:61115,PVEM:8065,PT:3620,MC:13509},{id:'018',n:'TLALNEPANTLA DE BAZ',v4T:100881,vVA:112433,vMC:16391,nul:5653,noreg:255,tv:235613,ln:351058,part:67.1151,g:'VA',vent:4.903,mVA:'coalicion',m4T:'coalicion',conf:false,PAN:65056,PRI:36888,PRD:2647,NAEM:1881,MORENA:82498,PVEM:6772,PT:3810,MC:16391},{id:'019',n:'SANTA MARIA TULTEPEC',v4T:121322,vVA:52944,vMC:20849,nul:5029,noreg:284,tv:200428,ln:313565,part:63.9191,g:'4T',vent:34.116,mVA:'cc',m4T:'coalicion',conf:false,PAN:0,PRI:0,PRD:0,NAEM:0,MORENA:97802,PVEM:11628,PT:6263,MC:20849},{id:'020',n:'ZUMPANGO DE OCAMPO',v4T:74029,vVA:38609,vMC:21539,nul:4718,noreg:124,tv:139019,ln:270634,part:51.3679,g:'4T',vent:25.4785,mVA:'cc',m4T:'cc',conf:false,PAN:0,PRI:0,PRD:0,NAEM:0,MORENA:0,PVEM:0,PT:0,MC:21539},{id:'021',n:'ECATEPEC DE MORELOS',v4T:92244,vVA:36456,vMC:14470,nul:6303,noreg:248,tv:149721,ln:283142,part:52.8784,g:'4T',vent:37.2613,mVA:'coalicion',m4T:'coalicion',conf:false,PAN:10069,PRI:20797,PRD:1863,NAEM:1741,MORENA:67560,PVEM:10297,PT:8833,MC:14470},{id:'022',n:'OJO DE AGUA',v4T:93459,vVA:50070,vMC:17634,nul:4107,noreg:128,tv:165398,ln:265009,part:62.4122,g:'4T',vent:26.2331,mVA:'coalicion',m4T:'coalicion',conf:false,PAN:16729,PRI:27117,PRD:1761,NAEM:1883,MORENA:78262,PVEM:6105,PT:4548,MC:17634},{id:'023',n:'TEXCOCO DE MORA',v4T:97949,vVA:41547,vMC:23933,nul:5028,noreg:329,tv:168786,ln:271420,part:62.1863,g:'4T',vent:33.4163,mVA:'cc',m4T:'coalicion',conf:false,PAN:0,PRI:0,PRD:0,NAEM:0,MORENA:76527,PVEM:11116,PT:5301,MC:23933},{id:'024',n:'CD. NEZAHUALCOYOTL',v4T:97977,vVA:46185,vMC:23619,nul:4517,noreg:222,tv:172520,ln:279505,part:61.7234,g:'4T',vent:30.0209,mVA:'cc',m4T:'coalicion',conf:false,PAN:0,PRI:0,PRD:0,NAEM:0,MORENA:78968,PVEM:9051,PT:5187,MC:23619},{id:'025',n:'CD. NEZAHUALCOYOTL',v4T:110272,vVA:41093,vMC:33842,nul:9679,noreg:234,tv:195120,ln:313615,part:62.2164,g:'4T',vent:35.4546,mVA:'cc',m4T:'individual',conf:false,PAN:0,PRI:0,PRD:0,NAEM:0,MORENA:91834,PVEM:12244,PT:6194,MC:33842},{id:'026',n:'CUAUTITLAN IZCALLI',v4T:99301,vVA:68624,vMC:15744,nul:4762,noreg:294,tv:188725,ln:305432,part:61.7895,g:'4T',vent:16.2549,mVA:'coalicion',m4T:'coalicion',conf:false,PAN:41198,PRI:19741,PRD:1793,NAEM:2204,MORENA:80896,PVEM:7095,PT:3629,MC:15744},{id:'027',n:'VALLE DE CHALCO SOLIDARIDAD',v4T:107029,vVA:33770,vMC:11893,nul:11740,noreg:137,tv:164569,ln:282755,part:58.202,g:'4T',vent:44.5157,mVA:'individual',m4T:'individual',conf:false,PAN:5875,PRI:14948,PRD:10033,NAEM:2914,MORENA:83177,PVEM:10719,PT:13133,MC:11893},{id:'028',n:'AMECAMECA DE JUAREZ',v4T:122216,vVA:45649,vMC:20633,nul:6866,noreg:236,tv:195600,ln:308615,part:63.3799,g:'4T',vent:39.1447,mVA:'coalicion',m4T:'coalicion',conf:false,PAN:9204,PRI:27998,PRD:3275,NAEM:3668,MORENA:88957,PVEM:22106,PT:7358,MC:20633},{id:'029',n:'TIANGUISTENCO DE GALEANA',v4T:81638,vVA:51687,vMC:17886,nul:6351,noreg:238,tv:157800,ln:237890,part:66.3332,g:'4T',vent:18.9804,mVA:'coalicion',m4T:'cc',conf:false,PAN:13119,PRI:29283,PRD:2714,NAEM:3517,MORENA:0,PVEM:0,PT:0,MC:17886},{id:'030',n:'NAUCALPAN DE JUAREZ',v4T:115231,vVA:73732,vMC:16461,nul:5717,noreg:210,tv:211351,ln:350608,part:60.2813,g:'4T',vent:19.6351,mVA:'coalicion',m4T:'coalicion',conf:false,PAN:43910,PRI:21706,PRD:2268,NAEM:1667,MORENA:92792,PVEM:8828,PT:4305,MC:16461},{id:'031',n:'LOS REYES ACAQUILPAN',v4T:89871,vVA:53706,vMC:10560,nul:5220,noreg:569,tv:159926,ln:287537,part:55.6193,g:'4T',vent:22.6136,mVA:'coalicion',m4T:'coalicion',conf:false,PAN:5997,PRI:41628,PRD:2283,NAEM:1536,MORENA:74473,PVEM:4556,PT:3854,MC:10560},{id:'032',n:'NAUCALPAN DE JUAREZ',v4T:81233,vVA:84403,vMC:12669,nul:4561,noreg:227,tv:183093,ln:288303,part:63.5071,g:'VA',vent:1.7314,mVA:'coalicion',m4T:'coalicion',conf:false,PAN:58373,PRI:18485,PRD:2105,NAEM:1556,MORENA:64096,PVEM:7425,PT:3211,MC:12669},{id:'033',n:'OJO DE AGUA',v4T:112412,vVA:74573,vMC:12991,nul:5802,noreg:177,tv:205955,ln:318811,part:64.601,g:'4T',vent:18.3725,mVA:'coalicion',m4T:'coalicion',conf:false,PAN:17354,PRI:49529,PRD:2041,NAEM:2856,MORENA:95340,PVEM:6213,PT:5510,MC:12991},{id:'034',n:'TOLUCA DE LERDO',v4T:94287,vVA:84156,vMC:20211,nul:5058,noreg:244,tv:203956,ln:314904,part:64.7677,g:'4T',vent:4.9672,mVA:'coalicion',m4T:'coalicion',conf:false,PAN:30975,PRI:45488,PRD:2080,NAEM:1693,MORENA:75539,PVEM:8505,PT:4112,MC:20211},{id:'035',n:'METEPEC',v4T:85558,vVA:92707,vMC:19302,nul:4964,noreg:245,tv:202776,ln:294495,part:68.8555,g:'VA',vent:3.5256,mVA:'coalicion',m4T:'cc',conf:false,PAN:40239,PRI:44173,PRD:2295,NAEM:2249,MORENA:0,PVEM:0,PT:0,MC:19302},{id:'036',n:'SAN MIGUEL ZINACANTEPEC',v4T:67671,vVA:66002,vMC:16447,nul:5282,noreg:259,tv:155661,ln:284996,part:54.6187,g:'4T',vent:1.0722,mVA:'coalicion',m4T:'cc',conf:false,PAN:16925,PRI:41913,PRD:1873,NAEM:2380,MORENA:0,PVEM:0,PT:0,MC:16447},{id:'037',n:'TLALNEPANTLA DE BAZ',v4T:104253,vVA:46197,vMC:13936,nul:5476,noreg:256,tv:170118,ln:297087,part:57.262,g:'4T',vent:34.1269,mVA:'coalicion',m4T:'coalicion',conf:false,PAN:14290,PRI:24940,PRD:1809,NAEM:2546,MORENA:81045,PVEM:7633,PT:6989,MC:13936},{id:'038',n:'COACALCO DE BERRIOZABAL',v4T:116739,vVA:62702,vMC:24774,nul:4864,noreg:314,tv:209393,ln:325449,part:64.3397,g:'4T',vent:25.8065,mVA:'cc',m4T:'coalicion',conf:false,PAN:0,PRI:0,PRD:0,NAEM:0,MORENA:93321,PVEM:10412,PT:4988,MC:24774},{id:'039',n:'TEPEXPAN',v4T:82626,vVA:47461,vMC:12795,nul:5019,noreg:167,tv:148068,ln:237773,part:62.2728,g:'4T',vent:23.7492,mVA:'coalicion',m4T:'coalicion',conf:false,PAN:15258,PRI:26293,PRD:1732,NAEM:2253,MORENA:63678,PVEM:9578,PT:5364,MC:12795},{id:'040',n:'IXTAPALUCA',v4T:97949,vVA:41163,vMC:15763,nul:5553,noreg:217,tv:160645,ln:286295,part:56.1117,g:'4T',vent:35.3488,mVA:'cc',m4T:'coalicion',conf:false,PAN:0,PRI:0,PRD:0,NAEM:0,MORENA:68197,PVEM:19975,PT:4591,MC:15763},{id:'041',n:'CD. NEZAHUALCOYOTL',v4T:107890,vVA:37031,vMC:24321,nul:5163,noreg:181,tv:174586,ln:285588,part:61.1321,g:'4T',vent:40.5869,mVA:'coalicion',m4T:'coalicion',conf:false,PAN:11386,PRI:17127,PRD:4543,NAEM:1960,MORENA:89633,PVEM:7572,PT:4904,MC:24321},{id:'042',n:'ECATEPEC DE MORELOS',v4T:101731,vVA:48810,vMC:16796,nul:4981,noreg:215,tv:172533,ln:284951,part:60.5483,g:'4T',vent:30.673,mVA:'coalicion',m4T:'coalicion',conf:false,PAN:16121,PRI:24542,PRD:2894,NAEM:1979,MORENA:76429,PVEM:9610,PT:8441,MC:16796},{id:'043',n:'CUAUTITLAN IZCALLI',v4T:93074,vVA:79496,vMC:19776,nul:5220,noreg:444,tv:198010,ln:303589,part:65.223,g:'4T',vent:6.8572,mVA:'coalicion',m4T:'coalicion',conf:false,PAN:51504,PRI:18476,PRD:2427,NAEM:2756,MORENA:76206,PVEM:6566,PT:3667,MC:19776},{id:'044',n:'NICOLAS ROMERO',v4T:70756,vVA:80474,vMC:20923,nul:8098,noreg:260,tv:180511,ln:313688,part:57.5448,g:'VA',vent:5.3836,mVA:'individual',m4T:'coalicion',conf:false,PAN:33412,PRI:27757,PRD:12611,NAEM:6694,MORENA:54857,PVEM:6402,PT:3513,MC:20923},{id:'045',n:'BARRIO LA CABECERA 3A SECCION',v4T:81922,vVA:57683,vMC:24716,nul:7002,noreg:252,tv:171575,ln:272884,part:62.8747,g:'4T',vent:14.1273,mVA:'coalicion',m4T:'coalicion',conf:false,PAN:8050,PRI:42204,PRD:2360,NAEM:2131,MORENA:57960,PVEM:14875,PT:4932,MC:24716}];
+const MUNICIPIOS=[{id:'001',n:'ACAMBAY DE RUIZ CASTANEDA',v4T:12923,vVA:15645,vMC:1317,nul:1392,noreg:448,tv:31725,ln:50601,part:62.6964,g:'VA',vent:8.58,mVA:'individual',m4T:'coalicion',PAN:8311,PRI:7334,PRD:0,NAEM:0,MORENA:10163,PVEM:1369,PT:512,MC:1317},{id:'002',n:'ACOLMAN',v4T:32703,vVA:0,vMC:5307,nul:1502,noreg:45,tv:60181,ln:94590,part:63.623,g:'4T',vent:45.5227,mVA:'individual',m4T:'coalicion',PAN:0,PRI:0,PRD:0,NAEM:0,MORENA:26752,PVEM:2654,PT:1302,MC:5307},{id:'003',n:'ACULCO',v4T:15579,vVA:8161,vMC:823,nul:779,noreg:21,tv:25363,ln:37262,part:68.0667,g:'4T',vent:29.2473,mVA:'coalicion',m4T:'coalicion',PAN:808,PRI:6874,PRD:195,NAEM:99,MORENA:13121,PVEM:1354,PT:397,MC:823},{id:'004',n:'ALMOLOYA DE ALQUISIRAS',v4T:4345,vVA:585,vMC:193,nul:1097,noreg:2046,tv:8266,ln:12655,part:65.3181,g:'4T',vent:45.4875,mVA:'coalicion',m4T:'individual',PAN:154,PRI:311,PRD:51,NAEM:57,MORENA:4055,PVEM:164,PT:126,MC:193},{id:'005',n:'ALMOLOYA DE JUAREZ',v4T:29062,vVA:34190,vMC:13508,nul:3573,noreg:56,tv:80389,ln:128893,part:62.3688,g:'VA',vent:6.379,mVA:'individual',m4T:'coalicion',PAN:2030,PRI:28310,PRD:2860,NAEM:990,MORENA:13127,PVEM:13238,PT:1056,MC:13508},{id:'006',n:'ALMOLOYA DEL RIO',v4T:1319,vVA:5123,vMC:267,nul:258,noreg:7,tv:6974,ln:9565,part:72.9117,g:'VA',vent:54.5455,mVA:'individual',m4T:'coalicion',PAN:470,PRI:1430,PRD:1012,NAEM:2211,MORENA:430,PVEM:807,PT:30,MC:267},{id:'007',n:'AMANALCO',v4T:3793,vVA:0,vMC:3991,nul:864,noreg:324,tv:13864,ln:19899,part:69.6718,g:'MC',vent:1.4282,mVA:'individual',m4T:'coalicion',PAN:0,PRI:0,PRD:0,NAEM:0,MORENA:2791,PVEM:444,PT:308,MC:3991},{id:'008',n:'AMATEPEC',v4T:10276,vVA:0,vMC:301,nul:777,noreg:22,tv:12578,ln:20527,part:61.2754,g:'4T',vent:79.3051,mVA:'individual',m4T:'coalicion',PAN:0,PRI:0,PRD:0,NAEM:0,MORENA:7581,PVEM:660,PT:1484,MC:301},{id:'009',n:'AMECAMECA',v4T:9319,vVA:14615,vMC:4325,nul:826,noreg:21,tv:29106,ln:45830,part:63.5086,g:'VA',vent:18.1956,mVA:'individual',m4T:'individual',PAN:3064,PRI:11127,PRD:129,NAEM:295,MORENA:7746,PVEM:1425,PT:148,MC:4325},{id:'010',n:'APAXCO',v4T:10795,vVA:0,vMC:704,nul:619,noreg:816,tv:15320,ln:24118,part:63.521,g:'4T',vent:65.8681,mVA:'individual',m4T:'individual',PAN:0,PRI:0,PRD:0,NAEM:0,MORENA:3277,PVEM:3076,PT:4442,MC:704},{id:'011',n:'ATENCO',v4T:20701,vVA:0,vMC:2338,nul:1615,noreg:217,tv:30922,ln:51970,part:59.4997,g:'4T',vent:59.3849,mVA:'individual',m4T:'individual',PAN:0,PRI:0,PRD:0,NAEM:0,MORENA:10394,PVEM:6462,PT:3845,MC:2338},{id:'012',n:'ATIZAPAN',v4T:5402,vVA:745,vMC:166,nul:299,noreg:144,tv:6756,ln:9823,part:68.7774,g:'4T',vent:68.9313,mVA:'coalicion',m4T:'individual',PAN:109,PRI:551,PRD:23,NAEM:36,MORENA:3367,PVEM:478,PT:1557,MC:166},{id:'013',n:'ATIZAPAN DE ZARAGOZA',v4T:105862,vVA:140214,vMC:15834,nul:6395,noreg:1236,tv:269541,ln:422236,part:63.8366,g:'VA',vent:12.7446,mVA:'coalicion',m4T:'coalicion',PAN:106644,PRI:21924,PRD:2716,NAEM:2174,MORENA:82657,PVEM:10431,PT:3925,MC:15834},{id:'014',n:'ATLACOMULCO',v4T:27152,vVA:21011,vMC:5724,nul:1466,noreg:48,tv:55401,ln:85268,part:64.9728,g:'4T',vent:11.0846,mVA:'coalicion',m4T:'coalicion',PAN:1947,PRI:17941,PRD:257,NAEM:249,MORENA:22808,PVEM:1834,PT:1183,MC:5724},{id:'015',n:'ATLAUTLA',v4T:6889,vVA:4247,vMC:153,nul:539,noreg:6,tv:11834,ln:23911,part:49.4919,g:'4T',vent:22.3255,mVA:'individual',m4T:'individual',PAN:199,PRI:746,PRD:2824,NAEM:478,MORENA:1120,PVEM:4388,PT:1381,MC:153},{id:'016',n:'AXAPUSCO',v4T:5275,vVA:8718,vMC:162,nul:798,noreg:293,tv:15246,ln:20322,part:75.0221,g:'VA',vent:22.583,mVA:'individual',m4T:'coalicion',PAN:1528,PRI:3729,PRD:2822,NAEM:639,MORENA:3048,PVEM:176,PT:1721,MC:162},{id:'017',n:'AYAPANGO',v4T:1058,vVA:2614,vMC:1455,nul:128,noreg:2,tv:5257,ln:6833,part:76.9355,g:'VA',vent:22.0468,mVA:'individual',m4T:'coalicion',PAN:44,PRI:813,PRD:1674,NAEM:83,MORENA:883,PVEM:84,PT:65,MC:1455},{id:'018',n:'CALIMAYA',v4T:15368,vVA:14109,vMC:3309,nul:1086,noreg:24,tv:33896,ln:47227,part:71.7725,g:'4T',vent:3.7143,mVA:'coalicion',m4T:'coalicion',PAN:10336,PRI:2713,PRD:290,NAEM:204,MORENA:11128,PVEM:1013,PT:2264,MC:3309},{id:'019',n:'CAPULHUAC',v4T:5249,vVA:4413,vMC:4255,nul:826,noreg:44,tv:14787,ln:28816,part:51.3152,g:'4T',vent:5.6536,mVA:'coalicion',m4T:'coalicion',PAN:409,PRI:3296,PRD:382,NAEM:113,MORENA:4068,PVEM:443,PT:409,MC:4255},{id:'020',n:'COACALCO DE BERRIOZABAL',v4T:65681,vVA:71813,vMC:13479,nul:3730,noreg:284,tv:154987,ln:234077,part:66.212,g:'VA',vent:3.9565,mVA:'coalicion',m4T:'coalicion',PAN:13890,PRI:50796,PRD:1821,NAEM:1656,MORENA:55459,PVEM:3568,PT:2055,MC:13479},{id:'021',n:'COATEPEC HARINAS',v4T:5929,vVA:8106,vMC:910,nul:932,noreg:10,tv:15887,ln:29975,part:53.0008,g:'VA',vent:13.703,mVA:'coalicion',m4T:'coalicion',PAN:1003,PRI:6585,PRD:145,NAEM:66,MORENA:3764,PVEM:377,PT:1432,MC:910},{id:'022',n:'COCOTITLAN',v4T:4233,vVA:0,vMC:2213,nul:376,noreg:2,tv:9532,ln:12887,part:73.966,g:'4T',vent:21.1918,mVA:'individual',m4T:'individual',PAN:0,PRI:0,PRD:0,NAEM:0,MORENA:1881,PVEM:1021,PT:1331,MC:2213},{id:'023',n:'COYOTEPEC',v4T:11560,vVA:0,vMC:2936,nul:921,noreg:612,tv:25449,ln:41541,part:61.2624,g:'4T',vent:33.8874,mVA:'individual',m4T:'coalicion',PAN:0,PRI:0,PRD:0,NAEM:0,MORENA:9560,PVEM:865,PT:525,MC:2936},{id:'024',n:'CUAUTITLAN',v4T:34134,vVA:31034,vMC:4334,nul:1346,noreg:60,tv:70908,ln:108370,part:65.4314,g:'4T',vent:4.3719,mVA:'coalicion',m4T:'coalicion',PAN:7957,PRI:20225,PRD:805,NAEM:785,MORENA:29431,PVEM:1654,PT:1005,MC:4334},{id:'025',n:'CUAUTITLAN IZCALLI',v4T:139255,vVA:117412,vMC:20335,nul:6650,noreg:665,tv:284317,ln:431935,part:65.824,g:'4T',vent:7.6826,mVA:'coalicion',m4T:'coalicion',PAN:79819,PRI:25692,PRD:2641,NAEM:2923,MORENA:115551,PVEM:8495,PT:4916,MC:20335},{id:'026',n:'CHALCO',v4T:118462,vVA:0,vMC:10660,nul:9198,noreg:505,tv:159697,ln:289760,part:55.1135,g:'4T',vent:67.5041,mVA:'individual',m4T:'individual',PAN:0,PRI:0,PRD:0,NAEM:0,MORENA:78993,PVEM:35515,PT:3954,MC:10660},{id:'027',n:'CHAPA DE MOTA',v4T:8691,vVA:7859,vMC:1286,nul:497,noreg:36,tv:18369,ln:24056,part:76.3593,g:'4T',vent:4.5294,mVA:'coalicion',m4T:'coalicion',PAN:6072,PRI:1382,PRD:129,NAEM:54,MORENA:7478,PVEM:480,PT:263,MC:1286},{id:'028',n:'CHAPULTEPEC',v4T:2842,vVA:2204,vMC:888,nul:231,noreg:10,tv:6175,ln:9678,part:63.8045,g:'4T',vent:10.332,mVA:'coalicion',m4T:'coalicion',PAN:304,PRI:1734,PRD:29,NAEM:32,MORENA:1062,PVEM:1384,PT:245,MC:888},{id:'029',n:'CHIAUTLA',v4T:6759,vVA:1495,vMC:8110,nul:442,noreg:13,tv:16819,ln:24263,part:69.3195,g:'MC',vent:8.0326,mVA:'coalicion',m4T:'coalicion',PAN:381,PRI:902,PRD:63,NAEM:66,MORENA:6149,PVEM:185,PT:141,MC:8110},{id:'030',n:'CHICOLOAPAN',v4T:48280,vVA:0,vMC:6285,nul:2230,noreg:468,tv:87715,ln:146641,part:59.8161,g:'4T',vent:47.8766,mVA:'individual',m4T:'coalicion',PAN:0,PRI:0,PRD:0,NAEM:0,MORENA:40261,PVEM:3335,PT:1840,MC:6285},{id:'031',n:'CHICONCUAC',v4T:7332,vVA:5432,vMC:384,nul:596,noreg:721,tv:14465,ln:22282,part:64.9179,g:'4T',vent:13.1352,mVA:'individual',m4T:'individual',PAN:2287,PRI:896,PRD:1243,NAEM:1006,MORENA:2772,PVEM:1220,PT:3340,MC:384},{id:'032',n:'CHIMALHUACAN',v4T:138804,vVA:91327,vMC:15479,nul:10236,noreg:333,tv:256179,ln:513126,part:49.9252,g:'4T',vent:18.5327,mVA:'individual',m4T:'coalicion',PAN:6407,PRI:77195,PRD:5521,NAEM:2204,MORENA:114564,PVEM:7856,PT:5092,MC:15479},{id:'033',n:'DONATO GUERRA',v4T:12879,vVA:0,vMC:288,nul:1084,noreg:3,tv:19837,ln:27361,part:72.501,g:'4T',vent:63.4723,mVA:'individual',m4T:'individual',PAN:0,PRI:0,PRD:0,NAEM:0,MORENA:5891,PVEM:3622,PT:3366,MC:288},{id:'034',n:'ECATEPEC DE MORELOS',v4T:429784,vVA:0,vMC:71807,nul:41481,noreg:1014,tv:719080,ln:1293604,part:55.5873,g:'4T',vent:49.7826,mVA:'individual',m4T:'individual',PAN:0,PRI:0,PRD:0,NAEM:0,MORENA:312375,PVEM:61382,PT:56027,MC:71807},{id:'035',n:'ECATZINGO',v4T:3192,vVA:2450,vMC:92,nul:208,noreg:4,tv:5946,ln:7904,part:75.2277,g:'4T',vent:12.479,mVA:'coalicion',m4T:'individual',PAN:191,PRI:2166,PRD:10,NAEM:6,MORENA:533,PVEM:2659,PT:0,MC:92},{id:'036',n:'HUEHUETOCA',v4T:23823,vVA:15933,vMC:5112,nul:2359,noreg:6356,tv:64189,ln:116992,part:54.8661,g:'4T',vent:12.2918,mVA:'coalicion',m4T:'coalicion',PAN:11553,PRI:2183,PRD:304,NAEM:1188,MORENA:15022,PVEM:6116,PT:833,MC:5112},{id:'037',n:'HUEYPOXTLA',v4T:13977,vVA:6608,vMC:2987,nul:1023,noreg:14,tv:24609,ln:34763,part:70.7908,g:'4T',vent:29.9443,mVA:'individual',m4T:'individual',PAN:252,PRI:5805,PRD:177,NAEM:374,MORENA:6408,PVEM:6625,PT:944,MC:2987},{id:'038',n:'HUIXQUILUCAN',v4T:49991,vVA:80592,vMC:9555,nul:6428,noreg:191,tv:146757,ln:219842,part:66.7557,g:'VA',vent:20.8515,mVA:'individual',m4T:'individual',PAN:74817,PRI:0,PRD:4865,NAEM:910,MORENA:39490,PVEM:7453,PT:3048,MC:9555},{id:'039',n:'ISIDRO FABELA',v4T:1633,vVA:3405,vMC:716,nul:221,noreg:0,tv:6921,ln:9323,part:74.2358,g:'VA',vent:25.6032,mVA:'individual',m4T:'coalicion',PAN:684,PRI:937,PRD:815,NAEM:969,MORENA:486,PVEM:993,PT:43,MC:716},{id:'040',n:'IXTAPALUCA',v4T:131785,vVA:0,vMC:18499,nul:11593,noreg:210,tv:220156,ln:377797,part:58.2736,g:'4T',vent:51.4571,mVA:'individual',m4T:'individual',PAN:0,PRI:0,PRD:0,NAEM:0,MORENA:81489,PVEM:43110,PT:7186,MC:18499},{id:'041',n:'IXTAPAN DE LA SAL',v4T:8098,vVA:7382,vMC:1980,nul:709,noreg:19,tv:18188,ln:29202,part:62.2834,g:'4T',vent:3.9367,mVA:'coalicion',m4T:'coalicion',PAN:1261,PRI:5379,PRD:234,NAEM:146,MORENA:6944,PVEM:426,PT:341,MC:1980},{id:'042',n:'IXTAPAN DEL ORO',v4T:1339,vVA:539,vMC:21,nul:53,noreg:12,tv:1964,ln:5627,part:34.9031,g:'4T',vent:40.7332,mVA:'individual',m4T:'coalicion',PAN:23,PRI:84,PRD:381,NAEM:51,MORENA:951,PVEM:44,PT:287,MC:21},{id:'043',n:'IXTLAHUACA',v4T:44146,vVA:30328,vMC:5413,nul:3732,noreg:84,tv:83703,ln:121828,part:68.7059,g:'4T',vent:16.5084,mVA:'coalicion',m4T:'individual',PAN:1773,PRI:26968,PRD:394,NAEM:414,MORENA:38508,PVEM:3013,PT:2625,MC:5413},{id:'044',n:'XALATLACO',v4T:9059,vVA:0,vMC:1046,nul:522,noreg:34,tv:12418,ln:20718,part:59.9382,g:'4T',vent:64.5273,mVA:'individual',m4T:'individual',PAN:0,PRI:0,PRD:0,NAEM:0,MORENA:4944,PVEM:808,PT:3307,MC:1046},{id:'045',n:'JALTENCO',v4T:8976,vVA:0,vMC:1678,nul:427,noreg:6,tv:12523,ln:21116,part:59.3057,g:'4T',vent:58.2768,mVA:'individual',m4T:'individual',PAN:0,PRI:0,PRD:0,NAEM:0,MORENA:6001,PVEM:351,PT:2624,MC:1678},{id:'046',n:'JILOTEPEC',v4T:22308,vVA:27029,vMC:1760,nul:1170,noreg:31,tv:52298,ln:74888,part:69.835,g:'VA',vent:9.0271,mVA:'coalicion',m4T:'coalicion',PAN:1587,PRI:24147,PRD:303,NAEM:264,MORENA:18190,PVEM:2315,PT:587,MC:1760},{id:'047',n:'JILOTZINGO',v4T:3998,vVA:6836,vMC:1577,nul:484,noreg:6,tv:12901,ln:17459,part:73.8931,g:'VA',vent:21.9983,mVA:'individual',m4T:'coalicion',PAN:3396,PRI:3302,PRD:25,NAEM:113,MORENA:916,PVEM:2625,PT:135,MC:1577},{id:'048',n:'JIQUIPILCO',v4T:15159,vVA:12477,vMC:11440,nul:1952,noreg:29,tv:41057,ln:58213,part:70.5289,g:'4T',vent:6.5324,mVA:'coalicion',m4T:'coalicion',PAN:460,PRI:11027,PRD:303,NAEM:284,MORENA:12030,PVEM:624,PT:1153,MC:11440},{id:'049',n:'JOCOTITLAN',v4T:14269,vVA:13114,vMC:2607,nul:1989,noreg:5444,tv:37423,ln:53940,part:69.3789,g:'4T',vent:3.0863,mVA:'individual',m4T:'individual',PAN:2152,PRI:10389,PRD:573,NAEM:0,MORENA:10481,PVEM:2363,PT:1425,MC:2607},{id:'050',n:'JOQUICINGO',v4T:3785,vVA:0,vMC:2395,nul:250,noreg:3,tv:8562,ln:11286,part:75.8639,g:'4T',vent:16.2345,mVA:'individual',m4T:'coalicion',PAN:0,PRI:0,PRD:0,NAEM:0,MORENA:1186,PVEM:2310,PT:78,MC:2395},{id:'051',n:'JUCHITEPEC',v4T:7761,vVA:4953,vMC:480,nul:867,noreg:12,tv:14073,ln:19825,part:70.9861,g:'4T',vent:19.9531,mVA:'individual',m4T:'individual',PAN:170,PRI:4536,PRD:188,NAEM:59,MORENA:5344,PVEM:505,PT:1912,MC:480},{id:'052',n:'LERMA',v4T:42253,vVA:36265,vMC:3819,nul:3759,noreg:79,tv:86175,ln:123905,part:69.5493,g:'4T',vent:6.9487,mVA:'coalicion',m4T:'individual',PAN:5146,PRI:29302,PRD:458,NAEM:338,MORENA:32812,PVEM:7030,PT:2411,MC:3819},{id:'053',n:'MALINALCO',v4T:5100,vVA:975,vMC:6588,nul:639,noreg:140,tv:15109,ln:21570,part:70.0464,g:'MC',vent:9.8484,mVA:'individual',m4T:'coalicion',PAN:104,PRI:287,PRD:308,NAEM:276,MORENA:1011,PVEM:3651,PT:103,MC:6588},{id:'054',n:'MELCHOR OCAMPO',v4T:14030,vVA:0,vMC:2211,nul:1055,noreg:38,tv:30872,ln:46168,part:66.8688,g:'4T',vent:38.2839,mVA:'individual',m4T:'individual',PAN:0,PRI:0,PRD:0,NAEM:0,MORENA:9406,PVEM:4126,PT:498,MC:2211},{id:'055',n:'METEPEC',v4T:52486,vVA:76525,vMC:8150,nul:2423,noreg:195,tv:139779,ln:198094,part:70.562,g:'VA',vent:17.1979,mVA:'coalicion',m4T:'coalicion',PAN:43887,PRI:27000,PRD:1174,NAEM:830,MORENA:40685,PVEM:3276,PT:4906,MC:8150},{id:'056',n:'MEXICALTZINGO',v4T:2162,vVA:2628,vMC:1878,nul:216,noreg:11,tv:6895,ln:10978,part:62.8074,g:'VA',vent:6.7585,mVA:'coalicion',m4T:'individual',PAN:237,PRI:2194,PRD:57,NAEM:71,MORENA:1869,PVEM:142,PT:151,MC:1878},{id:'057',n:'MORELOS',v4T:8142,vVA:0,vMC:3696,nul:712,noreg:29,tv:17949,ln:25299,part:70.9475,g:'4T',vent:24.7702,mVA:'individual',m4T:'coalicion',PAN:0,PRI:0,PRD:0,NAEM:0,MORENA:6185,PVEM:1062,PT:388,MC:3696},{id:'058',n:'NAUCALPAN DE JUAREZ',v4T:228616,vVA:175648,vMC:29020,nul:10946,noreg:776,tv:445006,ln:710848,part:62.6021,g:'4T',vent:11.9028,mVA:'coalicion',m4T:'coalicion',PAN:120659,PRI:38870,PRD:4442,NAEM:2907,MORENA:185648,PVEM:16257,PT:8383,MC:29020},{id:'059',n:'NEXTLALPAN',v4T:14342,vVA:0,vMC:5301,nul:958,noreg:33,tv:25006,ln:37193,part:67.2331,g:'4T',vent:36.1553,mVA:'individual',m4T:'individual',PAN:0,PRI:0,PRD:0,NAEM:0,MORENA:12062,PVEM:624,PT:1656,MC:5301},{id:'060',n:'NEZAHUALCOYOTL',v4T:327080,vVA:0,vMC:76731,nul:26100,noreg:522,tv:544933,ln:878708,part:62.0153,g:'4T',vent:45.9412,mVA:'individual',m4T:'individual',PAN:0,PRI:0,PRD:0,NAEM:0,MORENA:281299,PVEM:29258,PT:16523,MC:76731},{id:'061',n:'NICOLAS ROMERO',v4T:81941,vVA:73231,vMC:18447,nul:6516,noreg:188,tv:180323,ln:313688,part:57.4848,g:'4T',vent:4.8302,mVA:'coalicion',m4T:'coalicion',PAN:37801,PRI:21346,PRD:6985,NAEM:4169,MORENA:64919,PVEM:7122,PT:3783,MC:18447},{id:'062',n:'NOPALTEPEC',v4T:1948,vVA:1924,vMC:2128,nul:301,noreg:12,tv:6313,ln:8616,part:73.2707,g:'MC',vent:2.8513,mVA:'coalicion',m4T:'coalicion',PAN:1501,PRI:319,PRD:12,NAEM:11,MORENA:1687,PVEM:69,PT:80,MC:2128},{id:'063',n:'OCOYOACAC',v4T:11872,vVA:0,vMC:11267,nul:1783,noreg:2041,tv:38229,ln:55507,part:68.8724,g:'4T',vent:1.5826,mVA:'individual',m4T:'coalicion',PAN:0,PRI:0,PRD:0,NAEM:0,MORENA:7011,PVEM:3435,PT:619,MC:11267},{id:'064',n:'OCUILAN',v4T:5344,vVA:4268,vMC:5109,nul:999,noreg:6,tv:15726,ln:23274,part:67.569,g:'4T',vent:1.4943,mVA:'individual',m4T:'individual',PAN:564,PRI:1374,PRD:1607,NAEM:723,MORENA:3435,PVEM:215,PT:1694,MC:5109},{id:'065',n:'EL ORO',v4T:8527,vVA:9759,vMC:326,nul:619,noreg:7,tv:19238,ln:29101,part:66.1077,g:'VA',vent:6.404,mVA:'individual',m4T:'coalicion',PAN:3524,PRI:5683,PRD:90,NAEM:462,MORENA:7404,PVEM:474,PT:333,MC:326},{id:'066',n:'OTUMBA',v4T:11200,vVA:5062,vMC:131,nul:578,noreg:2,tv:16973,ln:29810,part:56.9373,g:'4T',vent:36.1633,mVA:'coalicion',m4T:'individual',PAN:289,PRI:4513,PRD:92,NAEM:31,MORENA:5381,PVEM:4789,PT:1030,MC:131},{id:'067',n:'OTZOLOAPAN',v4T:1111,vVA:0,vMC:14,nul:263,noreg:1,tv:2807,ln:4202,part:66.8015,g:'4T',vent:39.0809,mVA:'individual',m4T:'individual',PAN:0,PRI:0,PRD:0,NAEM:0,MORENA:62,PVEM:19,PT:1030,MC:14},{id:'068',n:'OTZOLOTEPEC',v4T:17130,vVA:18087,vMC:3692,nul:1597,noreg:31,tv:40537,ln:65213,part:62.1609,g:'VA',vent:2.3608,mVA:'individual',m4T:'individual',PAN:4108,PRI:13653,PRD:326,NAEM:0,MORENA:12455,PVEM:3027,PT:1648,MC:3692},{id:'069',n:'OZUMBA',v4T:12095,vVA:0,vMC:1662,nul:391,noreg:13,tv:15280,ln:22258,part:68.6495,g:'4T',vent:68.2788,mVA:'individual',m4T:'individual',PAN:0,PRI:0,PRD:0,NAEM:0,MORENA:5052,PVEM:6875,PT:168,MC:1662},{id:'070',n:'PAPALOTLA',v4T:1765,vVA:1507,vMC:212,nul:73,noreg:7,tv:3564,ln:4471,part:79.7137,g:'4T',vent:7.2391,mVA:'individual',m4T:'coalicion',PAN:72,PRI:1211,PRD:224,NAEM:0,MORENA:1543,PVEM:105,PT:72,MC:212},{id:'071',n:'LA PAZ',v4T:62721,vVA:55377,vMC:6713,nul:3961,noreg:500,tv:129272,ln:214668,part:60.2195,g:'4T',vent:5.681,mVA:'coalicion',m4T:'coalicion',PAN:4406,PRI:45590,PRD:1951,NAEM:1089,MORENA:53095,PVEM:2452,PT:2086,MC:6713},{id:'072',n:'POLOTITLAN',v4T:4210,vVA:2704,vMC:1272,nul:658,noreg:18,tv:8862,ln:12722,part:69.6589,g:'4T',vent:16.9939,mVA:'coalicion',m4T:'individual',PAN:298,PRI:2262,PRD:74,NAEM:19,MORENA:2060,PVEM:1108,PT:1042,MC:1272},{id:'073',n:'RAYON',v4T:2540,vVA:3036,vMC:1727,nul:276,noreg:52,tv:7631,ln:10244,part:74.4924,g:'VA',vent:6.4998,mVA:'coalicion',m4T:'coalicion',PAN:176,PRI:2671,PRD:80,NAEM:22,MORENA:1331,PVEM:106,PT:946,MC:1727},{id:'074',n:'SAN ANTONIO LA ISLA',v4T:6551,vVA:6128,vMC:1661,nul:415,noreg:44,tv:14799,ln:20680,part:71.5619,g:'4T',vent:2.8583,mVA:'individual',m4T:'individual',PAN:1932,PRI:3444,PRD:752,NAEM:0,MORENA:2896,PVEM:2948,PT:707,MC:1661},{id:'075',n:'SAN FELIPE DEL PROGRESO',v4T:31601,vVA:29813,vMC:2049,nul:2394,noreg:119,tv:65976,ln:103343,part:63.8418,g:'4T',vent:2.7101,mVA:'coalicion',m4T:'coalicion',PAN:1319,PRI:27231,PRD:261,NAEM:309,MORENA:26488,PVEM:2114,PT:1381,MC:2049},{id:'076',n:'SAN MARTIN DE LAS PIRAMIDES',v4T:4589,vVA:6782,vMC:3899,nul:421,noreg:20,tv:15711,ln:22627,part:69.4347,g:'VA',vent:13.9584,mVA:'individual',m4T:'coalicion',PAN:1146,PRI:3459,PRD:30,NAEM:2147,MORENA:4151,PVEM:151,PT:110,MC:3899},{id:'077',n:'SAN MATEO ATENCO',v4T:27905,vVA:19796,vMC:3688,nul:1872,noreg:41,tv:53302,ln:75745,part:70.3703,g:'4T',vent:15.2133,mVA:'coalicion',m4T:'individual',PAN:3326,PRI:14528,PRD:877,NAEM:382,MORENA:18867,PVEM:6010,PT:3028,MC:3688},{id:'078',n:'SAN SIMON DE GUERRERO',v4T:1420,vVA:1380,vMC:1307,nul:185,noreg:19,tv:4311,ln:5548,part:77.7037,g:'4T',vent:0.9279,mVA:'coalicion',m4T:'coalicion',PAN:28,PRI:73,PRD:1231,NAEM:12,MORENA:1291,PVEM:23,PT:72,MC:1307},{id:'079',n:'SANTO TOMAS',v4T:1665,vVA:2154,vMC:820,nul:219,noreg:0,tv:4858,ln:7971,part:60.9459,g:'VA',vent:10.0659,mVA:'coalicion',m4T:'coalicion',PAN:60,PRI:241,PRD:1755,NAEM:7,MORENA:1436,PVEM:95,PT:61,MC:820},{id:'080',n:'SOYANIQUILPAN DE JUAREZ',v4T:4632,vVA:4248,vMC:62,nul:236,noreg:9,tv:9187,ln:11734,part:78.2938,g:'4T',vent:4.1798,mVA:'coalicion',m4T:'individual',PAN:3860,PRI:300,PRD:12,NAEM:16,MORENA:4358,PVEM:163,PT:111,MC:62},{id:'081',n:'SULTEPEC',v4T:4893,vVA:0,vMC:1628,nul:710,noreg:4,tv:11413,ln:20093,part:56.8009,g:'4T',vent:28.6077,mVA:'individual',m4T:'coalicion',PAN:0,PRI:0,PRD:0,NAEM:0,MORENA:1379,PVEM:2957,PT:229,MC:1628},{id:'082',n:'TECAMAC',v4T:129248,vVA:88179,vMC:13059,nul:9668,noreg:590,tv:240744,ln:380698,part:63.2375,g:'4T',vent:17.0592,mVA:'coalicion',m4T:'individual',PAN:21649,PRI:58678,PRD:1807,NAEM:1553,MORENA:114655,PVEM:9405,PT:5188,MC:13059},{id:'083',n:'TEJUPILCO',v4T:12763,vVA:0,vMC:6296,nul:1541,noreg:15,tv:36010,ln:61374,part:58.6731,g:'4T',vent:17.9589,mVA:'individual',m4T:'coalicion',PAN:0,PRI:0,PRD:0,NAEM:0,MORENA:10026,PVEM:1258,PT:821,MC:6296},{id:'084',n:'TEMAMATLA',v4T:4833,vVA:432,vMC:1729,nul:397,noreg:4,tv:8327,ln:12100,part:68.8182,g:'4T',vent:37.2763,mVA:'individual',m4T:'individual',PAN:60,PRI:275,PRD:53,NAEM:44,MORENA:1438,PVEM:3066,PT:329,MC:1729},{id:'085',n:'TEMASCALAPA',v4T:8512,vVA:0,vMC:356,nul:1069,noreg:26,tv:22408,ln:32551,part:68.8397,g:'4T',vent:36.3977,mVA:'individual',m4T:'coalicion',PAN:0,PRI:0,PRD:0,NAEM:0,MORENA:7331,PVEM:427,PT:318,MC:356},{id:'086',n:'TEMASCALCINGO',v4T:19040,vVA:9410,vMC:3319,nul:1779,noreg:21,tv:33569,ln:53687,part:62.5272,g:'4T',vent:28.6872,mVA:'coalicion',m4T:'individual',PAN:642,PRI:8248,PRD:236,NAEM:104,MORENA:9782,PVEM:5006,PT:4252,MC:3319},{id:'087',n:'TEMASCALTEPEC',v4T:4911,vVA:4598,vMC:3937,nul:545,noreg:3,tv:13994,ln:26714,part:52.3845,g:'4T',vent:2.2367,mVA:'coalicion',m4T:'coalicion',PAN:2823,PRI:1330,PRD:200,NAEM:94,MORENA:4111,PVEM:336,PT:284,MC:3937},{id:'088',n:'TEMOAYA',v4T:21294,vVA:0,vMC:6562,nul:1596,noreg:50,tv:44127,ln:78778,part:56.0144,g:'4T',vent:33.3855,mVA:'individual',m4T:'coalicion',PAN:0,PRI:0,PRD:0,NAEM:0,MORENA:17238,PVEM:1699,PT:1192,MC:6562},{id:'089',n:'TENANCINGO',v4T:26234,vVA:5791,vMC:10984,nul:1970,noreg:53,tv:45032,ln:77818,part:57.8684,g:'4T',vent:33.8648,mVA:'coalicion',m4T:'individual',PAN:1075,PRI:3962,PRD:280,NAEM:307,MORENA:11723,PVEM:10708,PT:3803,MC:10984},{id:'090',n:'TENANGO DEL AIRE',v4T:4279,vVA:2476,vMC:174,nul:242,noreg:0,tv:7171,ln:9620,part:74.5426,g:'4T',vent:25.1429,mVA:'individual',m4T:'individual',PAN:2103,PRI:215,PRD:158,NAEM:0,MORENA:935,PVEM:2224,PT:1120,MC:174},{id:'091',n:'TENANGO DEL VALLE',v4T:25946,vVA:0,vMC:4571,nul:1691,noreg:17,tv:39214,ln:66715,part:58.7784,g:'4T',vent:54.5086,mVA:'individual',m4T:'individual',PAN:0,PRI:0,PRD:0,NAEM:0,MORENA:10184,PVEM:8504,PT:7258,MC:4571},{id:'092',n:'TEOLOYUCAN',v4T:23244,vVA:17011,vMC:3078,nul:1673,noreg:42,tv:45048,ln:71358,part:63.1296,g:'4T',vent:13.8364,mVA:'coalicion',m4T:'individual',PAN:12757,PRI:2900,PRD:493,NAEM:299,MORENA:17646,PVEM:4829,PT:769,MC:3078},{id:'093',n:'TEOTIHUACAN',v4T:12312,vVA:19042,vMC:1066,nul:1077,noreg:35,tv:33532,ln:49994,part:67.072,g:'VA',vent:20.0704,mVA:'individual',m4T:'coalicion',PAN:705,PRI:17320,PRD:191,NAEM:826,MORENA:10683,PVEM:406,PT:525,MC:1066},{id:'094',n:'TEPETLAOXTOC',v4T:7622,vVA:4356,vMC:3736,nul:605,noreg:555,tv:16874,ln:24445,part:69.0284,g:'4T',vent:19.3552,mVA:'coalicion',m4T:'individual',PAN:294,PRI:3777,PRD:65,NAEM:99,MORENA:5602,PVEM:217,PT:1803,MC:3736},{id:'095',n:'TEPETLIXPA',v4T:3709,vVA:1597,vMC:4280,nul:523,noreg:1,tv:10110,ln:15757,part:64.162,g:'MC',vent:5.6479,mVA:'individual',m4T:'individual',PAN:1175,PRI:278,PRD:18,NAEM:126,MORENA:1089,PVEM:2569,PT:51,MC:4280},{id:'096',n:'TEPOTZOTLAN',v4T:18144,vVA:4066,vMC:19280,nul:1582,noreg:47,tv:43119,ln:67350,part:64.0223,g:'MC',vent:2.6346,mVA:'individual',m4T:'individual',PAN:1931,PRI:1274,PRD:406,NAEM:455,MORENA:16413,PVEM:520,PT:1211,MC:19280},{id:'097',n:'TEQUIXQUIAC',v4T:8340,vVA:0,vMC:6517,nul:799,noreg:16,tv:20803,ln:30450,part:68.3186,g:'4T',vent:8.7632,mVA:'individual',m4T:'individual',PAN:0,PRI:0,PRD:0,NAEM:0,MORENA:7377,PVEM:633,PT:330,MC:6517},{id:'098',n:'TEXCALTITLAN',v4T:1990,vVA:2667,vMC:2452,nul:284,noreg:2,tv:7395,ln:13979,part:52.9008,g:'VA',vent:2.9074,mVA:'coalicion',m4T:'coalicion',PAN:238,PRI:787,PRD:1416,NAEM:133,MORENA:1733,PVEM:95,PT:90,MC:2452},{id:'099',n:'TEXCALYACAC',v4T:1293,vVA:1359,vMC:811,nul:287,noreg:3,tv:3753,ln:4661,part:80.5192,g:'VA',vent:1.7586,mVA:'individual',m4T:'individual',PAN:16,PRI:184,PRD:206,NAEM:953,MORENA:627,PVEM:666,PT:0,MC:811},{id:'100',n:'TEXCOCO',v4T:72971,vVA:0,vMC:23543,nul:3726,noreg:253,tv:133261,ln:220404,part:60.4622,g:'4T',vent:37.0911,mVA:'individual',m4T:'coalicion',PAN:0,PRI:0,PRD:0,NAEM:0,MORENA:58763,PVEM:7058,PT:2846,MC:23543},{id:'101',n:'TEZOYUCA',v4T:8970,vVA:0,vMC:725,nul:758,noreg:13,tv:23680,ln:36958,part:64.0727,g:'4T',vent:34.8184,mVA:'individual',m4T:'coalicion',PAN:0,PRI:0,PRD:0,NAEM:0,MORENA:7555,PVEM:441,PT:415,MC:725},{id:'102',n:'TIANGUISTENCO',v4T:21873,vVA:15461,vMC:2283,nul:1245,noreg:304,tv:41166,ln:62882,part:65.4655,g:'4T',vent:15.576,mVA:'coalicion',m4T:'coalicion',PAN:1411,PRI:12637,PRD:316,NAEM:328,MORENA:14462,PVEM:5413,PT:736,MC:2283},{id:'103',n:'TIMILPAN',v4T:4058,vVA:6937,vMC:156,nul:459,noreg:333,tv:11943,ln:14535,part:82.1672,g:'VA',vent:24.1062,mVA:'coalicion',m4T:'coalicion',PAN:267,PRI:6460,PRD:37,NAEM:20,MORENA:3483,PVEM:249,PT:164,MC:156},{id:'104',n:'TLALMANALCO',v4T:15888,vVA:3723,vMC:5023,nul:1076,noreg:42,tv:25752,ln:40188,part:64.0788,g:'4T',vent:42.1909,mVA:'individual',m4T:'individual',PAN:516,PRI:1360,PRD:339,NAEM:1508,MORENA:9634,PVEM:1535,PT:4719,MC:5023},{id:'105',n:'TLALNEPANTLA DE BAZ',v4T:168292,vVA:154312,vMC:27497,nul:8921,noreg:347,tv:359369,ln:568800,part:63.1802,g:'4T',vent:3.8902,mVA:'coalicion',m4T:'coalicion',PAN:78761,PRI:61273,PRD:3629,NAEM:2360,MORENA:137521,PVEM:10074,PT:6731,MC:27497},{id:'106',n:'TLATLAYA',v4T:11086,vVA:0,vMC:405,nul:508,noreg:11,tv:16996,ln:25677,part:66.1915,g:'4T',vent:62.8442,mVA:'individual',m4T:'coalicion',PAN:0,PRI:0,PRD:0,NAEM:0,MORENA:10363,PVEM:224,PT:232,MC:405},{id:'107',n:'TOLUCA',v4T:221595,vVA:176651,vMC:40386,nul:11059,noreg:607,tv:450298,ln:719862,part:62.5534,g:'4T',vent:9.9809,mVA:'coalicion',m4T:'coalicion',PAN:57210,PRI:102573,PRD:4161,NAEM:3973,MORENA:179782,PVEM:18263,PT:8745,MC:40386},{id:'108',n:'TONATICO',v4T:2250,vVA:0,vMC:2928,nul:233,noreg:3,tv:7851,ln:11407,part:68.8262,g:'MC',vent:8.6358,mVA:'individual',m4T:'coalicion',PAN:0,PRI:0,PRD:0,NAEM:0,MORENA:1738,PVEM:125,PT:258,MC:2928},{id:'109',n:'TULTEPEC',v4T:46014,vVA:0,vMC:8999,nul:3308,noreg:87,tv:83177,ln:132971,part:62.5527,g:'4T',vent:44.5015,mVA:'individual',m4T:'individual',PAN:0,PRI:0,PRD:0,NAEM:0,MORENA:37356,PVEM:3090,PT:5568,MC:8999},{id:'110',n:'TULTITLAN',v4T:146015,vVA:0,vMC:26883,nul:12987,noreg:309,tv:236585,ln:385431,part:61.3819,g:'4T',vent:50.3548,mVA:'individual',m4T:'individual',PAN:0,PRI:0,PRD:0,NAEM:0,MORENA:121406,PVEM:18120,PT:6489,MC:26883},{id:'111',n:'VALLE DE BRAVO',v4T:22670,vVA:0,vMC:976,nul:1167,noreg:492,tv:41168,ln:59293,part:69.4315,g:'4T',vent:52.6963,mVA:'individual',m4T:'coalicion',PAN:0,PRI:0,PRD:0,NAEM:0,MORENA:19580,PVEM:1173,PT:858,MC:976},{id:'112',n:'VILLA DE ALLENDE',v4T:13624,vVA:8247,vMC:589,nul:831,noreg:23,tv:23314,ln:38266,part:60.9261,g:'4T',vent:23.0634,mVA:'coalicion',m4T:'coalicion',PAN:399,PRI:1076,PRD:6453,NAEM:83,MORENA:11624,PVEM:639,PT:565,MC:589},{id:'113',n:'VILLA DEL CARBON',v4T:8977,vVA:15045,vMC:1234,nul:870,noreg:23,tv:26149,ln:38144,part:68.5534,g:'VA',vent:23.2055,mVA:'individual',m4T:'coalicion',PAN:6135,PRI:8807,PRD:103,NAEM:0,MORENA:5408,PVEM:651,PT:2349,MC:1234},{id:'114',n:'VILLA GUERRERO',v4T:13001,vVA:0,vMC:7289,nul:1026,noreg:45,tv:28015,ln:48509,part:57.7522,g:'4T',vent:20.3891,mVA:'individual',m4T:'coalicion',PAN:0,PRI:0,PRD:0,NAEM:0,MORENA:2552,PVEM:9215,PT:602,MC:7289},{id:'115',n:'VILLA VICTORIA',v4T:20265,vVA:23827,vMC:952,nul:2124,noreg:65,tv:47233,ln:76639,part:61.6305,g:'VA',vent:7.5413,mVA:'individual',m4T:'coalicion',PAN:984,PRI:22095,PRD:438,NAEM:310,MORENA:15869,PVEM:2047,PT:666,MC:952},{id:'116',n:'XONACATLAN',v4T:16718,vVA:0,vMC:8758,nul:1183,noreg:7,tv:34266,ln:48733,part:70.3138,g:'4T',vent:23.23,mVA:'individual',m4T:'individual',PAN:0,PRI:0,PRD:0,NAEM:0,MORENA:6248,PVEM:7491,PT:2979,MC:8758},{id:'117',n:'ZACAZONAPAN',v4T:1991,vVA:151,vMC:601,nul:133,noreg:19,tv:2895,ln:4076,part:71.0255,g:'4T',vent:48.0138,mVA:'coalicion',m4T:'coalicion',PAN:26,PRI:69,PRD:37,NAEM:13,MORENA:1722,PVEM:129,PT:73,MC:601},{id:'118',n:'ZACUALPAN',v4T:4222,vVA:0,vMC:153,nul:281,noreg:3,tv:7010,ln:11095,part:63.1816,g:'4T',vent:58.0456,mVA:'individual',m4T:'coalicion',PAN:0,PRI:0,PRD:0,NAEM:0,MORENA:3520,PVEM:274,PT:252,MC:153},{id:'119',n:'ZINACANTEPEC',v4T:39005,vVA:45302,vMC:11371,nul:3545,noreg:193,tv:99416,ln:153876,part:64.6079,g:'VA',vent:6.334,mVA:'coalicion',m4T:'coalicion',PAN:6647,PRI:35185,PRD:811,NAEM:895,MORENA:28703,PVEM:4817,PT:2867,MC:11371},{id:'120',n:'ZUMPAHUACAN',v4T:4703,vVA:2274,vMC:991,nul:452,noreg:2,tv:9080,ln:13289,part:68.3272,g:'4T',vent:26.7511,mVA:'individual',m4T:'individual',PAN:1348,PRI:820,PRD:18,NAEM:88,MORENA:579,PVEM:643,PT:3481,MC:991},{id:'121',n:'ZUMPANGO',v4T:34093,vVA:0,vMC:8367,nul:2418,noreg:53,tv:74641,ln:181303,part:41.1692,g:'4T',vent:34.4663,mVA:'individual',m4T:'coalicion',PAN:0,PRI:0,PRD:0,NAEM:0,MORENA:26808,PVEM:3534,PT:1597,MC:8367},{id:'122',n:'VALLE DE CHALCO SOLIDARIDAD',v4T:102030,vVA:37278,vMC:10852,nul:11785,noreg:108,tv:162053,ln:282755,part:57.3122,g:'4T',vent:39.9573,mVA:'individual',m4T:'individual',PAN:5414,PRI:18028,PRD:11603,NAEM:2233,MORENA:70445,PVEM:14177,PT:17408,MC:10852},{id:'123',n:'LUVIANOS',v4T:5392,vVA:5492,vMC:379,nul:925,noreg:61,tv:12249,ln:22803,part:53.7166,g:'VA',vent:0.8164,mVA:'coalicion',m4T:'coalicion',PAN:293,PRI:4604,PRD:405,NAEM:60,MORENA:3241,PVEM:749,PT:1140,MC:379},{id:'124',n:'SAN JOSE DEL RINCON',v4T:19722,vVA:0,vMC:7656,nul:2316,noreg:21,tv:41364,ln:75381,part:54.8732,g:'4T',vent:29.1703,mVA:'individual',m4T:'coalicion',PAN:0,PRI:0,PRD:0,NAEM:0,MORENA:10497,PVEM:6841,PT:1068,MC:7656},{id:'125',n:'TONANITLA',v4T:3463,vVA:2201,vMC:1344,nul:272,noreg:34,tv:7314,ln:10703,part:68.336,g:'4T',vent:17.2546,mVA:'coalicion',m4T:'coalicion',PAN:405,PRI:915,PRD:612,NAEM:110,MORENA:3015,PVEM:115,PT:133,MC:1344}];
+
+</script>
+
+<script>
+// ============================================================
+// BLOQUE 3 — VALIDACIÓN DE TOTALES
+// ============================================================
+function validarTotales() {
+  const t4T_ayu = MUNICIPIOS.reduce((s,m) => s+m.v4T, 0);
+  const tVA_ayu = MUNICIPIOS.reduce((s,m) => s+m.vVA, 0);
+  const tMC_ayu = MUNICIPIOS.reduce((s,m) => s+m.vMC, 0);
+  const diff4T = Math.abs(t4T_ayu - TOTALES_REF.aytos.t4T) / TOTALES_REF.aytos.t4T;
+  if (diff4T < 0.01) {
+    console.log('✅ Totales validados correctamente');
+  } else {
+    console.warn('⚠️ Diferencia en totales detectada. Calculado 4T AYU:', t4T_ayu, '| Referencia:', TOTALES_REF.aytos.t4T);
+  }
+}
+
+// ============================================================
+// BLOQUE 4 — GRÁFICAS SISTEMA DE RESULTADOS
+// ============================================================
+
+// Configura Chart.js con colores del tema activo
+function applyChartTheme() {
+  const dark = document.documentElement.getAttribute('data-theme') === 'dark';
+  Chart.defaults.color          = dark ? '#8878A8' : '#555566';
+  Chart.defaults.borderColor    = dark ? 'rgba(255,255,255,.07)' : 'rgba(0,0,0,.06)';
+  Chart.defaults.backgroundColor= dark ? 'rgba(255,255,255,.05)' : 'rgba(0,0,0,.03)';
+  if (Chart.defaults.plugins?.legend?.labels)
+    Chart.defaults.plugins.legend.labels.color = dark ? '#C8BCD8' : '#333344';
+}
+
+function initResultadosCharts() {
+  applyChartTheme();
+  const ref = TOTALES_REF;
+
+  // DIP Pie
+  new Chart(document.getElementById('dipPie'), {
+    type: 'doughnut',
+    data: { labels: ['4T','VA','MC','Nulos'],
+      datasets: [{ data: [ref.diput.t4T, ref.diput.tVA, ref.diput.tMC, ref.diput.nulos],
+        backgroundColor: ['#8B0000','#003087','#FF6600','#999'], borderWidth: 2 }] },
+    options: { responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { position: 'right' },
+      tooltip: { callbacks: { label: ctx => ` ${ctx.label}: ${fmtN(ctx.raw)}` }}}}
+  });
+
+  // DIP Bar
+  new Chart(document.getElementById('dipBar'), {
+    type: 'bar',
+    data: { labels: ['4T','VA','MC','Nulos'],
+      datasets: [{ data: [ref.diput.t4T, ref.diput.tVA, ref.diput.tMC, ref.diput.nulos],
+        backgroundColor: ['#8B0000','#003087','#FF6600','#999'], borderRadius: 5 }] },
+    options: { responsive: true, maintainAspectRatio: false,
+      indexAxis: 'y', plugins: { legend: { display: false } },
+      scales: { x: { ticks: { callback: v => fmtN(v) } } } }
+  });
+
+  // DIP partidos individuales
+  const pDip = ['PVEM','PT','MORENA','PAN','PRI','PRD','NAEM','MC','CC','IND'];
+  const vDip = {};
+  pDip.forEach(p => vDip[p] = 0);
+  DISTRITOS.forEach(d => pDip.forEach(p => { vDip[p] += d[p] || 0; }));
+  new Chart(document.getElementById('dipPartBar'), {
+    type: 'bar',
+    data: { labels: pDip,
+      datasets: [{ data: pDip.map(p => vDip[p]),
+        backgroundColor: pDip.map(p => C_PARTIDO[p] || '#888'), borderRadius: 4 }] },
+    options: { responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: { y: { ticks: { callback: v => fmtN(v) } } } }
+  });
+
+  // DIP Scatter
+  new Chart(document.getElementById('dipScatter'), {
+    type: 'scatter',
+    data: { datasets: [{ label: 'Distritos',
+      data: DISTRITOS.map(d => ({ x: d.part, y: d.vent, label: d.n })),
+      backgroundColor: DISTRITOS.map(d => cBloque(d.g) + 'CC'), pointRadius: 6 }] },
+    options: { plugins: { tooltip: { callbacks: { label: ctx => `${ctx.raw.label}: Part=${ctx.raw.x}%, Vent=${ctx.raw.y}%` }}},
+      scales: { x: { title: { display: true, text: 'Participación %' }}, y: { title: { display: true, text: 'Ventaja %' }}}}
+  });
+
+  // AYU Pie
+  new Chart(document.getElementById('ayuPie'), {
+    type: 'doughnut',
+    data: { labels: ['4T','VA','MC','Nulos'],
+      datasets: [{ data: [ref.aytos.t4T, ref.aytos.tVA, ref.aytos.tMC, ref.aytos.nulos],
+        backgroundColor: ['#8B0000','#003087','#FF6600','#999'], borderWidth: 2 }] },
+    options: { responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { position: 'right' },
+      tooltip: { callbacks: { label: ctx => ` ${ctx.label}: ${fmtN(ctx.raw)}` }}}}
+  });
+
+  // AYU Bar
+  new Chart(document.getElementById('ayuBar'), {
+    type: 'bar',
+    data: { labels: ['4T','VA','MC','Nulos'],
+      datasets: [{ data: [ref.aytos.t4T, ref.aytos.tVA, ref.aytos.tMC, ref.aytos.nulos],
+        backgroundColor: ['#8B0000','#003087','#FF6600','#999'], borderRadius: 5 }] },
+    options: { responsive: true, maintainAspectRatio: false,
+      indexAxis: 'y', plugins: { legend: { display: false } },
+      scales: { x: { ticks: { callback: v => fmtN(v) } } } }
+  });
+
+  // AYU partidos
+  const pAyu = ['PVEM','PT','MORENA','PAN','PRI','PRD','NAEM','MC','CC','IND'];
+  const vAyu = {};
+  pAyu.forEach(p => vAyu[p] = 0);
+  MUNICIPIOS.forEach(m => pAyu.forEach(p => { vAyu[p] += m[p] || 0; }));
+  new Chart(document.getElementById('ayuPartBar'), {
+    type: 'bar',
+    data: { labels: pAyu,
+      datasets: [{ data: pAyu.map(p => vAyu[p]),
+        backgroundColor: pAyu.map(p => C_PARTIDO[p] || '#888'), borderRadius: 4 }] },
+    options: { responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: { y: { ticks: { callback: v => fmtN(v) } } } }
+  });
+
+  // AYU participación top/bottom
+  const sorted = [...MUNICIPIOS].sort((a,b) => b.part - a.part);
+  const top10 = sorted.slice(0, 10);
+  const bot10 = sorted.slice(-10).reverse();
+  new Chart(document.getElementById('ayuPartAlta'), {
+    type: 'bar',
+    data: { labels: top10.map(m => m.n.length > 16 ? m.n.substring(0,14)+'…' : m.n),
+      datasets: [{ data: top10.map(m => m.part), backgroundColor: '#662483', borderRadius: 4 }] },
+    options: { indexAxis: 'y', plugins: { legend: { display: false } }, scales: { x: { min: 0, max: 100 } } }
+  });
+  new Chart(document.getElementById('ayuPartBaja'), {
+    type: 'bar',
+    data: { labels: bot10.map(m => m.n.length > 16 ? m.n.substring(0,14)+'…' : m.n),
+      datasets: [{ data: bot10.map(m => m.part), backgroundColor: '#E6007E', borderRadius: 4 }] },
+    options: { indexAxis: 'y', plugins: { legend: { display: false } }, scales: { x: { min: 0, max: 100 } } }
+  });
+
+  // AYU Scatter
+  new Chart(document.getElementById('ayuScatter'), {
+    type: 'scatter',
+    data: { datasets: [{ label: 'Municipios',
+      data: MUNICIPIOS.map(m => ({ x: m.part, y: m.vent, label: m.n })),
+      backgroundColor: MUNICIPIOS.map(m => cBloque(m.g) + 'BB'), pointRadius: 5 }] },
+    options: { plugins: { tooltip: { callbacks: { label: ctx => `${ctx.raw.label}: Part=${ctx.raw.x}%, Vent=${ctx.raw.y}%` }}},
+      scales: { x: { title: { display: true, text: 'Participación %' }}, y: { title: { display: true, text: 'Ventaja %' }}}}
+  });
+
+  // Gauges PREP (doughnut semicircular)
+  [['gaugeAyu', 95.4], ['gaugeDip', 94.7]].forEach(([id, pct]) => {
+    new Chart(document.getElementById(id), {
+      type: 'doughnut',
+      data: { datasets: [{ data: [pct, 100-pct],
+        backgroundColor: ['#E6007E','#e8e0f0'], borderWidth: 0,
+        circumference: 180, rotation: 270 }] },
+      options: { plugins: { legend: { display: false },
+        tooltip: { callbacks: { label: ctx => ctx.dataIndex === 0 ? `${pct}% capturado` : '' }}},
+        cutout: '70%' }
+    });
+  });
+
+  // Comparativa
+  buildComparativa();
+}
+</script>
+
+<script>
+// ============================================================
+// BLOQUE 5 — TABLAS DATATABLES
+// ============================================================
+let _dipDT = null, _ayuDT = null, _compDT = null;
+const DT_CFG = { dom:'Bfrtip', buttons:['csv','excel','pdf','print'],
+  language:{ url:'//cdn.datatables.net/plug-ins/1.13.7/i18n/es-ES.json' } };
+
+function buildDipTable(filtG, filtMVA) {
+  const tb = document.getElementById('tbDip');
+  tb.innerHTML = '';
+  let data = [...DISTRITOS];
+  if (filtG) data = data.filter(d => d.g === filtG);
+  if (filtMVA) data = data.filter(d => d.mVA === filtMVA);
+  data.forEach(d => {
+    const tr = document.createElement('tr');
+    if (d.conf) tr.classList.add('conflicto');
+    tr.innerHTML = `<td>${d.id}</td><td>${d.n}</td>
+      <td>${labelMod(d.mVA)}</td><td>${labelMod(d.m4T)}</td>
+      <td>${badgeG(d.g)}</td>
+      <td>${fmtN(d.v4T)}</td><td>${fmtN(d.vVA)}</td><td>${fmtN(d.vMC)}</td>
+      <td>${fmtN(d.nul)}</td><td>${fmtN(d.tv)}</td>
+      <td>${d.part.toFixed(4)}%</td><td>${d.vent.toFixed(4)}%</td>
+      <td>${d.conf ? '<span title="Este distrito presenta actas bajo candidatura común y coalición. Los votos de ambas modalidades han sido consolidados." style=\'cursor:help\'>⚠️</span>' : ''}</td>`;
+    tb.appendChild(tr);
+  });
+}
+
+function rebuildDipTable() {
+  if (_dipDT) { _dipDT.destroy(); _dipDT = null; }
+  buildDipTable(document.getElementById('filtDipG').value, document.getElementById('filtDipMVA').value);
+  _dipDT = $('#tblDip').DataTable({ ...DT_CFG, pageLength: 15, order: [[0,'asc']] });
+}
+
+function buildAyuTable(filtG, filtMVA) {
+  const tb = document.getElementById('tbAyu');
+  tb.innerHTML = '';
+  let data = [...MUNICIPIOS];
+  if (filtG) data = data.filter(m => m.g === filtG);
+  if (filtMVA) data = data.filter(m => m.mVA === filtMVA);
+  data.forEach(m => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td>${m.id}</td><td>${m.n}</td>
+      <td>${labelMod(m.mVA)}</td><td>${labelMod(m.m4T)}</td>
+      <td>${badgeG(m.g)}</td>
+      <td>${fmtN(m.v4T)}</td><td>${fmtN(m.vVA)}</td><td>${fmtN(m.vMC)}</td>
+      <td>${fmtN(m.nul)}</td><td>${fmtN(m.tv)}</td><td>${fmtN(m.ln)}</td>
+      <td>${m.part.toFixed(4)}%</td><td>${m.vent.toFixed(4)}%</td>`;
+    tb.appendChild(tr);
+  });
+}
+
+function rebuildAyuTable() {
+  if (_ayuDT) { _ayuDT.destroy(); _ayuDT = null; }
+  buildAyuTable(document.getElementById('filtAyuG').value, document.getElementById('filtAyuMVA').value);
+  _ayuDT = $('#tblAyu').DataTable({ ...DT_CFG, pageLength: 15, order: [[0,'asc']] });
+}
+
+function buildDipCompetidos() {
+  const sorted = [...DISTRITOS].sort((a,b) => a.vent - b.vent).slice(0, 5);
+  document.getElementById('dipCompetidos').innerHTML = sorted.map(d =>
+    `<div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid #f0eaf8;font-size:.82rem">
+      <span>${d.id} ${d.n}${d.conf?' ⚠️':''}</span>
+      <span>${badgeG(d.g)} <strong style="color:var(--mg)">${d.vent.toFixed(4)}%</strong></span>
+    </div>`
+  ).join('');
+}
+
+function buildAyuCompetidos() {
+  const sorted = [...MUNICIPIOS].sort((a,b) => a.vent - b.vent).filter(m => m.vent < 5).slice(0, 10);
+  document.getElementById('ayuCompetidos').innerHTML = sorted.length
+    ? sorted.map(m =>
+        `<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #f0eaf8;font-size:.8rem">
+          <span>${m.id} ${m.n}</span>
+          <span>${badgeG(m.g)} <strong style="color:var(--mg)">${m.vent.toFixed(4)}%</strong></span>
+        </div>`
+      ).join('')
+    : '<p style="color:var(--tx-muted);font-size:.82rem;padding:8px 0">No hay municipios con ventaja &lt;5%</p>';
+}
+
+function buildComparativa() {
+  const distLookup = {};
+  DISTRITOS.forEach(d => { distLookup[parseInt(d.id)] = d; });
+  let coinc = 0, split = 0;
+  const tb = document.getElementById('tbComp');
+  tb.innerHTML = '';
+  MUNICIPIOS.forEach(m => {
+    const munId = parseInt(m.id);
+    const distId = MUN_TO_DIST[munId];
+    const dist = distId ? distLookup[distId] : null;
+    const gDip = dist ? dist.g : '—';
+    const ok = dist && m.g === gDip;
+    if (dist) { ok ? coinc++ : split++; }
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td>${m.id}</td><td>${m.n}</td>
+      <td>${badgeG(m.g)}</td>
+      <td>${dist ? 'Dist. ' + dist.id : '—'}</td>
+      <td>${dist ? badgeG(gDip) : '—'}</td>
+      <td style="font-size:1.1rem">${dist ? (ok ? '✅' : '❌') : '—'}</td>`;
+    tb.appendChild(tr);
+  });
+  document.getElementById('kSplit').textContent = split;
+  document.getElementById('kCoinc').textContent = coinc;
+
+  new Chart(document.getElementById('compBar'), {
+    type: 'bar',
+    data: { labels: ['4T','VA','MC'],
+      datasets: [
+        { label: 'Ganó AYU', data: [TOTALES_REF.aytos.w4T, TOTALES_REF.aytos.wVA, TOTALES_REF.aytos.wMC], backgroundColor: ['#8B000099','#00308799','#FF660099'], borderRadius: 4 },
+        { label: 'Ganó DIP', data: [TOTALES_REF.diput.w4T, TOTALES_REF.diput.wVA, TOTALES_REF.diput.wMC], backgroundColor: ['#8B0000','#003087','#FF6600'], borderRadius: 4 }
+      ] },
+    options: { plugins: { legend: { position: 'top' } }, scales: { y: { beginAtZero: true } } }
+  });
+
+  new Chart(document.getElementById('compDona'), {
+    type: 'doughnut',
+    data: { labels: ['Consistentes', 'Voto diferenciado'],
+      datasets: [{ data: [coinc, split], backgroundColor: ['#662483','#E6007E'], borderWidth: 3 }] },
+    options: { plugins: { legend: { position: 'bottom' },
+      tooltip: { callbacks: { label: ctx => ` ${ctx.label}: ${ctx.raw} municipios` }}}}
+  });
+}
+</script>
+
+<script>
+// ============================================================
+// BLOQUE 6 — MAPAS LEAFLET
+// ============================================================
+let _topoCache = null;
+
+function getTopoJSON(cb) {
+  if (_topoCache) { cb(_topoCache); return; }
+  fetch(TOPO_URL)
+    .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+    .then(t => { _topoCache = t; cb(t); })
+    .catch(err => {
+      console.warn('Error cargando TopoJSON:', err);
+      // Mostrar mensaje en los mapas
+      ['mapDIP','mapAYU','mapConsulta'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el && el._leaflet_id == null) {
+          el.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--tx-muted);font-size:.9rem;flex-direction:column;gap:8px"><i class="fas fa-map-marked-alt" style="font-size:2rem;opacity:.4"></i><span>No se pudo cargar el mapa geográfico.<br>Verifica tu conexión a internet.</span></div>';
+        }
+      });
+    });
+}
+
+const TILE_URL = 'https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png';
+const TILE_OPT = { attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> © <a href="https://carto.com/">CARTO</a>', subdomains: 'abcd', maxZoom: 14 };
+
+function initMapDIP() {
+  const mapEl = document.getElementById('mapDIP');
+  if (!mapEl || mapEl._leaflet_id) return; // evitar doble inicialización
+  const map = L.map('mapDIP', { scrollWheelZoom: false }).setView([19.35, -99.65], 7);
+  window._leafletMapDIP = map; // referencia global para invalidateSize
+  L.tileLayer(TILE_URL, TILE_OPT).addTo(map);
+  // ResizeObserver: re-pinta cuando el contenedor adquiere dimensiones visibles
+  if (window.ResizeObserver) {
+    const ro = new ResizeObserver(() => map.invalidateSize());
+    ro.observe(mapEl);
+  }
+  const distLookup = {};
+  DISTRITOS.forEach(d => { distLookup[parseInt(d.id)] = d; });
+  getTopoJSON(topo => {
+    const geojson = topojson.feature(topo, topo.objects.municipalities);
+    // state_code puede ser número o string según la versión del TopoJSON
+    const edomex = { type: 'FeatureCollection',
+      features: geojson.features.filter(f => {
+        const sc = f.properties.state_code;
+        return sc === 15 || sc === '15';
+      })
+    };
+    if (edomex.features.length === 0) {
+      console.warn('No se encontraron municipios del Estado de México en el TopoJSON');
+      mapEl.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--tx-muted);font-size:.9rem;flex-direction:column;gap:8px"><i class="fas fa-exclamation-triangle" style="font-size:2rem;color:var(--mg)"></i><span>No se encontraron datos geográficos para Estado de México.</span></div>';
+      return;
+    }
+    L.geoJSON(edomex, {
+      style: f => {
+        const mc = parseInt(f.properties.mun_code);
+        const distId = MUN_TO_DIST[mc];
+        const d = distId ? distLookup[distId] : null;
+        return { fillColor: d ? cBloque(d.g) : '#ddd', fillOpacity: 0.75,
+          color: d && d.conf ? '#FFD700' : '#fff',
+          weight: d && d.conf ? 2.5 : 1,
+          dashArray: d && d.conf ? '5,3' : null };
+      },
+      onEachFeature: (f, layer) => {
+        const mc = parseInt(f.properties.mun_code);
+        const distId = MUN_TO_DIST[mc];
+        const d = distId ? distLookup[distId] : null;
+        // Nombre oficial INEGI 2025
+        const nomInegi = (typeof MUN_CENTROIDS !== 'undefined' && MUN_CENTROIDS[mc])
+          ? MUN_CENTROIDS[mc].nom : (f.properties.mun_name || 'Municipio');
+        const cveinegi = (typeof MUN_CENTROIDS !== 'undefined' && MUN_CENTROIDS[mc])
+          ? MUN_CENTROIDS[mc].cveinegi : '—';
+        const popup = d
+          ? `<div style="font-size:.85rem;min-width:200px">
+             <b style="font-size:.95rem">Dist. ${d.id}: ${d.n}</b>${d.conf ? ' ⚠️' : ''}
+             <div style="color:#888;font-size:.75rem;margin-bottom:4px">${nomInegi} · Clave: ${cveinegi}</div>
+             <div>Ganador: <b style="color:${cBloque(d.g)}">${d.g}</b></div>
+             <div>4T: ${fmtN(d.v4T)} | VA: ${fmtN(d.vVA)} | MC: ${fmtN(d.vMC)}</div>
+             <div>Participación: ${d.part.toFixed(2)}% | Ventaja: ${d.vent.toFixed(2)}%</div>
+             <div style="color:#888;font-size:.72rem">Mod. VA: ${d.mVA} | Mod. 4T: ${d.m4T}</div>
+             ${d.conf ? '<div style="color:#e65100;font-size:.72rem">⚠️ Coexistencia CC + Coalición</div>' : ''}
+             </div>`
+          : `<b>${nomInegi}</b><br><span style="color:#888;font-size:.75rem">Clave: ${cveinegi}</span><br>Sin datos de distrito`;
+        layer.bindPopup(popup, { maxWidth: 260 });
+        layer.on('mouseover', function() { this.setStyle({ weight: 3, fillOpacity: 1 }); this.openPopup(); });
+        layer.on('mouseout', function() { this.setStyle({ weight: d && d.conf ? 2.5 : 1, fillOpacity: 0.75 }); this.closePopup(); });
+      }
+    }).addTo(map);
+    // Invalidar tamaño escalonado para garantizar renderizado sin zona gris
+    setTimeout(() => map.invalidateSize(), 200);
+    setTimeout(() => map.invalidateSize(), 600);
+    setTimeout(() => map.invalidateSize(), 1200);
+  });
+}
+
+function initMapAYU() {
+  const mapEl = document.getElementById('mapAYU');
+  if (!mapEl || mapEl._leaflet_id) return; // evitar doble inicialización
+  const map = L.map('mapAYU', { scrollWheelZoom: false }).setView([19.35, -99.65], 7);
+  window._leafletMapAYU = map; // referencia global para invalidateSize
+  L.tileLayer(TILE_URL, TILE_OPT).addTo(map);
+  // ResizeObserver: re-pinta cuando el contenedor adquiere dimensiones visibles
+  if (window.ResizeObserver) {
+    const ro = new ResizeObserver(() => map.invalidateSize());
+    ro.observe(mapEl);
+  }
+  const munLookup = {};
+  MUNICIPIOS.forEach(m => { munLookup[parseInt(m.id)] = m; });
+  getTopoJSON(topo => {
+    const geojson = topojson.feature(topo, topo.objects.municipalities);
+    const edomex = { type: 'FeatureCollection',
+      features: geojson.features.filter(f => {
+        const sc = f.properties.state_code;
+        return sc === 15 || sc === '15';
+      })
+    };
+    if (edomex.features.length === 0) {
+      mapEl.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--tx-muted);font-size:.9rem;flex-direction:column;gap:8px"><i class="fas fa-exclamation-triangle" style="font-size:2rem;color:var(--mg)"></i><span>No se encontraron datos geográficos para Estado de México.</span></div>';
+      return;
+    }
+    L.geoJSON(edomex, {
+      style: f => {
+        const m = munLookup[parseInt(f.properties.mun_code)];
+        return { fillColor: m ? cBloque(m.g) : '#ddd', fillOpacity: 0.78, color: '#fff', weight: 1 };
+      },
+      onEachFeature: (f, layer) => {
+        const mc = parseInt(f.properties.mun_code);
+        const m = munLookup[mc];
+        // Nombre oficial INEGI 2025
+        const nomInegi = (typeof MUN_CENTROIDS !== 'undefined' && MUN_CENTROIDS[mc])
+          ? MUN_CENTROIDS[mc].nom : (m ? m.n : f.properties.mun_name || 'Municipio');
+        const cveinegi = (typeof MUN_CENTROIDS !== 'undefined' && MUN_CENTROIDS[mc])
+          ? MUN_CENTROIDS[mc].cveinegi : '—';
+        const popup = m
+          ? `<div style="font-size:.85rem;min-width:200px">
+             <b style="font-size:.95rem">${nomInegi}</b>
+             <div style="color:#888;font-size:.75rem;margin-bottom:4px">Clave INEGI: ${cveinegi} · ID: ${String(mc).padStart(3,'0')}</div>
+             <div>Ganador: <b style="color:${cBloque(m.g)}">${m.g}</b></div>
+             <div>4T: ${fmtN(m.v4T)} | VA: ${fmtN(m.vVA)} | MC: ${fmtN(m.vMC)}</div>
+             <div>Participación: ${m.part.toFixed(2)}% | Ventaja: ${m.vent.toFixed(2)}%</div>
+             <div style="color:#888;font-size:.72rem">Mod. VA: ${m.mVA} | Mod. 4T: ${m.m4T}</div>
+             </div>`
+          : `<b>${nomInegi}</b><br><span style="color:#888;font-size:.75rem">Clave: ${cveinegi}</span><br>Sin datos electorales`;
+        layer.bindPopup(popup, { maxWidth: 260 });
+        layer.on('mouseover', function() { this.setStyle({ weight: 3, fillOpacity: 1 }); this.openPopup(); });
+        layer.on('mouseout', function() { this.setStyle({ weight: 1, fillOpacity: 0.78 }); this.closePopup(); });
+      }
+    }).addTo(map);
+    // Invalidar tamaño escalonado para garantizar renderizado sin zona gris
+    setTimeout(() => map.invalidateSize(), 200);
+    setTimeout(() => map.invalidateSize(), 600);
+    setTimeout(() => map.invalidateSize(), 1200);
+  });
+}
+
+// ============================================================
+// BLOQUE 7 — SISTEMA DE CONSULTA (rediseñado)
+// ============================================================
+
+// ── Configuración de partidos ──────────────────────────────
+const SC_PARTIDOS = [
+  { key:'MORENA', nombre:'MORENA',       logo:'img/MORENA.svg', color:'#8B0000', bloque:'4T' },
+  { key:'PVEM',   nombre:'PVEM',         logo:'img/PVEM.svg',   color:'#5B8C2A', bloque:'4T' },
+  { key:'PT',     nombre:'PT',           logo:'img/PT.svg',     color:'#CC0000', bloque:'4T' },
+  { key:'PAN',    nombre:'PAN',          logo:'img/PAN.svg',    color:'#003087', bloque:'VA' },
+  { key:'PRI',    nombre:'PRI',          logo:'img/PRI.svg',    color:'#006847', bloque:'VA' },
+  { key:'PRD',    nombre:'PRD',          logo:'img/PRD.svg',    color:'#FFCC00', bloque:'VA' },
+  { key:'NAEM',   nombre:'NAEM',         logo:'img/NAEM.svg',   color:'#1B4B8A', bloque:'VA' },
+  { key:'MC',     nombre:'Mov. Ciudadano',logo:'img/MC.svg',    color:'#FF6600', bloque:'MC' },
+  { key:'CC',     nombre:'Cand. Común',  logo:'img/CC.svg',     color:'#1565c0', bloque:'N/A' },
+  { key:'IND',    nombre:'Cand. Indep.', logo:'img/IND.svg',    color:'#6a1b9a', bloque:'N/A' }
+];
+
+// Secciones simuladas por unidad geográfica (5-8 secciones por unidad)
+function scGenSecciones(id, tipo) {
+  const base = parseInt(id) * 10 + (tipo === 'dip' ? 500 : 0);
+  const n = 5 + (parseInt(id) % 4);
+  return Array.from({length: n}, (_, i) => ({
+    id: String(base + i + 1).padStart(4,'0'),
+    label: `Sección ${base + i + 1}`
+  }));
+}
+
+// Estado del módulo
+let _scDT = null, _scChart = null, _scMapInst = null, _scMapLayer = null;
+let _scSidebarOpen = true;
+
+// ── Sidebar: toggle / open / close ────────────────────────
+function scToggleSidebar() {
+  const sb = document.getElementById('scSidebar');
+  const isMobile = window.innerWidth <= 768;
+  if (isMobile) {
+    _scSidebarOpen ? scCloseSidebar() : scOpenSidebar();
+  } else {
+    _scSidebarOpen = !_scSidebarOpen;
+    sb.classList.toggle('collapsed', !_scSidebarOpen);
+    // Invalidar mapa si está visible
+    if (_scMapInst) setTimeout(() => _scMapInst.invalidateSize(), 300);
+  }
+}
+
+function scOpenSidebar() {
+  const sb = document.getElementById('scSidebar');
+  const ov = document.getElementById('scOverlay');
+  sb.classList.remove('collapsed');
+  if (ov) ov.classList.add('visible');
+  _scSidebarOpen = true;
+}
+
+function scCloseSidebar() {
+  const sb = document.getElementById('scSidebar');
+  const ov = document.getElementById('scOverlay');
+  sb.classList.add('collapsed');
+  if (ov) ov.classList.remove('visible');
+  _scSidebarOpen = false;
+}
+
+// Mostrar botón hamburguesa siempre visible
+function scInitResponsive() {
+  const isMobile = window.innerWidth <= 768;
+  if (isMobile && _scSidebarOpen) scCloseSidebar();
+}
+
+// ── Inicialización ─────────────────────────────────────────
+function initConsulta() {
+  scPopulateGeo();
+  scInitResponsive();
+  window.addEventListener('resize', scInitResponsive);
+  _scMapInst = L.map('mapConsulta', { scrollWheelZoom: false }).setView([19.35, -99.65], 7);
+  L.tileLayer(TILE_URL, TILE_OPT).addTo(_scMapInst);
+  scApply();
+}
+
+// ── Poblar selector de geografía ──────────────────────────
+function scPopulateGeo() {
+  const elec = document.querySelector('input[name="scElec"]:checked').value;
+  const pool = elec === 'dip' ? DISTRITOS : MUNICIPIOS;
+  const label = elec === 'dip' ? 'Distrito' : 'Municipio';
+  const lbl = document.getElementById('scGeoLabel');
+  if (lbl) lbl.innerHTML = `<i class="fas fa-map-marker-alt"></i> ${label}
+    <span class="sc-active-badge" id="scGeoBadge" style="display:none">1</span>`;
+  const sel = document.getElementById('scGeoSel');
+  sel.innerHTML = '<option value="">— Todos —</option>';
+  // Ordenar: tanto distritos como municipios por número de ID (001, 002, 003...)
+  const sorted = [...pool].sort((a, b) => parseInt(a.id, 10) - parseInt(b.id, 10));
+  // Agregar todas las opciones (garantiza los 125 municipios / 45 distritos)
+  sorted.forEach(r => {
+    if (!r || !r.id) return; // saltar entradas inválidas
+    const opt = document.createElement('option');
+    opt.value = r.id;
+    opt.textContent = `${r.id} — ${r.n || r.id}`;
+    sel.appendChild(opt);
+  });
+  // Actualizar label con conteo real de opciones disponibles
+  const totalOpts = sorted.filter(r => r && r.id).length;
+  if (lbl) lbl.innerHTML = `<i class="fas fa-map-marker-alt"></i> ${label} <span style="font-size:.75rem;color:var(--tx-muted)">(${totalOpts})</span>
+    <span class="sc-active-badge" id="scGeoBadge" style="display:none">1</span>`;
+  const secSel = document.getElementById('scSecSel');
+  secSel.innerHTML = '<option value="">— Todas —</option>';
+  secSel.disabled = true;
+}
+
+// ── Cambio de elección ─────────────────────────────────────
+function scOnElecChange() {
+  scPopulateGeo();
+  scApply();
+}
+
+// ── Cambio de geografía → secciones en cascada ────────────
+function scOnGeoChange() {
+  const elec = document.querySelector('input[name="scElec"]:checked').value;
+  const geoId = document.getElementById('scGeoSel').value;
+  const secSel = document.getElementById('scSecSel');
+  const badge = document.getElementById('scGeoBadge');
+  secSel.innerHTML = '<option value="">— Todas —</option>';
+  if (geoId) {
+    scGenSecciones(geoId, elec).forEach(s => {
+      const opt = document.createElement('option');
+      opt.value = s.id; opt.textContent = s.label;
+      secSel.appendChild(opt);
+    });
+    secSel.disabled = false;
+    if (badge) badge.style.display = 'inline-flex';
+  } else {
+    secSel.disabled = true;
+    if (badge) badge.style.display = 'none';
+  }
+  // En móvil, cerrar sidebar al seleccionar
+  if (window.innerWidth <= 768) scCloseSidebar();
+  scApply();
+}
+
+// ── Obtener datos filtrados ────────────────────────────────
+function scGetData() {
+  const elec = document.querySelector('input[name="scElec"]:checked').value;
+  const geoId = document.getElementById('scGeoSel').value;
+  const bloqueSelEl = document.getElementById('scBloqueSel');
+  const bloqueSel = bloqueSelEl ? bloqueSelEl.value : '';
+
+  // Mostrar/ocultar filtro de bloque según elección
+  const bloqueGroup = document.getElementById('scBloqueGroup');
+  if (bloqueGroup) bloqueGroup.style.display = elec === 'dip' ? 'none' : '';
+  const bloqueBadge = document.getElementById('scBloqueBadge');
+  if (bloqueBadge) bloqueBadge.style.display = bloqueSel ? 'inline-flex' : 'none';
+
+  let pool = elec === 'dip' ? [...DISTRITOS] : [...MUNICIPIOS];
+  if (geoId) pool = pool.filter(r => r.id === geoId);
+
+  // Filtro de bloque de competitividad (solo disponible en AYU)
+  if (elec === 'ayu' && bloqueSel) {
+    pool = pool.filter(m => {
+      const b = (typeof clasificarBloque === 'function')
+        ? clasificarBloque(m.vent, 'municipios', m.id)
+        : (m.vent < 5 ? 'B1' : m.vent <= 15 ? 'B2' : 'B3');
+      return b === bloqueSel;
+    });
+  }
+  return pool;
+}
+
+// ── Aplicar filtros y renderizar ──────────────────────────
+function scApply() {
+  const data = scGetData();
+  scUpdateTopbar(data);
+  scRenderKPIs(data);
+  scRenderCards(data);
+  scRenderChart();
+  scRenderTable(data);
+  renderCMapa();
+}
+
+// ── Actualizar topbar contextual ──────────────────────────
+function scUpdateTopbar(data) {
+  const elec = document.querySelector('input[name="scElec"]:checked').value;
+  const geoId = document.getElementById('scGeoSel').value;
+  const secId = document.getElementById('scSecSel').value;
+  const elecLabel = elec === 'dip' ? 'Diputaciones' : 'Ayuntamientos';
+  const elecIcon  = elec === 'dip' ? 'fa-landmark' : 'fa-city';
+  let title = elecLabel;
+  if (geoId && data[0]) title += ` — ${data[0].n}`;
+  if (secId) title += ` · Secc. ${secId}`;
+  const titleEl = document.getElementById('scTopbarTitle');
+  const metaEl  = document.getElementById('scTopbarMeta');
+  if (titleEl) {
+    titleEl.innerHTML = `<i class="fas ${elecIcon}" style="color:var(--mg);font-size:.85rem"></i> ${title}`;
+  }
+  if (metaEl) {
+    const tv = data.reduce((s,r) => s+r.tv, 0);
+    const filtrosActivos = (geoId ? 1 : 0) + (secId ? 1 : 0);
+    const geoLabel = elec==='dip' ? 'distritos' : 'municipios';
+    metaEl.innerHTML =
+      `<span style="display:flex;align-items:center;gap:5px;white-space:nowrap">
+         <i class="fas fa-map-marker-alt" style="color:var(--mg);font-size:.7rem"></i>
+         <strong>${data.length}</strong>&nbsp;${geoLabel}
+       </span>
+       <span style="color:var(--border-2)">|</span>
+       <span style="display:flex;align-items:center;gap:5px;white-space:nowrap">
+         <i class="fas fa-vote-yea" style="color:var(--li);font-size:.7rem"></i>
+         <strong>${fmtN(tv)}</strong>&nbsp;votos
+       </span>
+       ${filtrosActivos > 0 ? `<span style="background:var(--mg);color:#fff;padding:2px 9px;border-radius:10px;font-size:.66rem;font-weight:800;white-space:nowrap">${filtrosActivos} filtro${filtrosActivos>1?'s':''} activo${filtrosActivos>1?'s':''}</span>` : ''}`;
+  }
+}
+
+// ── KPIs de contexto ──────────────────────────────────────
+function scRenderKPIs(data) {
+  const tv = data.reduce((s,r) => s + r.tv, 0);
+  const nul = data.reduce((s,r) => s + r.nul, 0);
+  const ln = data.reduce((s,r) => s + (r.ln||0), 0);
+  const part = ln > 0 ? (tv / ln * 100).toFixed(2) : '—';
+  const v4T = data.reduce((s,r) => s + r.v4T, 0);
+  const vVA = data.reduce((s,r) => s + r.vVA, 0);
+  const vMC = data.reduce((s,r) => s + r.vMC, 0);
+  const elec = document.querySelector('input[name="scElec"]:checked').value;
+  const geoId = document.getElementById('scGeoSel').value;
+  const secId = document.getElementById('scSecSel').value;
+  let scope = elec === 'dip' ? 'Diputaciones' : 'Ayuntamientos';
+  if (geoId) scope += ` · ${data[0]?.n || geoId}`;
+  if (secId) scope += ` · Secc. ${secId}`;
+  document.getElementById('scKpiRow').innerHTML = `
+    <div class="sc-kpi" style="border-left-color:var(--m)">
+      <div class="sc-kpi-val">${fmtN(tv)}</div>
+      <div class="sc-kpi-lbl">Votos totales</div>
+      <div class="sc-kpi-sub">${scope}</div>
+    </div>
+    <div class="sc-kpi" style="border-left-color:var(--t4T)">
+      <div class="sc-kpi-val" style="color:var(--t4T)">${fmtN(v4T)}</div>
+      <div class="sc-kpi-lbl">Votos 4T</div>
+      <div class="sc-kpi-sub">${tv>0?(v4T/tv*100).toFixed(2):'0'}%</div>
+    </div>
+    <div class="sc-kpi" style="border-left-color:var(--tVA)">
+      <div class="sc-kpi-val" style="color:var(--tVA)">${fmtN(vVA)}</div>
+      <div class="sc-kpi-lbl">Votos VA</div>
+      <div class="sc-kpi-sub">${tv>0?(vVA/tv*100).toFixed(2):'0'}%</div>
+    </div>
+    <div class="sc-kpi" style="border-left-color:var(--tMC)">
+      <div class="sc-kpi-val" style="color:var(--tMC)">${fmtN(vMC)}</div>
+      <div class="sc-kpi-lbl">Votos MC</div>
+      <div class="sc-kpi-sub">${tv>0?(vMC/tv*100).toFixed(2):'0'}%</div>
+    </div>
+    <div class="sc-kpi" style="border-left-color:var(--tx-muted)">
+      <div class="sc-kpi-val" style="color:var(--tx-muted)">${fmtN(nul)}</div>
+      <div class="sc-kpi-lbl">Votos nulos</div>
+      <div class="sc-kpi-sub">${tv>0?(nul/tv*100).toFixed(2):'0'}%</div>
+    </div>
+    <div class="sc-kpi" style="border-left-color:var(--li)">
+      <div class="sc-kpi-val" style="color:var(--li)">${part}%</div>
+      <div class="sc-kpi-lbl">Participación</div>
+      <div class="sc-kpi-sub">${fmtN(ln)} lista nominal</div>
+    </div>`;
+}
+
+// ── Cards de resultados ────────────────────────────────────
+function scRenderCards(data) {
+  const vista = document.querySelector('input[name="scVista"]:checked').value;
+  const wrap = document.getElementById('scCardsWrap');
+  if (data.length === 0) {
+    wrap.innerHTML = '<div style="text-align:center;padding:40px;color:var(--tx-muted)"><i class="fas fa-search" style="font-size:2rem;margin-bottom:10px;display:block;opacity:.4"></i>Sin resultados para los filtros seleccionados.</div>';
+    return;
+  }
+
+  // Agregar votos de todos los registros filtrados
+  const totales = {};
+  SC_PARTIDOS.forEach(p => { totales[p.key] = 0; });
+  data.forEach(r => SC_PARTIDOS.forEach(p => { totales[p.key] += (r[p.key] || 0); }));
+  const tvTotal = Object.values(totales).reduce((s,v) => s+v, 0);
+  const maxVotos = Math.max(...Object.values(totales));
+
+  // Encabezado geográfico
+  const geoId = document.getElementById('scGeoSel').value;
+  const secId = document.getElementById('scSecSel').value;
+  const elec = document.querySelector('input[name="scElec"]:checked').value;
+  const geoNombre = geoId ? (data[0]?.n || geoId) : (elec === 'dip' ? 'Todos los Distritos' : 'Todos los Municipios');
+  const ganadorKey = SC_PARTIDOS.reduce((a,b) => totales[a.key] > totales[b.key] ? a : b).key;
+
+  let html = `<div class="sc-geo-header">
+    <div>
+      <div class="sc-geo-title">${geoNombre}${secId ? ` · Sección ${secId}` : ''}</div>
+      <div style="font-size:.78rem;color:var(--tx-muted);margin-top:3px">${data.length} ${elec==='dip'?'distrito(s)':'municipio(s)'} · ${fmtN(tvTotal)} votos totales</div>
+    </div>
+    <div class="sc-geo-meta">
+      <span><i class="fas fa-trophy" style="color:var(--mg)"></i> Ganador: <strong>${ganadorKey}</strong></span>
+      <span><i class="fas fa-percentage" style="color:var(--li)"></i> ${tvTotal>0?(totales[ganadorKey]/tvTotal*100).toFixed(2):'0'}%</span>
+    </div>
+  </div>`;
+
+  if (vista === 'partidos') {
+    // Vista por partido individual
+    html += `<div class="sc-section-title"><i class="fas fa-flag"></i> Votos por Partido Político</div>`;
+    html += `<div class="sc-partido-grid">`;
+    const sorted = [...SC_PARTIDOS].sort((a,b) => totales[b.key] - totales[a.key]);
+    sorted.forEach((p, idx) => {
+      const v = totales[p.key];
+      const pct = tvTotal > 0 ? (v / tvTotal * 100) : 0;
+      const barW = maxVotos > 0 ? (v / maxVotos * 100) : 0;
+      const esGanador = idx === 0 && v > 0;
+      html += `<div class="sc-partido-card${esGanador?' ganador':''}" style="border-top-color:${p.color}">
+        <img src="${p.logo}" class="sc-partido-logo" alt="${p.nombre}" onerror="this.style.display='none'">
+        <div class="sc-partido-nombre">${p.nombre}</div>
+        <div class="sc-partido-votos" style="color:${p.color}">${fmtN(v)}</div>
+        <div class="sc-partido-pct" style="color:${p.color}">${pct.toFixed(2)}%</div>
+        <div class="sc-partido-bar-bg">
+          <div class="sc-partido-bar" style="width:${barW}%;background:${p.color}"></div>
+        </div>
+      </div>`;
+    });
+    html += `</div>`;
+  } else {
+    // Vista por bloque
+    html += `<div class="sc-section-title"><i class="fas fa-layer-group"></i> Votos por Bloque</div>`;
+    const bloques = [
+      { key:'4T', label:'4T', color:C_BLOQUE['4T'], votos: data.reduce((s,r)=>s+r.v4T,0),
+        logos:['img/PVEM.svg','img/PT.svg','img/MORENA.svg'],
+        mun: data.filter(r=>r.g==='4T').length },
+      { key:'VA', label:'VA', color:C_BLOQUE['VA'], votos: data.reduce((s,r)=>s+r.vVA,0),
+        logos:['img/PAN.svg','img/PRI.svg','img/PRD.svg','img/NAEM.svg'],
+        mun: data.filter(r=>r.g==='VA').length },
+      { key:'MC', label:'MC', color:C_BLOQUE['MC'], votos: data.reduce((s,r)=>s+r.vMC,0),
+        logos:['img/MC.svg'],
+        mun: data.filter(r=>r.g==='MC').length },
+    ];
+    const tvBloques = bloques.reduce((s,b)=>s+b.votos,0);
+    const maxB = Math.max(...bloques.map(b=>b.votos));
+    const elecLabel = elec === 'dip' ? 'distritos' : 'municipios';
+    html += `<div class="sc-bloque-grid">`;
+    bloques.forEach(b => {
+      const pct = tvBloques > 0 ? (b.votos / tvBloques * 100) : 0;
+      const barW = maxB > 0 ? (b.votos / maxB * 100) : 0;
+      html += `<div class="sc-bloque-card" style="border-left-color:${b.color}">
+        <div class="sc-bloque-header">
+          <span class="sc-bloque-badge" style="background:${b.color}">${b.label}</span>
+          <div class="sc-bloque-logos">${b.logos.map(l=>`<img src="${l}" alt="${b.label}" onerror="this.style.display='none'">`).join('')}</div>
+        </div>
+        <div class="sc-bloque-votos" style="color:${b.color}">${fmtN(b.votos)}</div>
+        <div class="sc-bloque-pct" style="color:${b.color}">${pct.toFixed(2)}% de los votos</div>
+        <div class="sc-bloque-bar-bg"><div class="sc-bloque-bar" style="width:${barW}%;background:${b.color}"></div></div>
+        <div class="sc-bloque-mun"><i class="fas fa-map-pin"></i> ${b.mun} ${elecLabel} ganados</div>
+      </div>`;
+    });
+    html += `</div>`;
+
+    // Detalle por partido dentro de cada bloque
+    html += `<div class="sc-section-title"><i class="fas fa-list"></i> Desglose por Partido</div>`;
+    html += `<div class="sc-partido-grid">`;
+    const sorted = [...SC_PARTIDOS].sort((a,b) => totales[b.key] - totales[a.key]);
+    sorted.forEach(p => {
+      const v = totales[p.key];
+      const pct = tvTotal > 0 ? (v / tvTotal * 100) : 0;
+      const barW = maxVotos > 0 ? (v / maxVotos * 100) : 0;
+      html += `<div class="sc-partido-card" style="border-top-color:${p.color}">
+        <img src="${p.logo}" class="sc-partido-logo" alt="${p.nombre}" onerror="this.style.display='none'">
+        <div class="sc-partido-nombre">${p.nombre}</div>
+        <div class="sc-partido-votos" style="color:${p.color}">${fmtN(v)}</div>
+        <div class="sc-partido-pct" style="color:${p.color}">${pct.toFixed(2)}%</div>
+        <div class="sc-partido-bar-bg">
+          <div class="sc-partido-bar" style="width:${barW}%;background:${p.color}"></div>
+        </div>
+      </div>`;
+    });
+    html += `</div>`;
+  }
+
+  wrap.innerHTML = html;
+}
+
+// ── Gráfica ────────────────────────────────────────────────
+function scRenderChart() {
+  const data = scGetData();
+  const canvas = document.getElementById('scChart');
+  if (_scChart) { _scChart.destroy(); _scChart = null; }
+  if (!canvas || data.length === 0) return;
+  const tipo = document.getElementById('scGTipo')?.value || 'bar';
+
+  const totales = {};
+  SC_PARTIDOS.forEach(p => { totales[p.key] = 0; });
+  data.forEach(r => SC_PARTIDOS.forEach(p => { totales[p.key] += (r[p.key] || 0); }));
+  const sorted = [...SC_PARTIDOS].sort((a,b) => totales[b.key] - totales[a.key]);
+  const labels = sorted.map(p => p.nombre);
+  const values = sorted.map(p => totales[p.key]);
+  const colors = sorted.map(p => p.color);
+
+  if (tipo === 'doughnut') {
+    _scChart = new Chart(canvas, { type: 'doughnut',
+      data: { labels, datasets: [{ data: values, backgroundColor: colors, borderWidth: 3, borderColor: '#fff' }] },
+      options: { responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { position: 'right', labels: { font: { size: 11 }, padding: 14 }},
+          tooltip: { callbacks: { label: ctx => ` ${ctx.label}: ${fmtN(ctx.raw)} votos` }}}}});
+  } else {
+    _scChart = new Chart(canvas, { type: 'bar',
+      data: { labels, datasets: [{ data: values, backgroundColor: colors, borderRadius: 5, borderSkipped: false }] },
+      options: { responsive: true, maintainAspectRatio: false,
+        indexAxis: tipo === 'barH' ? 'y' : 'x',
+        plugins: { legend: { display: false },
+          tooltip: { callbacks: { label: ctx => ` ${fmtN(ctx.raw)} votos` }}},
+        scales: {
+          x: { grid: { color: 'rgba(0,0,0,.05)' }, ticks: { callback: v => typeof v==='number'?fmtN(v):v }},
+          y: { grid: { color: 'rgba(0,0,0,.05)' }, ticks: { callback: v => typeof v==='number'?fmtN(v):v }}
+        }}});
+  }
+}
+
+// ── Tabla detallada ────────────────────────────────────────
+function scRenderTable(data) {
+  const th = document.getElementById('thConsulta');
+  const tb = document.getElementById('tbConsulta');
+  if (!th || !tb) return;
+  th.innerHTML = '<th>ID</th><th>Nombre</th><th>Ganador</th><th>MORENA</th><th>PVEM</th><th>PT</th><th>PAN</th><th>PRI</th><th>PRD</th><th>NAEM</th><th>MC</th><th>Nulos</th><th>Total</th><th>Part.%</th>';
+  tb.innerHTML = '';
+  data.forEach(r => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td>${r.id}</td><td>${r.n}</td><td>${badgeG(r.g)}</td>
+      <td>${fmtN(r.MORENA||0)}</td><td>${fmtN(r.PVEM||0)}</td><td>${fmtN(r.PT||0)}</td>
+      <td>${fmtN(r.PAN||0)}</td><td>${fmtN(r.PRI||0)}</td><td>${fmtN(r.PRD||0)}</td>
+      <td>${fmtN(r.NAEM||0)}</td><td>${fmtN(r.MC||0)}</td>
+      <td>${fmtN(r.nul)}</td><td>${fmtN(r.tv)}</td><td>${r.part.toFixed(2)}%</td>`;
+    tb.appendChild(tr);
+  });
+  if (_scDT) { _scDT.destroy(); _scDT = null; }
+  _scDT = $('#tblConsulta').DataTable({ ...DT_CFG, pageLength: 25, order: [[0,'asc']],
+    language: { url: '//cdn.datatables.net/plug-ins/1.13.7/i18n/es-ES.json' } });
+}
+
+// ── Mapa ───────────────────────────────────────────────────
+function renderCMapa() {
+  if (!_scMapInst) return;
+  if (_scMapLayer) { _scMapLayer.remove(); _scMapLayer = null; }
+  const data = scGetData();
+  const colorMode = document.getElementById('mapaColor')?.value || 'bloque';
+  const activeIds = new Set(data.map(r => parseInt(r.id)));
+  const munLookup = {};
+  MUNICIPIOS.forEach(m => { munLookup[parseInt(m.id)] = m; });
+  getTopoJSON(topo => {
+    const geojson = topojson.feature(topo, topo.objects.municipalities);
+    const edomex = { type: 'FeatureCollection',
+      features: geojson.features.filter(f => { const sc = f.properties.state_code; return sc===15||sc==='15'; }) };
+    _scMapLayer = L.geoJSON(edomex, {
+      style: f => {
+        const mc = parseInt(f.properties.mun_code);
+        const m = munLookup[mc];
+        if (!m || !activeIds.has(mc)) return { fillColor:'#ddd', fillOpacity:.3, color:'#fff', weight:.5 };
+        let color = cBloque(m.g);
+        if (colorMode==='part') { const p=m.part/100; color=`hsl(${270-p*180},70%,${60-p*30}%)`; }
+        else if (colorMode==='vent') { const v=Math.min(m.vent/80,1); color=`hsl(${330-v*150},80%,${55-v*25}%)`; }
+        return { fillColor:color, fillOpacity:.82, color:'#fff', weight:1 };
+      },
+      onEachFeature: (f, layer) => {
+        const mc = parseInt(f.properties.mun_code);
+        const m = munLookup[mc];
+        // Nombre oficial INEGI 2025
+        const nomInegi = (typeof MUN_CENTROIDS !== 'undefined' && MUN_CENTROIDS[mc])
+          ? MUN_CENTROIDS[mc].nom : (m ? m.n : f.properties.mun_name || 'Municipio');
+        const cveinegi = (typeof MUN_CENTROIDS !== 'undefined' && MUN_CENTROIDS[mc])
+          ? MUN_CENTROIDS[mc].cveinegi : '—';
+        if (m && activeIds.has(parseInt(m.id))) {
+          layer.bindPopup(`<div style="font-size:.85rem;min-width:190px">
+            <b style="font-size:.95rem">${nomInegi}</b>
+            <div style="color:#888;font-size:.72rem;margin-bottom:4px">Clave INEGI: ${cveinegi} · ID: ${String(mc).padStart(3,'0')}</div>
+            <div>Ganador: <b style="color:${cBloque(m.g)}">${m.g}</b></div>
+            <div>MORENA: ${fmtN(m.MORENA||0)} | PAN: ${fmtN(m.PAN||0)} | PRI: ${fmtN(m.PRI||0)}</div>
+            <div>Part: ${m.part.toFixed(2)}% | Vent: ${m.vent.toFixed(2)}%</div>
+            </div>`);
+          layer.on('mouseover', function() { this.setStyle({weight:3,fillOpacity:1}); this.openPopup(); });
+          layer.on('mouseout', function() { this.setStyle({weight:1,fillOpacity:.82}); this.closePopup(); });
+        } else {
+          layer.bindPopup(`<b>${nomInegi}</b><br><span style="color:#888;font-size:.75rem">Clave: ${cveinegi}</span><br><i>Sin datos en filtro actual</i>`);
+        }
+      }
+    }).addTo(_scMapInst);
+    setTimeout(() => _scMapInst.invalidateSize(), 200);
+  });
+}
+
+// ── Reset ──────────────────────────────────────────────────
+function scReset() {
+  document.querySelector('input[name="scElec"][value="ayu"]').checked = true;
+  scPopulateGeo();
+  document.getElementById('scGeoSel').value = '';
+  const secSel = document.getElementById('scSecSel');
+  secSel.innerHTML = '<option value="">— Todas —</option>';
+  secSel.disabled = true;
+  const badge = document.getElementById('scGeoBadge');
+  if (badge) badge.style.display = 'none';
+  const secBadge = document.getElementById('scSecBadge');
+  if (secBadge) secBadge.style.display = 'none';
+  scApply();
+}
+
+// ── Switch tab ─────────────────────────────────────────────
+function scSwitchTab(id, btn) {
+  document.querySelectorAll('.sc-tab-content').forEach(t => t.classList.remove('activo'));
+  document.querySelectorAll('.sc-tab').forEach(b => b.classList.remove('activo'));
+  document.getElementById(id).classList.add('activo');
+  btn.classList.add('activo');
+  if (id === 'scTabMapa' && _scMapInst) setTimeout(() => _scMapInst.invalidateSize(), 150);
+  if (id === 'scTabGrafica') scRenderChart();
+}
+
+function scDlChart() {
+  const a = document.createElement('a');
+  a.href = document.getElementById('scChart').toDataURL('image/png');
+  a.download = 'grafica_partidos_prep2024.png'; a.click();
+}
+
+// Stubs de compatibilidad (funciones que ya no se usan pero pueden ser llamadas)
+function applyFilters() { if(window._consultaInit) scApply(); }
+function clearFilters() { scReset(); }
+function switchPanel() {}
+function dlChartPNG() { scDlChart(); }
+function expCSV() { if(_scDT) _scDT.button('.buttons-csv').trigger(); }
+function expExcel() { if(_scDT) _scDT.button('.buttons-excel').trigger(); }
+function expPDF() { if(_scDT) _scDT.button('.buttons-pdf').trigger(); }
+
+// ============================================================
+// BLOQUE 8 — INICIALIZACIÓN
+// ============================================================
+$(document).ready(function() {
+  // Validar totales
+  validarTotales();
+
+  // ── Fecha dinámica ──
+  (function() {
+    const dias = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+    const meses = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+    const hoy = new Date();
+    const txt = `${dias[hoy.getDay()]}, ${hoy.getDate()} de ${meses[hoy.getMonth()]} de ${hoy.getFullYear()}`;
+    const el = document.getElementById('nav-fecha-txt');
+    if (el) el.textContent = txt;
+  })();
+
+  // ── Tema: detectar preferencia del sistema y localStorage ──
+  const savedTheme = localStorage.getItem('darkMode');
+  const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+  const initialTheme = savedTheme ? savedTheme : (prefersDark ? 'dark' : 'light');
+  setTheme(initialTheme);
+  // Escuchar cambios del sistema (si el usuario no ha elegido manualmente)
+  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
+    if (!localStorage.getItem('darkMode')) setTheme(e.matches ? 'dark' : 'light');
+  });
+
+  // Inicializar vistas
+  document.querySelectorAll('.vista').forEach(v => { v.style.display = 'none'; });
+  document.getElementById('vista-inicio').style.display = 'block';
+  document.getElementById('vista-inicio').classList.add('activa');
+  document.getElementById('subnav').style.display = 'none';
+
+  // Tablas simples
+  $('#tblDipBloque,#tblAyuBloque').DataTable({ paging: false, searching: false, info: false });
+
+  // Tablas principales
+  buildDipTable('', '');
+  _dipDT = $('#tblDip').DataTable({ ...DT_CFG, pageLength: 15, order: [[0,'asc']] });
+  buildAyuTable('', '');
+  _ayuDT = $('#tblAyu').DataTable({ ...DT_CFG, pageLength: 15, order: [[0,'asc']] });
+  _compDT = $('#tblComp').DataTable({ ...DT_CFG, pageLength: 15, order: [[0,'asc']] });
+
+  // Gráficas (siempre inicializar en ready)
+  initResultadosCharts();
+  buildDipCompetidos();
+  buildAyuCompetidos();
+  // Mapas R2.3/R3.3: se inicializan LAZY al navegar a la vista resultados
+  // para evitar zona gris de Leaflet cuando el contenedor está oculto
+
+  // URL hash navigation
+  const hash = location.hash.replace('#', '') || 'inicio';
+  if (['inicio','resultados','dashboards','consulta'].includes(hash)) irA(hash);
+
+  // URL params para consulta
+  const params = new URLSearchParams(location.search);
+  if (params.get('vista') === 'consulta') irA('consulta');
+});
+</script>
+</body>
+</html>

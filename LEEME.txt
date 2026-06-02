@@ -1,0 +1,46 @@
+﻿					Programa de Resultados Electorales Preliminares,
+					Estado de México 2024
+					_______________________________________________
+
+El Programa de Resultados Electorales Preliminares (PREP) inicia la publicación el 2 de junio a partir de las 20:00 horas, hora local y se podrá acceder a la información a través del sitio web en http://www.ieem.org.mx
+
+A. El Programa de Resultados Electorales Preliminares permite la descarga de la base de datos mediante archivos zip que contienen archivos de texto plano csv, además de un catálogo de candidatos. Los archivos de descarga contienen información específica por acta y la información se puede obtener por partido o por candidato.
+
+B. Los archivos contienen información de todas las actas de la base de datos y se nombran como "DIP_LOC.csv", la información se presenta por Partido.
+
+    La descripción de cada campo se muestra a continuación:
+
+
+		1. CLAVE_CASILLA - Se conforma por la concatenación de las variables ID_ENTIDAD, SECCION, TIPO_CASILLA, ID_CASILLA y EXT_CONTIGUA.
+
+		2. CLAVE_ACTA - Se conforma por la agregación de las variables CLAVE_CASILLA y TIPO_ACTA.
+			
+		3. ID_ENTIDAD - Muestra el identificador del Estado, de acuerdo con el Catálogo del Anexo 18.10 del Reglamento de Elecciones.
+	
+		4. ENTIDAD - Indica el nombre de la Entidad Federativa a la que corresponde cada Acta.
+	
+		5. ID_DISTRITO: Representan el número del Distrito Electoral Local.
+	
+		6. DISTRITO: Representan el nombre del Distrito Electotal Local.
+
+		7. SECCION - Corresponde a la clave de la sección de la casilla.
+
+		8. ID_CASILLA - Es el número de identificación de la casilla.
+
+		9. TIPO_CASILLA: Se refiere al tipo de casilla. Debe asignarse una letra: 
+			B.- Básica, 
+			C.- Contigua, 
+			E.- Extraordinaria, 
+			S.- Especial,
+			A.- Voto Anticipado,
+			M.- Voto desde el Extranjero
+
+		10. EXT_CONTIGUA - Número  de casilla contigua a una extraordinaria. 	
+
+		11. UBICACION_CASILLA - Identifica la ubicación de casilla:
+			1. PARA CASILLA URBANA
+			2. PARA CASILLA NO URBANA
+			3. PARA ACTAS FUERA DE CATÁLOGO
+
+		12. LISTA_NOMINAL - Es el  número  de ciudadanos  y ciudadanas con  derecho a  votar  que integran la  Lista Nominal de las Actas PREP contabilizadas. En el caso de las casillas especiales, el valor de la lista es cero debido a que en tales casillas no se cuenta con listas nominales.
+

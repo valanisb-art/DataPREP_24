@@ -1,0 +1,27 @@
+# ────────────────────────────────────────────────
+# Configuración GitHub Pages — PREP 2024 IEEM
+# Estado de México
+# ────────────────────────────────────────────────
+title: "PREP 2024 IEEM — Estado de México"
+description: "Sistema Integral de Consulta y Análisis de Resultados Electorales Preliminares — Estado de México 2024"
+url: ""
+baseurl: ""
+lang: "es-MX"
+
+# Sin tema Jekyll — sitio HTML puro
+theme: null
+
+# GitHub Pages — sin plugins
+plugins: []
+
+# Solo excluir archivos que NO son parte del sitio web
+exclude:
+  - "*.ps1"
+  - "*.py"
+  - "INSTRUCCIONES_GITHUB.md"
+  - "LEEME*.txt"
+  - "debug*.ps1"
+  - "extract*.ps1"
+  - "procesar*.ps1"
+  - "gen_*.ps1"
+  - "build_*.ps1"
